@@ -4,10 +4,10 @@ services:
   app:
     build: .
     ports:
-      - "3000:3000"
+      - "5173:5173"
     volumes:
-      - .:/app          # live code sync
+      - .:/app
       - /app/node_modules
     environment:
       - NODE_ENV=development
-    command: npm run dev
+    command: npm run dev -- --host 0.0.0.0 --port 5173
