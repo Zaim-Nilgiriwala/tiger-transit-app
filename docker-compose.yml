@@ -1,13 +1,57 @@
-version: "3.8"
+version: '3.8'
 
 services:
-  app:
-    build: .
-    ports:
-      - "5173:5173"
-    volumes:
-      - .:/app
-      - /app/node_modules
+  postgres:
+    image: postgis/postgis:15-3.3
+    container_name: tigertransit-postgres
     environment:
-      - NODE_ENV=development
-    command: npm run dev -- --host 0.0.0.0 --port 5173
+      POSTGRES_DB: tigertransit
+      POSTGRES_USER: transit
+      POSTGRES_PASSWORD: transit_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U transit -d tigertransit"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: tigertransit-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: tigertransit-backend
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://transit:transit_dev@postgres:5432/tigertransit
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: development
+      GPS_ENABLED: "false"
+      PORT: 3000
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: npm run dev
+
+volumes:
+  postgres_data:
+  redis_data:

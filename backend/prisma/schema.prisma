@@ -1,0 +1,177 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+model Agency {
+  id           String  @id @map("agency_id")
+  name         String  @map("agency_name")
+  url          String? @map("agency_url")
+  timezone     String  @map("agency_timezone")
+  lang         String? @map("agency_lang")
+  phone        String? @map("agency_phone")
+  fareUrl      String? @map("agency_fare_url")
+  email        String? @map("agency_email")
+  routes       Route[]
+
+  @@map("agency")
+}
+
+model Route {
+  id            String   @id @map("route_id")
+  agencyId      String   @map("agency_id")
+  shortName     String?  @map("route_short_name")
+  longName      String   @map("route_long_name")
+  routeType     Int      @map("route_type")
+  color         String?  @map("route_color")
+  textColor     String?  @map("route_text_color")
+  sortOrder     Int?     @map("route_sort_order")
+  isActive      Boolean  @default(true) @map("is_active")
+  updatedAt     DateTime @default(now()) @map("updated_at")
+
+  agency        Agency   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  trips         Trip[]
+
+  @@index([isActive])
+  @@map("routes")
+}
+
+model Stop {
+  id                String   @id @map("stop_id")
+  name              String   @map("stop_name")
+  lat               Decimal  @map("stop_lat") @db.Decimal(10, 8)
+  lon               Decimal  @map("stop_lon") @db.Decimal(11, 8)
+  code              String?  @map("stop_code")
+  desc              String?  @map("stop_desc")
+  wheelchairBoarding Int?    @default(0) @map("wheelchair_boarding")
+  isMajorStop       Boolean  @default(false) @map("is_major_stop")
+
+  stopTimes         StopTime[]
+
+  @@index([isMajorStop])
+  @@map("stops")
+}
+
+model Trip {
+  id            String     @id @map("trip_id")
+  routeId       String     @map("route_id")
+  serviceId     String     @map("service_id")
+  headsign      String?    @map("trip_headsign")
+  directionId   Int?       @map("direction_id")
+  blockId       String?    @map("block_id")
+  shapeId       String?    @map("shape_id")
+
+  route         Route      @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  stopTimes     StopTime[]
+
+  @@index([routeId])
+  @@index([serviceId])
+  @@map("trips")
+}
+
+model StopTime {
+  tripId            String   @map("trip_id")
+  stopId            String   @map("stop_id")
+  stopSequence      Int      @map("stop_sequence")
+  arrivalTime       String   @map("arrival_time")
+  departureTime     String   @map("departure_time")
+  shapeDistTraveled Decimal? @map("shape_dist_traveled") @db.Decimal(10, 4)
+  timepoint         Int?     @default(0)
+
+  trip              Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  stop              Stop     @relation(fields: [stopId], references: [id])
+
+  @@id([tripId, stopSequence])
+  @@index([stopId])
+  @@index([tripId])
+  @@map("stop_times")
+}
+
+model Shape {
+  id              String   @map("shape_id")
+  ptLat           Decimal  @map("shape_pt_lat") @db.Decimal(10, 8)
+  ptLon           Decimal  @map("shape_pt_lon") @db.Decimal(11, 8)
+  ptSequence      Int      @map("shape_pt_sequence")
+  distTraveled    Decimal? @map("shape_dist_traveled") @db.Decimal(10, 4)
+
+  @@id([id, ptSequence])
+  @@index([id])
+  @@map("shapes")
+}
+
+model Calendar {
+  serviceId String   @id @map("service_id")
+  monday    Int
+  tuesday   Int
+  wednesday Int
+  thursday  Int
+  friday    Int
+  saturday  Int
+  sunday    Int
+  startDate DateTime @map("start_date") @db.Date
+  endDate   DateTime @map("end_date") @db.Date
+
+  @@map("calendar")
+}
+
+model CalendarDate {
+  serviceId     String   @map("service_id")
+  date          DateTime @db.Date
+  exceptionType Int      @map("exception_type")
+
+  @@id([serviceId, date])
+  @@index([date])
+  @@map("calendar_dates")
+}
+
+model RouteGeometry {
+  routeId         String   @id @map("route_id")
+  directionId     Int      @map("direction_id")
+  encodedPolyline String   @map("encoded_polyline") @db.Text
+  bounds          Json?
+  lastUpdated     DateTime @default(now()) @map("last_updated")
+
+  @@unique([routeId, directionId])
+  @@map("route_geometries")
+}
+
+model VehiclePosition {
+  vehicleId       String   @map("vehicle_id")
+  routeId         String?  @map("route_id")
+  tripId          String?  @map("trip_id")
+  latitude        Decimal  @db.Decimal(10, 8)
+  longitude       Decimal  @db.Decimal(11, 8)
+  bearing         Decimal? @db.Decimal(5, 2)
+  speed           Decimal? @db.Decimal(5, 2)
+  timestamp       DateTime
+  occupancyStatus String?  @map("occupancy_status")
+  lastUpdated     DateTime @default(now()) @map("last_updated")
+
+  @@id([vehicleId, timestamp])
+  @@index([routeId, lastUpdated])
+  @@index([lastUpdated])
+  @@map("vehicle_positions")
+}
+
+model ServiceAlert {
+  id              Int       @id @default(autoincrement()) @map("alert_id")
+  alertType       String    @map("alert_type")
+  severity        String
+  title           String
+  description     String?   @db.Text
+  affectedRoutes  String[]  @map("affected_routes")
+  affectedStops   String[]  @map("affected_stops")
+  startTime       DateTime  @map("start_time")
+  endTime         DateTime? @map("end_time")
+  isActive        Boolean   @default(true) @map("is_active")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  @@index([isActive, startTime])
+  @@map("service_alerts")
+}
