@@ -1,0 +1,29 @@
+# Data pull script with credentials
+dataPull.js
+
+# Generated data files
+sysRpt_*.jsonl
+*.jsonl
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+nul
+
+# IDE
+.vscode/
+.idea/
+
+# Claude Code
+.claude/
+
+# GTFS zip (extracted data is in gtfs_data/)
+gtfs_109.zip
