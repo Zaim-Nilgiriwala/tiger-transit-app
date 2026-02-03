@@ -1,0 +1,263 @@
+{
+  "160 Ross": {
+    "stop_id": 20,
+    "stop_name": "160 Ross",
+    "match_type": "exact",
+    "confidence": "high",
+    "alternatives": []
+  },
+  "Aspen Heights Lane": {
+    "stop_id": 7,
+    "stop_name": "Aspen Heights Ln",
+    "match_type": "fuzzy",
+    "confidence": "high",
+    "alternatives": [
+      "Aspen Heights Ln"
+    ]
+  },
+  "Auburn Mall": {
+    "stop_id": 193,
+    "stop_name": "Auburn Mall",
+    "match_type": "exact",
+    "confidence": "high",
+    "alternatives": []
+  },
+  "Delta Aviation Building": {
+    "stop_id": 126,
+    "stop_name": "Delta Aviation School",
+    "match_type": "fuzzy",
+    "confidence": "medium",
+    "alternatives": [
+      "Delta Aviation School"
+    ]
+  },
+  "Donahue Crossing #1": {
+    "stop_id": 101,
+    "stop_name": "Donahue Crossing 1st Stop",
+    "match_type": "fuzzy",
+    "confidence": "medium",
+    "alternatives": [
+      "Donahue Crossing 1st Stop",
+      "Donahue Crossing 3rd Stop",
+      "Donahue Crossing 2nd Stop"
+    ]
+  },
+  "Eagles Landing": {
+    "stop_id": 33,
+    "stop_name": "Eagles Landing 1st Stop",
+    "match_type": "fuzzy",
+    "confidence": "medium",
+    "alternatives": [
+      "Eagles Landing 1st Stop",
+      "Eagle's Landing 2nd Stop",
+      "Eagles West Apartments"
+    ]
+  },
+  "Edge West Apts": {
+    "stop_id": 208,
+    "stop_name": "Edge West Apartments",
+    "match_type": "fuzzy",
+    "confidence": "medium",
+    "alternatives": [
+      "Edge West Apartments",
+      "Eagles West Apartments"
+    ]
+  },
+  "HUB": {
+    "stop_id": null,
+    "stop_name": null,
+    "match_type": "unmatched",
+    "confidence": "none",
+    "alternatives": []
+  },
+  "Highland Condos": {
+    "stop_id": 46,
+    "stop_name": "Highland Condominiums",
+    "match_type": "fuzzy",
+    "confidence": "medium",
+    "alternatives": [
+      "Highland Condominiums"
+    ]
+  },
+  "Industry Park": {
+    "stop_id": 176,
+    "stop_name": "Gentilly Park",
+    "match_type": "fuzzy",
+    "confidence": "low",
+    "alternatives": [
+      "Gentilly Park",
+      "Madison Park"
+    ]
+  },
+  "Intramural Field": {
+    "stop_id": 42,
+    "stop_name": "Intramural Field (Biggio Drive)",
+    "match_type": "fuzzy",
+    "confidence": "medium",
+    "alternatives": [
+      "Intramural Field (Biggio Drive)"
+    ]
+  },
+  "Marathon Gas Staion": {
+    "stop_id": 196,
+    "stop_name": "Mell St Station",
+    "match_type": "fuzzy",
+    "confidence": "low",
+    "alternatives": [
+      "Mell St Station",
+      "Martin Ave & North Gay St"
+    ]
+  },
+  "Mary Lane and Harris": {
+    "stop_id": 199,
+    "stop_name": "Mary Ln & Harris Ave",
+    "match_type": "fuzzy",
+    "confidence": "medium",
+    "alternatives": [
+      "Mary Ln & Harris Ave"
+    ]
+  },
+  "Mell St": {
+    "stop_id": 196,
+    "stop_name": "Mell St Station",
+    "match_type": "fuzzy",
+    "confidence": "low",
+    "alternatives": [
+      "Mell St Station"
+    ]
+  },
+  "Mell Street Station": {
+    "stop_id": 196,
+    "stop_name": "Mell St Station",
+    "match_type": "fuzzy",
+    "confidence": "high",
+    "alternatives": [
+      "Mell St Station",
+      "Beech Street and Magnolia"
+    ]
+  },
+  "Museum": {
+    "stop_id": null,
+    "stop_name": null,
+    "match_type": "unmatched",
+    "confidence": "none",
+    "alternatives": [
+      "Recruitment 2",
+      "Recruitment 1",
+      "Jule Collins Smith Museum of Art"
+    ]
+  },
+  "Peachtree Apts": {
+    "stop_id": 77,
+    "stop_name": "Peachtree Apartments",
+    "match_type": "fuzzy",
+    "confidence": "medium",
+    "alternatives": [
+      "Peachtree Apartments",
+      "Evergreen Apartments"
+    ]
+  },
+  "Savannah Square": {
+    "stop_id": 191,
+    "stop_name": "Samford Square",
+    "match_type": "fuzzy",
+    "confidence": "low",
+    "alternatives": [
+      "Samford Square",
+      "Savannah Sq & Williamsburg Pl",
+      "Asian Supermarket"
+    ]
+  },
+  "South Quad": {
+    "stop_id": 30,
+    "stop_name": "South Quad Parking Deck",
+    "match_type": "fuzzy",
+    "confidence": "low",
+    "alternatives": [
+      "South Quad Parking Deck",
+      "South Quad Parking Deck SQ"
+    ]
+  },
+  "South Quad Parking Deck": {
+    "stop_id": 30,
+    "stop_name": "South Quad Parking Deck",
+    "match_type": "exact",
+    "confidence": "high",
+    "alternatives": []
+  },
+  "Student Center": {
+    "stop_id": 129,
+    "stop_name": "AU Alumni Center",
+    "match_type": "fuzzy",
+    "confidence": "low",
+    "alternatives": [
+      "AU Alumni Center",
+      "Student Center Greenspace Pavilion",
+      "Student Center Haley Center Pavillion"
+    ]
+  },
+  "Student Center Middle Pavilon": {
+    "stop_id": 47,
+    "stop_name": "Student Center Greenspace Pavilion",
+    "match_type": "fuzzy",
+    "confidence": "medium",
+    "alternatives": [
+      "Student Center Greenspace Pavilion",
+      "Student Center Haley Center Pavillion",
+      "Student Center Stadium Parking Deck Pavilion"
+    ]
+  },
+  "Student Center Parking Deck": {
+    "stop_id": 57,
+    "stop_name": "Student Center Stadium Parking Deck Pavilion",
+    "match_type": "fuzzy",
+    "confidence": "medium",
+    "alternatives": [
+      "Student Center Stadium Parking Deck Pavilion",
+      "South Quad Parking Deck",
+      "South Quad Parking Deck SQ"
+    ]
+  },
+  "The Beacon": {
+    "stop_id": 165,
+    "stop_name": "The Beacon",
+    "match_type": "exact",
+    "confidence": "high",
+    "alternatives": []
+  },
+  "The Grove": {
+    "stop_id": 112,
+    "stop_name": "The Grove",
+    "match_type": "exact",
+    "confidence": "high",
+    "alternatives": []
+  },
+  "The Mill": {
+    "stop_id": 188,
+    "stop_name": "The Mill",
+    "match_type": "exact",
+    "confidence": "high",
+    "alternatives": []
+  },
+  "West Parking First Stop": {
+    "stop_id": 85,
+    "stop_name": "West Parking Lot",
+    "match_type": "fuzzy",
+    "confidence": "medium",
+    "alternatives": [
+      "West Parking Lot",
+      "West Parking Lot #2",
+      "Eagles Landing 1st Stop"
+    ]
+  },
+  "Yugo North 1": {
+    "stop_id": 206,
+    "stop_name": "Yugo Auburn North 1",
+    "match_type": "fuzzy",
+    "confidence": "medium",
+    "alternatives": [
+      "Yugo Auburn North 1",
+      "Yugo Auburn North 2nd Stop"
+    ]
+  }
+}
