@@ -31,11 +31,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. GTFS shape distances are computable between any two stops on a route (shape_dist_traveled lookup works)
   4. Timepoint Excel spreadsheet (all 23 sheets) is parsed into a mapping table of (route_id, stop_id, scheduled_departure_time) tuples
   5. Weather data joins by hour produce temperature and precipitation columns aligned to telemetry timestamps with no nulls in the join window
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md -- Parse telemetry JSONL and weather CSV into clean parquets
+- [ ] 01-02-PLAN.md -- Parse GTFS static files and arrivals CSVs with ID mappings
+- [ ] 01-03-PLAN.md -- Generate timepoint mapping (with user review) and parse timepoint Excel
 
 ### Phase 2: Row Explosion & Labels
 **Goal**: Each telemetry observation is expanded into N rows (one per remaining stop), labeled with ground truth time_to_arrival_seconds, and split into train/val/test sets by calendar date
@@ -119,7 +120,7 @@ Phases execute in numeric order: 1 > 2 > 3 > 4 > 5 > 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Data Foundation | 0/TBD | Not started | - |
+| 1. Data Foundation | 0/3 | Planning complete | - |
 | 2. Row Explosion & Labels | 0/TBD | Not started | - |
 | 3. Baseline Model | 0/TBD | Not started | - |
 | 4. Differentiator Features | 0/TBD | Not started | - |
