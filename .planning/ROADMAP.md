@@ -13,7 +13,7 @@ Build an XGBoost-based ETA prediction model for Auburn's Tiger Transit system, r
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Data Foundation** - Parse all raw sources into clean, joined DataFrames ready for feature engineering
-- [ ] **Phase 2: Row Explosion & Labels** - Explode observations into per-stop rows, create ground truth labels, and split temporally
+- [x] **Phase 2: Row Explosion & Labels** - Explode observations into per-stop rows, create ground truth labels, and split temporally
 - [ ] **Phase 3: Baseline Model** - Engineer core features and train first XGBoost model with conservative hyperparameters
 - [ ] **Phase 4: Differentiator Features** - Add timepoint, rolling speed, historical, and Auburn-specific features
 - [ ] **Phase 5: Advanced Training** - Implement asymmetric loss, hyperparameter tuning, and quantile predictions
@@ -51,7 +51,7 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md -- Build stop sequences and explode telemetry into per-stop rows
-- [ ] 02-02-PLAN.md -- Label join via merge_asof and temporal train/val/test split
+- [x] 02-02-PLAN.md -- Label join via merge_asof and temporal train/val/test split
 
 ### Phase 3: Baseline Model
 **Goal**: A trained XGBoost model using only core features (distance, schedule, speed, temporal, weather) produces meaningful predictions that beat the naive schedule baseline
@@ -121,7 +121,7 @@ Phases execute in numeric order: 1 > 2 > 3 > 4 > 5 > 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Data Foundation | 3/3 | ✓ Complete | 2026-02-03 |
-| 2. Row Explosion & Labels | 1/2 | In progress | - |
+| 2. Row Explosion & Labels | 2/2 | ✓ Complete | 2026-02-04 |
 | 3. Baseline Model | 0/TBD | Not started | - |
 | 4. Differentiator Features | 0/TBD | Not started | - |
 | 5. Advanced Training | 0/TBD | Not started | - |
