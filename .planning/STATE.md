@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-03)
 
 **Core value:** Accurate arrival time predictions for all remaining stops on a bus route, accounting for timepoint holds, schedule adherence, and real-world conditions.
-**Current focus:** Phase 2 complete. Ready for Phase 3 (baseline model training).
+**Current focus:** Phase 3 in progress. Feature engineering complete, ready for baseline training.
 
 ## Current Position
 
-Phase: 2 of 6 (Row Explosion & Labels) -- COMPLETE
-Plan: 2 of 2 in current phase (02-02 complete)
-Status: Phase complete
-Last activity: 2026-02-04 -- Completed 02-02-PLAN.md (Label Join & Temporal Split)
+Phase: 3 of 6 (Baseline Model)
+Plan: 1 of 2 in current phase (03-01 complete)
+Status: In progress
+Last activity: 2026-02-04 -- Completed 03-01-PLAN.md (Feature Engineering)
 
-Progress: [████░░░░░░] ~33%
+Progress: [██████░░░░] ~40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 7m
-- Total execution time: 0.6 hours
+- Total plans completed: 6
+- Average duration: 6m
+- Total execution time: 0.7 hours
 
 **By Phase:**
 
@@ -29,10 +29,11 @@ Progress: [████░░░░░░] ~33%
 |-------|-------|-------|----------|
 | 01-data-foundation | 3/3 | 26m | ~9m |
 | 02-row-explosion-labels | 2/2 | ~6m | ~3m |
+| 03-baseline-model | 1/2 | ~4m | ~4m |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (~3m), 02-01 (~3m), 01-03 (~8m), 01-02 (6m), 01-01 (12m)
-- Trend: improving
+- Last 5 plans: 03-01 (~4m), 02-02 (~3m), 02-01 (~3m), 01-03 (~8m), 01-02 (6m)
+- Trend: stable
 
 *Updated after each plan completion*
 
@@ -61,6 +62,8 @@ Recent decisions affecting current work:
 - [02-02]: Per-route 99.5th percentile outlier removal (10,439 rows)
 - [02-02]: Data ends Dec 13 (not Dec 20); test split has 4 days, 296K rows
 - [02-02]: Temporal splits with 1-day gap to prevent trip leakage
+- [03-01]: lateness_now has zero variance (scheduled_eta_seconds == eta_seconds in EtaSpot data)
+- [03-01]: load_featured() helper needed for category dtype restoration (pandas 2.3.3 limitation)
 
 ### Pending Todos
 
@@ -72,9 +75,9 @@ None.
 - ~~Label join success rate target (60%+ minimum, 70%+ ideal) -- validate in Phase 2 Plan 02-02.~~ RESOLVED: 88.8% success rate.
 - Only 5 weeks of data -- aggressive regularization needed throughout.
 
-## Phase 2 Data Artifacts
+## Phase 3 Data Artifacts
 
-Phase 1 artifacts remain available. Phase 2 artifacts:
+Phase 1-2 artifacts remain available. Phase 3 artifacts:
 
 | Artifact | Script | Rows | Key Columns |
 |----------|--------|------|-------------|
@@ -84,9 +87,12 @@ Phase 1 artifacts remain available. Phase 2 artifacts:
 | train.parquet | temporal_split.py | 1.21M | + date, is_weekday (Nov 6 - Dec 1) |
 | val.parquet | temporal_split.py | 384K | + date, is_weekday (Dec 3 - Dec 8) |
 | test.parquet | temporal_split.py | 297K | + date, is_weekday (Dec 10 - Dec 13) |
+| train_featured.parquet | build_features.py | 1.21M | 15 features + target + stops_away |
+| val_featured.parquet | build_features.py | 384K | 15 features + target + stops_away |
+| test_featured.parquet | build_features.py | 297K | 15 features + target + stops_away |
 
 ## Session Continuity
 
 Last session: 2026-02-04
-Stopped at: Completed 02-02-PLAN.md (Label Join & Temporal Split) -- Phase 2 complete
+Stopped at: Completed 03-01-PLAN.md (Feature Engineering) -- Phase 3 plan 1 of 2 complete
 Resume file: None
