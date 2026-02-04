@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-03)
 
 **Core value:** Accurate arrival time predictions for all remaining stops on a bus route, accounting for timepoint holds, schedule adherence, and real-world conditions.
-**Current focus:** Phase 4 in progress. Differentiator features v2 assembled, ready for retraining.
+**Current focus:** Phase 4 complete. Differentiator model trained with 175.7s MAE (55.5% over baseline). Ready for Phase 5 advanced training.
 
 ## Current Position
 
-Phase: 4 of 6 (Differentiator Features) -- IN PROGRESS
-Plan: 2 of 3 in current phase (04-01, 04-02 complete)
-Status: In progress
-Last activity: 2026-02-04 -- Completed 04-02-PLAN.md (Timepoint Features + v2 Assembly)
+Phase: 4 of 6 (Differentiator Features) -- COMPLETE
+Plan: 3 of 3 in current phase (all complete)
+Status: Phase complete
+Last activity: 2026-02-04 -- Completed 04-03-PLAN.md (Differentiator Model Training)
 
-Progress: [████████░░] ~67%
+Progress: [████████░░] ~75%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
+- Total plans completed: 10
 - Average duration: 8m
-- Total execution time: 1.1 hours
+- Total execution time: 1.3 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [████████░░] ~67%
 | 01-data-foundation | 3/3 | 26m | ~9m |
 | 02-row-explosion-labels | 2/2 | ~6m | ~3m |
 | 03-baseline-model | 2/2 | ~23m | ~12m |
-| 04-differentiator-features | 2/3 | ~11m | ~6m |
+| 04-differentiator-features | 3/3 | ~23m | ~8m |
 
 **Recent Trend:**
-- Last 5 plans: 04-02 (~5m), 04-01 (~6m), 03-02 (~19m), 03-01 (~4m), 02-02 (~3m)
+- Last 5 plans: 04-03 (~12m), 04-02 (~5m), 04-01 (~6m), 03-02 (~19m), 03-01 (~4m)
 
 *Updated after each plan completion*
 
@@ -76,6 +76,11 @@ Recent decisions affecting current work:
 - [04-02]: is_timepoint set to NaN for routes 27/235 (no timepoint data at all)
 - [04-02]: target_dwell 98% NaN acceptable -- only 58/119 stops have sufficient observations
 - [04-02]: Phase 3 features inlined in v2 pipeline for self-contained execution
+- [04-03]: Differentiator MAE 175.7s vs baseline 394.7s (55.5% improvement)
+- [04-03]: time_until_next_timepoint_departure is #2 SHAP feature (145.11), highest new Phase 4 feature
+- [04-03]: 5 Phase 4 features in top 10: timepoint departure, segment travel (median/p25/p75), speed_mean_180s
+- [04-03]: Model used all 3000 rounds without early stopping -- still improving, needs Optuna tuning in Phase 5
+- [04-03]: Hyperparameters kept identical to baseline (reg_lambda=5.0) to isolate feature impact
 
 ### Pending Todos
 
@@ -86,6 +91,15 @@ None.
 - ~~Timepoint Excel parsing (23 sheets, human-readable stop names) may require fuzzy matching to GTFS stop IDs -- validate in Phase 1.~~ RESOLVED: 27/28 matched after user review.
 - ~~Label join success rate target (60%+ minimum, 70%+ ideal) -- validate in Phase 2 Plan 02-02.~~ RESOLVED: 88.8% success rate.
 - Only 5 weeks of data -- aggressive regularization needed throughout.
+- Model still improving at 3000 rounds -- Phase 5 should explore higher learning rates and/or more rounds via Optuna.
+
+## Model Performance Tracker
+
+| Model | MAE | RMSE | vs Naive | Features | Rounds |
+|-------|-----|------|----------|----------|--------|
+| Naive (schedule) | 708.9s | 883.4s | -- | 1 | -- |
+| Baseline (P3) | 394.7s | 514.9s | 44.3% | 15 | 2000 |
+| Differentiator (P4) | 175.7s | 279.7s | 75.2% | 43 | 3000 |
 
 ## Phase 4 Data Artifacts
 
@@ -98,11 +112,14 @@ Phase 1-3 artifacts remain available. Phase 4 artifacts:
 | train_featured_v2.parquet | build_differentiator_features.py | 1,206,181 | 43 features + target + stops_away (45 cols) |
 | val_featured_v2.parquet | build_differentiator_features.py | 384,002 | 43 features + target + stops_away (45 cols) |
 | test_featured_v2.parquet | build_differentiator_features.py | 296,608 | 43 features + target + stops_away (45 cols) |
+| differentiator_v1.ubj | train_differentiator.py | -- | 3000-tree XGBoost model |
+| differentiator_metrics.json | train_differentiator.py | -- | Full metrics + baseline comparison |
+| differentiator_shap.png | train_differentiator.py | -- | Feature importance bar chart |
 
 v2 features = 15 Phase 3 + 28 Phase 4 (rolling speed, dynamics, historical, timepoint, speed_ratio, is_rush_hour).
 
 ## Session Continuity
 
 Last session: 2026-02-04
-Stopped at: Completed 04-02-PLAN.md (Timepoint Features + v2 Assembly)
+Stopped at: Completed 04-03-PLAN.md (Differentiator Model Training) -- Phase 4 complete
 Resume file: None
