@@ -62,5 +62,8 @@ nul
 # Claude Code
 .claude/
 
+# Processed data (large parquet files, reproducible via scripts/)
+data/processed/
+
 # GTFS zip (extracted data is in gtfs_data/)
 gtfs_109.zip
