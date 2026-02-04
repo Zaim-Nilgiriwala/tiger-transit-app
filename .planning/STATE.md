@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-03)
 
 **Core value:** Accurate arrival time predictions for all remaining stops on a bus route, accounting for timepoint holds, schedule adherence, and real-world conditions.
-**Current focus:** Phase 3 complete. Baseline model trained (394.7s MAE, 44.3% over naive). Ready for Phase 4 differentiator features.
+**Current focus:** Phase 4 in progress. Building differentiator features to improve on baseline (394.7s MAE).
 
 ## Current Position
 
-Phase: 3 of 6 (Baseline Model) -- COMPLETE
-Plan: 2 of 2 in current phase (03-02 complete)
-Status: Phase complete
-Last activity: 2026-02-04 -- Completed 03-02-PLAN.md (Baseline Model Training)
+Phase: 4 of 6 (Differentiator Features) -- IN PROGRESS
+Plan: 1 of 2 in current phase (04-01 complete)
+Status: In progress
+Last activity: 2026-02-04 -- Completed 04-01-PLAN.md (Rolling Speed + Historical Aggregates)
 
-Progress: [████████░░] ~53%
+Progress: [████████░░] ~60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
+- Total plans completed: 8
 - Average duration: 8m
-- Total execution time: 0.9 hours
+- Total execution time: 1.0 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [████████░░] ~53%
 | 01-data-foundation | 3/3 | 26m | ~9m |
 | 02-row-explosion-labels | 2/2 | ~6m | ~3m |
 | 03-baseline-model | 2/2 | ~23m | ~12m |
+| 04-differentiator-features | 1/2 | ~6m | ~6m |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (~19m), 03-01 (~4m), 02-02 (~3m), 02-01 (~3m), 01-03 (~8m)
-- Trend: 03-02 longer due to XGBoost training time (2000 rounds x2 runs)
+- Last 5 plans: 04-01 (~6m), 03-02 (~19m), 03-01 (~4m), 02-02 (~3m), 02-01 (~3m)
 
 *Updated after each plan completion*
 
@@ -69,6 +69,9 @@ Recent decisions affecting current work:
 - [03-02]: No early stopping at 2000 rounds -- model under-trained, needs more rounds or higher LR
 - [03-02]: lateness_now confirmed zero SHAP importance (zero variance from 03-01)
 - [03-02]: models/ added to .gitignore (reproducible artifacts)
+- [04-01]: speed_std_30s has 99.9% NaN due to 60s ping intervals -- expected, larger windows compensate
+- [04-01]: 1,212 valid segment combos (vs 2,550 research estimate) because training split is 58% of full data
+- [04-01]: Dwell time resolution limited to ~60s minimum by ping interval
 
 ### Pending Todos
 
@@ -80,27 +83,19 @@ None.
 - ~~Label join success rate target (60%+ minimum, 70%+ ideal) -- validate in Phase 2 Plan 02-02.~~ RESOLVED: 88.8% success rate.
 - Only 5 weeks of data -- aggressive regularization needed throughout.
 
-## Phase 3 Data Artifacts
+## Phase 4 Data Artifacts
 
-Phase 1-2 artifacts remain available. Phase 3 artifacts:
+Phase 1-3 artifacts remain available. Phase 4 artifacts (so far):
 
 | Artifact | Script | Rows | Key Columns |
 |----------|--------|------|-------------|
-| stop_sequences.parquet | build_stop_sequences.py | 202 | route_id, stop_id, stop_sequence, stop_progress |
-| exploded.parquet | explode_rows.py | 2.34M | all telemetry + target_stop_id, target_stop_progress, stops_away |
-| labeled.parquet | label_join.py | 2.08M | + actual_arrival, time_to_arrival_seconds |
-| train.parquet | temporal_split.py | 1.21M | + date, is_weekday (Nov 6 - Dec 1) |
-| val.parquet | temporal_split.py | 384K | + date, is_weekday (Dec 3 - Dec 8) |
-| test.parquet | temporal_split.py | 297K | + date, is_weekday (Dec 10 - Dec 13) |
-| train_featured.parquet | build_features.py | 1.21M | 15 features + target + stops_away |
-| val_featured.parquet | build_features.py | 384K | 15 features + target + stops_away |
-| test_featured.parquet | build_features.py | 297K | 15 features + target + stops_away |
-| baseline_v1.ubj | train_baseline.py | - | XGBoost model (2000 rounds, MAE 394.7s) |
-| baseline_metrics.json | train_baseline.py | - | Overall + sliced metrics + SHAP |
-| shap_summary.png | train_baseline.py | - | Feature importance bar chart |
+| historical_segments.parquet | build_differentiator_features.py | 1,953 | route_id, last_stop_id, hour_ct, day_type, segment_travel_median/p25/p75 |
+| historical_dwells.parquet | build_differentiator_features.py | 588 | route_id, stop_id, hour_ct, day_type, dwell_median/p25/p75 |
+
+Rolling features (13 cols) computed in-memory on unique pings, merged back to exploded data in Plan 02.
 
 ## Session Continuity
 
 Last session: 2026-02-04
-Stopped at: Completed 03-02-PLAN.md (Baseline Model Training) -- Phase 3 complete
+Stopped at: Completed 04-01-PLAN.md (Rolling Speed + Historical Aggregates)
 Resume file: None
