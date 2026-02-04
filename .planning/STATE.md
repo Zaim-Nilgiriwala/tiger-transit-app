@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-03)
 
 **Core value:** Accurate arrival time predictions for all remaining stops on a bus route, accounting for timepoint holds, schedule adherence, and real-world conditions.
-**Current focus:** Phase 3 in progress. Feature engineering complete, ready for baseline training.
+**Current focus:** Phase 3 complete. Baseline model trained (394.7s MAE, 44.3% over naive). Ready for Phase 4 differentiator features.
 
 ## Current Position
 
-Phase: 3 of 6 (Baseline Model)
-Plan: 1 of 2 in current phase (03-01 complete)
-Status: In progress
-Last activity: 2026-02-04 -- Completed 03-01-PLAN.md (Feature Engineering)
+Phase: 3 of 6 (Baseline Model) -- COMPLETE
+Plan: 2 of 2 in current phase (03-02 complete)
+Status: Phase complete
+Last activity: 2026-02-04 -- Completed 03-02-PLAN.md (Baseline Model Training)
 
-Progress: [██████░░░░] ~40%
+Progress: [████████░░] ~53%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 6m
-- Total execution time: 0.7 hours
+- Total plans completed: 7
+- Average duration: 8m
+- Total execution time: 0.9 hours
 
 **By Phase:**
 
@@ -29,11 +29,11 @@ Progress: [██████░░░░] ~40%
 |-------|-------|-------|----------|
 | 01-data-foundation | 3/3 | 26m | ~9m |
 | 02-row-explosion-labels | 2/2 | ~6m | ~3m |
-| 03-baseline-model | 1/2 | ~4m | ~4m |
+| 03-baseline-model | 2/2 | ~23m | ~12m |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (~4m), 02-02 (~3m), 02-01 (~3m), 01-03 (~8m), 01-02 (6m)
-- Trend: stable
+- Last 5 plans: 03-02 (~19m), 03-01 (~4m), 02-02 (~3m), 02-01 (~3m), 01-03 (~8m)
+- Trend: 03-02 longer due to XGBoost training time (2000 rounds x2 runs)
 
 *Updated after each plan completion*
 
@@ -64,6 +64,11 @@ Recent decisions affecting current work:
 - [02-02]: Temporal splits with 1-day gap to prevent trip leakage
 - [03-01]: lateness_now has zero variance (scheduled_eta_seconds == eta_seconds in EtaSpot data)
 - [03-01]: load_featured() helper needed for category dtype restoration (pandas 2.3.3 limitation)
+- [03-02]: Baseline XGBoost MAE 394.7s vs naive 708.9s (44.3% improvement)
+- [03-02]: SHAP top 3: pattern_id, route_progress, stop_index (distance_to_target #4)
+- [03-02]: No early stopping at 2000 rounds -- model under-trained, needs more rounds or higher LR
+- [03-02]: lateness_now confirmed zero SHAP importance (zero variance from 03-01)
+- [03-02]: models/ added to .gitignore (reproducible artifacts)
 
 ### Pending Todos
 
@@ -90,9 +95,12 @@ Phase 1-2 artifacts remain available. Phase 3 artifacts:
 | train_featured.parquet | build_features.py | 1.21M | 15 features + target + stops_away |
 | val_featured.parquet | build_features.py | 384K | 15 features + target + stops_away |
 | test_featured.parquet | build_features.py | 297K | 15 features + target + stops_away |
+| baseline_v1.ubj | train_baseline.py | - | XGBoost model (2000 rounds, MAE 394.7s) |
+| baseline_metrics.json | train_baseline.py | - | Overall + sliced metrics + SHAP |
+| shap_summary.png | train_baseline.py | - | Feature importance bar chart |
 
 ## Session Continuity
 
 Last session: 2026-02-04
-Stopped at: Completed 03-01-PLAN.md (Feature Engineering) -- Phase 3 plan 1 of 2 complete
+Stopped at: Completed 03-02-PLAN.md (Baseline Model Training) -- Phase 3 complete
 Resume file: None
