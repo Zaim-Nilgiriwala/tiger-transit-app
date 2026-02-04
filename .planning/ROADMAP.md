@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Data Foundation** - Parse all raw sources into clean, joined DataFrames ready for feature engineering
 - [x] **Phase 2: Row Explosion & Labels** - Explode observations into per-stop rows, create ground truth labels, and split temporally
 - [x] **Phase 3: Baseline Model** - Engineer core features and train first XGBoost model with conservative hyperparameters
-- [ ] **Phase 4: Differentiator Features** - Add timepoint, rolling speed, historical, and Auburn-specific features
+- [x] **Phase 4: Differentiator Features** - Add timepoint, rolling speed, historical, and Auburn-specific features
 - [ ] **Phase 5: Advanced Training** - Implement asymmetric loss, hyperparameter tuning, and quantile predictions
 - [ ] **Phase 6: Evaluation & Analysis** - Comprehensive sliced metrics, SHAP explainability, and bias detection
 
@@ -80,9 +80,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- Rolling speed features and historical segment/dwell aggregates
-- [ ] 04-02-PLAN.md -- Timepoint features and v2 featured parquet assembly
-- [ ] 04-03-PLAN.md -- Retrain XGBoost with differentiator features and compare to baseline
+- [x] 04-01-PLAN.md -- Rolling speed features and historical segment/dwell aggregates
+- [x] 04-02-PLAN.md -- Timepoint features and v2 featured parquet assembly
+- [x] 04-03-PLAN.md -- Retrain XGBoost with differentiator features and compare to baseline
 
 ### Phase 5: Advanced Training
 **Goal**: The model uses asymmetric loss matching the existing PyTorch penalty structure, hyperparameters are tuned via Optuna, and quantile predictions provide confidence intervals
@@ -124,6 +124,6 @@ Phases execute in numeric order: 1 > 2 > 3 > 4 > 5 > 6
 | 1. Data Foundation | 3/3 | ✓ Complete | 2026-02-03 |
 | 2. Row Explosion & Labels | 2/2 | ✓ Complete | 2026-02-04 |
 | 3. Baseline Model | 2/2 | ✓ Complete | 2026-02-04 |
-| 4. Differentiator Features | 0/3 | In Progress | - |
+| 4. Differentiator Features | 3/3 | ✓ Complete | 2026-02-04 |
 | 5. Advanced Training | 0/TBD | Not started | - |
 | 6. Evaluation & Analysis | 0/TBD | Not started | - |
