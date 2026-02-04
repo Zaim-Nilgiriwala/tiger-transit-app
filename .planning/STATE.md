@@ -5,33 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-02-03)
 
 **Core value:** Accurate arrival time predictions for all remaining stops on a bus route, accounting for timepoint holds, schedule adherence, and real-world conditions.
-**Current focus:** Phase 2 in progress. Plan 02-01 complete, 02-02 (label join) next.
+**Current focus:** Phase 2 complete. Ready for Phase 3 (baseline model training).
 
 ## Current Position
 
-Phase: 2 of 6 (Row Explosion & Labels) -- IN PROGRESS
-Plan: 1 of 2 in current phase (02-01 complete)
-Status: In progress
-Last activity: 2026-02-04 -- Completed 02-01-PLAN.md (Stop Sequences & Explosion)
+Phase: 2 of 6 (Row Explosion & Labels) -- COMPLETE
+Plan: 2 of 2 in current phase (02-02 complete)
+Status: Phase complete
+Last activity: 2026-02-04 -- Completed 02-02-PLAN.md (Label Join & Temporal Split)
 
-Progress: [███░░░░░░░] ~25%
+Progress: [████░░░░░░] ~33%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 8m
-- Total execution time: 0.5 hours
+- Total plans completed: 5
+- Average duration: 7m
+- Total execution time: 0.6 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-data-foundation | 3/3 | 26m | ~9m |
-| 02-row-explosion-labels | 1/2 | ~3m | ~3m |
+| 02-row-explosion-labels | 2/2 | ~6m | ~3m |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (~3m), 01-03 (~8m), 01-02 (6m), 01-01 (12m)
+- Last 5 plans: 02-02 (~3m), 02-01 (~3m), 01-03 (~8m), 01-02 (6m), 01-01 (12m)
 - Trend: improving
 
 *Updated after each plan completion*
@@ -57,28 +57,36 @@ Recent decisions affecting current work:
 - [01-03]: Marathon Gas Station skipped (outdated stop, no GTFS match)
 - [02-01]: Canonical shape selection by trip count (most trips per shape_id)
 - [02-01]: Explosion produced 2.34M rows (vs 4-6M estimate) -- avg 3.2 stops ahead per observation is correct
+- [02-02]: merge_asof(direction='forward', tolerance=2h) for ground truth labels -- 88.8% success rate
+- [02-02]: Per-route 99.5th percentile outlier removal (10,439 rows)
+- [02-02]: Data ends Dec 13 (not Dec 20); test split has 4 days, 296K rows
+- [02-02]: Temporal splits with 1-day gap to prevent trip leakage
 
 ### Pending Todos
 
-None yet.
+None.
 
 ### Blockers/Concerns
 
 - ~~Timepoint Excel parsing (23 sheets, human-readable stop names) may require fuzzy matching to GTFS stop IDs -- validate in Phase 1.~~ RESOLVED: 27/28 matched after user review.
-- Label join success rate target (60%+ minimum, 70%+ ideal) -- validate in Phase 2 Plan 02-02.
+- ~~Label join success rate target (60%+ minimum, 70%+ ideal) -- validate in Phase 2 Plan 02-02.~~ RESOLVED: 88.8% success rate.
 - Only 5 weeks of data -- aggressive regularization needed throughout.
 
 ## Phase 2 Data Artifacts
 
-Phase 1 artifacts remain available. New Phase 2 artifacts:
+Phase 1 artifacts remain available. Phase 2 artifacts:
 
 | Artifact | Script | Rows | Key Columns |
 |----------|--------|------|-------------|
 | stop_sequences.parquet | build_stop_sequences.py | 202 | route_id, stop_id, stop_sequence, stop_progress |
 | exploded.parquet | explode_rows.py | 2.34M | all telemetry + target_stop_id, target_stop_progress, stops_away |
+| labeled.parquet | label_join.py | 2.08M | + actual_arrival, time_to_arrival_seconds |
+| train.parquet | temporal_split.py | 1.21M | + date, is_weekday (Nov 6 - Dec 1) |
+| val.parquet | temporal_split.py | 384K | + date, is_weekday (Dec 3 - Dec 8) |
+| test.parquet | temporal_split.py | 297K | + date, is_weekday (Dec 10 - Dec 13) |
 
 ## Session Continuity
 
 Last session: 2026-02-04
-Stopped at: Completed 02-01-PLAN.md (Stop Sequences & Explosion)
+Stopped at: Completed 02-02-PLAN.md (Label Join & Temporal Split) -- Phase 2 complete
 Resume file: None
