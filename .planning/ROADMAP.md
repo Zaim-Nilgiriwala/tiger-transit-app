@@ -62,11 +62,11 @@ Plans:
   2. XGBoost trains with reg:squarederror, early stopping on validation MAE, and converges (training loss decreases, validation loss stabilizes)
   3. Test set MAE is reported and is lower than the naive baseline (using scheduled_time_to_target as the prediction)
   4. SHAP summary plot shows distance_to_target and scheduled_time_to_target among the top 3 most important features (sanity check)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 03-01-PLAN.md -- Engineer all 14 core features from Phase 2 splits into featured parquets
+- [ ] 03-02-PLAN.md -- Train XGBoost baseline, evaluate with sliced metrics, compute SHAP, save model
 
 ### Phase 4: Differentiator Features
 **Goal**: Auburn-specific and advanced features (timepoint holds, rolling speeds, historical segment/dwell times, class schedules) are engineered and demonstrably improve model accuracy over baseline
@@ -122,7 +122,7 @@ Phases execute in numeric order: 1 > 2 > 3 > 4 > 5 > 6
 |-------|----------------|--------|-----------|
 | 1. Data Foundation | 3/3 | ✓ Complete | 2026-02-03 |
 | 2. Row Explosion & Labels | 2/2 | ✓ Complete | 2026-02-04 |
-| 3. Baseline Model | 0/TBD | Not started | - |
+| 3. Baseline Model | 0/2 | Not started | - |
 | 4. Differentiator Features | 0/TBD | Not started | - |
 | 5. Advanced Training | 0/TBD | Not started | - |
 | 6. Evaluation & Analysis | 0/TBD | Not started | - |
