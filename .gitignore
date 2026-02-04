@@ -28,5 +28,8 @@ nul
 # Processed data (large parquet files, reproducible via scripts/)
 data/processed/
 
+# Model artifacts (reproducible via scripts/train_baseline.py)
+models/
+
 # GTFS zip (extracted data is in gtfs_data/)
 gtfs_109.zip
