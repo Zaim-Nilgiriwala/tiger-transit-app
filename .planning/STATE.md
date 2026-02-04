@@ -10,27 +10,27 @@ See: .planning/PROJECT.md (updated 2026-02-03)
 ## Current Position
 
 Phase: 1 of 6 (Data Foundation)
-Plan: 1 of 3 in current phase (01-02 complete)
+Plan: 2 of 3 in current phase (01-01, 01-02 complete)
 Status: In progress
-Last activity: 2026-02-03 -- Completed 01-02-PLAN.md (GTFS & Arrivals Parsing)
+Last activity: 2026-02-03 -- Completed 01-01-PLAN.md (Telemetry & Weather Parsing)
 
-Progress: [█░░░░░░░░░] ~5%
+Progress: [██░░░░░░░░] ~10%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 6m
-- Total execution time: 0.1 hours
+- Total plans completed: 2
+- Average duration: 9m
+- Total execution time: 0.3 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-data-foundation | 1/3 | 6m | 6m |
+| 01-data-foundation | 2/3 | 18m | 9m |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (6m)
+- Last 5 plans: 01-02 (6m), 01-01 (12m)
 - Trend: --
 
 *Updated after each plan completion*
@@ -48,6 +48,9 @@ Recent decisions affecting current work:
 - [01-02]: Mixed date formats in arrivals CSVs handled with pandas format='mixed'
 - [01-02]: Route ID extraction uses first numeric segment of compound GTFS IDs (e.g., 215_202_201_156 -> 215)
 - [01-02]: Arrivals timestamps converted from US/Central to UTC
+- [01-01]: Filter per-file before concat to avoid OOM with 38M+ raw telemetry rows
+- [01-01]: Skip raw_data_2026-01-07.jsonl (incompatible device-report schema)
+- [01-01]: Gitignore data/processed/ -- 296MB telemetry parquet is reproducible from scripts
 
 ### Pending Todos
 
@@ -62,5 +65,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-03
-Stopped at: Completed 01-02-PLAN.md (GTFS & Arrivals Parsing)
+Stopped at: Completed 01-01-PLAN.md (Telemetry & Weather Parsing)
 Resume file: None
