@@ -18,14 +18,14 @@
 
 ### Core Features (Baseline Model)
 
-- [ ] **FEAT-01**: distance_to_target — route distance along GTFS shape from current position to target stop (meters)
-- [ ] **FEAT-02**: scheduled_time_to_target — seconds from now until scheduled arrival at target stop (from GTFS stop_times)
-- [ ] **FEAT-03**: current_speed, route_progress (nextStopPercentProgress), stops_remaining, stop_index
-- [ ] **FEAT-04**: lateness_now — current schedule deviation in seconds (lastStop.time - lastStop.sdTime)
-- [ ] **FEAT-05**: minutes_since_midnight (raw, not cyclical), day_of_week (XGBoost native categorical)
-- [ ] **FEAT-06**: patternID as XGBoost native categorical
-- [ ] **FEAT-07**: precipitation (mm/hr), temperature (Celsius) from weather data
-- [ ] **FEAT-08**: passenger_load, is_idle / idle_duration
+- [x] **FEAT-01**: distance_to_target — route distance along GTFS shape from current position to target stop (meters)
+- [x] **FEAT-02**: scheduled_time_to_target — seconds from now until scheduled arrival at target stop (from GTFS stop_times)
+- [x] **FEAT-03**: current_speed, route_progress (nextStopPercentProgress), stops_remaining, stop_index
+- [x] **FEAT-04**: lateness_now — current schedule deviation in seconds (lastStop.time - lastStop.sdTime)
+- [x] **FEAT-05**: minutes_since_midnight (raw, not cyclical), day_of_week (XGBoost native categorical)
+- [x] **FEAT-06**: patternID as XGBoost native categorical
+- [x] **FEAT-07**: precipitation (mm/hr), temperature (Celsius) from weather data
+- [x] **FEAT-08**: passenger_load, is_idle / idle_duration
 
 ### Differentiator Features (Post-Baseline)
 
@@ -38,7 +38,7 @@
 
 ### Model Training
 
-- [ ] **TRAIN-01**: Baseline XGBoost model with reg:squarederror, conservative regularization (max_depth=3-4, min_child_weight=10-50), early stopping on validation MAE
+- [x] **TRAIN-01**: Baseline XGBoost model with reg:squarederror, conservative regularization (max_depth=3-4, min_child_weight=10-50), early stopping on validation MAE
 - [ ] **TRAIN-02**: Asymmetric loss implementation — custom XGBoost objective or quantile regression to replicate 5x overestimation penalty from existing PyTorch model
 - [ ] **TRAIN-03**: Optuna hyperparameter tuning (100-200 trials) with TimeSeriesSplit/GroupKFold cross-validation
 - [ ] **TRAIN-04**: Multi-quantile predictions (P50, P80) via reg:quantileerror for confidence intervals
@@ -89,21 +89,21 @@
 | DATA-06 | Phase 2 | Complete |
 | DATA-07 | Phase 2 | Complete |
 | DATA-08 | Phase 2 | Complete |
-| FEAT-01 | Phase 3 | Pending |
-| FEAT-02 | Phase 3 | Pending |
-| FEAT-03 | Phase 3 | Pending |
-| FEAT-04 | Phase 3 | Pending |
-| FEAT-05 | Phase 3 | Pending |
-| FEAT-06 | Phase 3 | Pending |
-| FEAT-07 | Phase 3 | Pending |
-| FEAT-08 | Phase 3 | Pending |
+| FEAT-01 | Phase 3 | Complete |
+| FEAT-02 | Phase 3 | Complete |
+| FEAT-03 | Phase 3 | Complete |
+| FEAT-04 | Phase 3 | Complete |
+| FEAT-05 | Phase 3 | Complete |
+| FEAT-06 | Phase 3 | Complete |
+| FEAT-07 | Phase 3 | Complete |
+| FEAT-08 | Phase 3 | Complete |
 | FEAT-09 | Phase 4 | Pending |
 | FEAT-10 | Phase 4 | Pending |
 | FEAT-11 | Phase 4 | Pending |
 | FEAT-12 | Phase 4 | Pending |
 | FEAT-13 | Phase 4 | Pending |
 | FEAT-14 | Phase 4 | Pending |
-| TRAIN-01 | Phase 3 | Pending |
+| TRAIN-01 | Phase 3 | Complete |
 | TRAIN-02 | Phase 5 | Pending |
 | TRAIN-03 | Phase 5 | Pending |
 | TRAIN-04 | Phase 5 | Pending |
