@@ -77,11 +77,12 @@ Plans:
   2. Timepoint features (is_timepoint, timepoints_remaining, time_until_next_timepoint_departure) are computed using the Phase 1 timepoint mapping and present in the feature matrix
   3. Historical segment travel time and dwell time aggregates are computed from training data only (no leakage from val/test dates)
   4. Retraining with differentiator features produces a lower test MAE than the Phase 3 baseline model (improvement logged with exact numbers)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md -- Rolling speed features and historical segment/dwell aggregates
+- [ ] 04-02-PLAN.md -- Timepoint features and v2 featured parquet assembly
+- [ ] 04-03-PLAN.md -- Retrain XGBoost with differentiator features and compare to baseline
 
 ### Phase 5: Advanced Training
 **Goal**: The model uses asymmetric loss matching the existing PyTorch penalty structure, hyperparameters are tuned via Optuna, and quantile predictions provide confidence intervals
@@ -123,6 +124,6 @@ Phases execute in numeric order: 1 > 2 > 3 > 4 > 5 > 6
 | 1. Data Foundation | 3/3 | ✓ Complete | 2026-02-03 |
 | 2. Row Explosion & Labels | 2/2 | ✓ Complete | 2026-02-04 |
 | 3. Baseline Model | 2/2 | ✓ Complete | 2026-02-04 |
-| 4. Differentiator Features | 0/TBD | Not started | - |
+| 4. Differentiator Features | 0/3 | In Progress | - |
 | 5. Advanced Training | 0/TBD | Not started | - |
 | 6. Evaluation & Analysis | 0/TBD | Not started | - |
