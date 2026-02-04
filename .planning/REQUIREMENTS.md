@@ -29,12 +29,12 @@
 
 ### Differentiator Features (Post-Baseline)
 
-- [ ] **FEAT-09**: Rolling average speed over 30s, 60s, 120s, 180s windows
-- [ ] **FEAT-10**: Timepoint features — is_timepoint (boolean), timepoints_remaining (count), time_until_next_timepoint_departure (seconds)
-- [ ] **FEAT-11**: Historical segment travel time mean/std aggregated by (segment, hour, day_type) from training data only
-- [ ] **FEAT-12**: Historical dwell time mean aggregated by (stop_id, hour, day_type) from training data only
-- [ ] **FEAT-13**: is_rush_hour (boolean), class_let_out_recently (boolean, approximate: classes end at :50/:00)
-- [ ] **FEAT-14**: Additional engineered features beyond specified list where they demonstrably improve accuracy
+- [x] **FEAT-09**: Rolling average speed over 30s, 60s, 120s, 180s windows
+- [x] **FEAT-10**: Timepoint features — is_timepoint (boolean), timepoints_remaining (count), time_until_next_timepoint_departure (seconds)
+- [x] **FEAT-11**: Historical segment travel time mean/std aggregated by (segment, hour, day_type) from training data only
+- [x] **FEAT-12**: Historical dwell time mean aggregated by (stop_id, hour, day_type) from training data only
+- [x] **FEAT-13**: is_rush_hour (boolean), class_let_out_recently (boolean, approximate: classes end at :50/:00)
+- [x] **FEAT-14**: Additional engineered features beyond specified list where they demonstrably improve accuracy
 
 ### Model Training
 
@@ -97,12 +97,12 @@
 | FEAT-06 | Phase 3 | Complete |
 | FEAT-07 | Phase 3 | Complete |
 | FEAT-08 | Phase 3 | Complete |
-| FEAT-09 | Phase 4 | Pending |
-| FEAT-10 | Phase 4 | Pending |
-| FEAT-11 | Phase 4 | Pending |
-| FEAT-12 | Phase 4 | Pending |
-| FEAT-13 | Phase 4 | Pending |
-| FEAT-14 | Phase 4 | Pending |
+| FEAT-09 | Phase 4 | Complete |
+| FEAT-10 | Phase 4 | Complete |
+| FEAT-11 | Phase 4 | Complete |
+| FEAT-12 | Phase 4 | Complete |
+| FEAT-13 | Phase 4 | Complete |
+| FEAT-14 | Phase 4 | Complete |
 | TRAIN-01 | Phase 3 | Complete |
 | TRAIN-02 | Phase 5 | Pending |
 | TRAIN-03 | Phase 5 | Pending |
