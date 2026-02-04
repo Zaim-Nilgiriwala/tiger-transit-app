@@ -93,11 +93,11 @@ Plans:
   2. Optuna study completes 100+ trials with GroupKFold or TimeSeriesSplit CV, and best trial MAE improves over the default-hyperparameter model from Phase 4
   3. Multi-quantile model produces P50 and P80 predictions, and P80 > P50 for all test samples (monotonicity check)
   4. Final tuned model test MAE is reported alongside all prior checkpoints (Phase 3 baseline, Phase 4 with features, Phase 5 tuned) showing progressive improvement
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
+- [ ] 05-01-PLAN.md -- Optuna hyperparameter tuning with 150 trials and TimeSeriesSplit CV
+- [ ] 05-02-PLAN.md -- Asymmetric loss retraining, quantile models, and full phase comparison
 
 ### Phase 6: Evaluation & Analysis
 **Goal**: The final model is comprehensively evaluated with sliced metrics, explainability analysis, and bias detection to confirm it is ready for production consideration
@@ -125,5 +125,5 @@ Phases execute in numeric order: 1 > 2 > 3 > 4 > 5 > 6
 | 2. Row Explosion & Labels | 2/2 | ✓ Complete | 2026-02-04 |
 | 3. Baseline Model | 2/2 | ✓ Complete | 2026-02-04 |
 | 4. Differentiator Features | 3/3 | ✓ Complete | 2026-02-04 |
-| 5. Advanced Training | 0/TBD | Not started | - |
+| 5. Advanced Training | 0/2 | Not started | - |
 | 6. Evaluation & Analysis | 0/TBD | Not started | - |
