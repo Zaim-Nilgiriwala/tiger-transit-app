@@ -47,11 +47,11 @@ Plans:
   2. merge_asof label join achieves a success rate above 60% (rows with valid time_to_arrival_seconds / total rows), and label distribution shows no 3600s spikes (timezone bug indicator)
   3. Train/val/test splits are strictly temporal by calendar date with a gap period, and no trip_id appears in more than one split
   4. Final Parquet files exist on disk with correct schema and row counts logged
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md -- Build stop sequences and explode telemetry into per-stop rows
+- [ ] 02-02-PLAN.md -- Label join via merge_asof and temporal train/val/test split
 
 ### Phase 3: Baseline Model
 **Goal**: A trained XGBoost model using only core features (distance, schedule, speed, temporal, weather) produces meaningful predictions that beat the naive schedule baseline
@@ -121,7 +121,7 @@ Phases execute in numeric order: 1 > 2 > 3 > 4 > 5 > 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Data Foundation | 3/3 | ✓ Complete | 2026-02-03 |
-| 2. Row Explosion & Labels | 0/TBD | Not started | - |
+| 2. Row Explosion & Labels | 0/2 | Not started | - |
 | 3. Baseline Model | 0/TBD | Not started | - |
 | 4. Differentiator Features | 0/TBD | Not started | - |
 | 5. Advanced Training | 0/TBD | Not started | - |
