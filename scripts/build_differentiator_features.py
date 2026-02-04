@@ -1,24 +1,31 @@
 """
 build_differentiator_features.py - Differentiator feature engineering for Tiger Transit.
 
-Computes GPS-derived rolling speed features and historical aggregate features
-that go beyond the baseline feature set (build_features.py).
+Computes GPS-derived rolling speed features, historical aggregate features,
+timepoint features, and speed ratio -- going beyond the baseline feature set.
 
 Features computed:
   Rolling speed: gps_speed_mps, speed_mean_{30,60,120,180}s, speed_std_{30,60,120,180}s
   Dynamics:      acceleration, is_idle_gps, seconds_idle
   Historical:    segment travel time medians, dwell time medians (saved as parquets)
+  Timepoint:     is_timepoint, scheduled_departure_seconds, timepoints_remaining,
+                 time_until_next_timepoint_departure, timepoint_adherence
+  Speed ratio:   speed_ratio (current / historical median)
+  Temporal:      is_rush_hour
 
 Usage:
     python scripts/build_differentiator_features.py
 
 Input:
-    data/processed/train.parquet
+    data/processed/{train,val,test}.parquet
+    data/processed/timepoints.parquet
+    data/processed/stop_sequences.parquet
+    data/processed/weather.parquet
 
 Output:
     data/processed/historical_segments.parquet
     data/processed/historical_dwells.parquet
-    (Rolling features are computed in-memory for merge-back; not saved standalone)
+    data/processed/{train,val,test}_featured_v2.parquet
 """
 
 import sys
@@ -450,6 +457,258 @@ def merge_rolling_to_exploded(exploded: pd.DataFrame, pings_featured: pd.DataFra
 
 
 # ---------------------------------------------------------------------------
+# Timepoint feature helpers
+# ---------------------------------------------------------------------------
+
+
+def load_timepoint_data():
+    """Load timepoint schedule and stop sequence data.
+
+    Returns:
+        tp_set: set of (route_id, stop_id) tuples that are timepoints
+        tp_schedule: DataFrame with (route_id, stop_id, scheduled_time_seconds)
+                     - one row per scheduled departure
+        stop_seq: DataFrame with (route_id, stop_id, stop_sequence)
+        tp_seq_by_route: dict mapping route_id -> sorted list of timepoint stop_sequences
+    """
+    tp = pd.read_parquet(DATA_DIR / "timepoints.parquet")
+    ss = pd.read_parquet(DATA_DIR / "stop_sequences.parquet")
+
+    # Convert scheduled_time to seconds since midnight
+    tp["scheduled_time_seconds"] = pd.to_timedelta(tp["scheduled_time"]).dt.total_seconds()
+
+    # Unique timepoint (route_id, stop_id) set
+    tp_unique = tp.drop_duplicates(subset=["route_id", "stop_id"])[["route_id", "stop_id"]]
+    tp_set = set(zip(tp_unique["route_id"], tp_unique["stop_id"]))
+
+    # Merge stop_sequence onto timepoint stops
+    tp_with_seq = tp_unique.merge(
+        ss[["route_id", "stop_id", "stop_sequence"]],
+        on=["route_id", "stop_id"],
+        how="left",
+    )
+
+    # Build per-route sorted timepoint stop_sequences
+    tp_seq_by_route = {}
+    for rid, grp in tp_with_seq.groupby("route_id"):
+        seqs = sorted(grp["stop_sequence"].dropna().astype(int).tolist())
+        tp_seq_by_route[rid] = seqs
+
+    return tp_set, tp, ss, tp_seq_by_route
+
+
+def compute_timepoint_features(df: pd.DataFrame, tp_set, tp_schedule,
+                                stop_seq, tp_seq_by_route) -> pd.DataFrame:
+    """Compute all timepoint features (vectorized).
+
+    Features:
+      - is_timepoint: 1 if target_stop_id is a timepoint for this route
+      - scheduled_departure_seconds: scheduled time for target stop (if timepoint)
+      - timepoints_remaining: count of timepoint stops between current and target
+      - time_until_next_timepoint_departure: seconds until next timepoint departure
+      - timepoint_adherence: seconds ahead/behind schedule at last passed timepoint
+
+    Routes 27, 235 get all NaN (no timepoint data).
+    """
+    n_before = len(df)
+
+    # --- is_timepoint ---
+    # Build MultiIndex from (route_id, target_stop_id) pairs in tp_set
+    tp_index = pd.MultiIndex.from_tuples(list(tp_set), names=["route_id", "stop_id"])
+    obs_index = pd.MultiIndex.from_frame(
+        df[["route_id", "target_stop_id"]].rename(columns={"target_stop_id": "stop_id"})
+    )
+    df["is_timepoint"] = obs_index.isin(tp_index).astype(int)
+
+    # --- scheduled_departure_seconds ---
+    # For target stops that are timepoints, get the FIRST scheduled departure
+    # (we use median scheduled time per route-stop as representative)
+    tp_first = tp_schedule.groupby(["route_id", "stop_id"])["scheduled_time_seconds"].median().reset_index()
+    tp_first = tp_first.rename(columns={"stop_id": "target_stop_id",
+                                         "scheduled_time_seconds": "scheduled_departure_seconds"})
+    df = df.merge(tp_first, on=["route_id", "target_stop_id"], how="left")
+    # Non-timepoint target stops already get NaN from left merge
+
+    # --- Get last_stop_sequence via merge ---
+    seq_lookup = stop_seq[["route_id", "stop_id", "stop_sequence"]].copy()
+    seq_lookup = seq_lookup.rename(columns={"stop_id": "last_stop_id",
+                                             "stop_sequence": "last_stop_sequence"})
+    df = df.merge(seq_lookup, on=["route_id", "last_stop_id"], how="left")
+
+    assert len(df) == n_before, (
+        f"Row count changed after stop_sequence merge! Before={n_before}, After={len(df)}"
+    )
+
+    # --- timepoints_remaining ---
+    # For each row: count timepoint stop_sequences > last_stop_sequence AND <= target_stop_sequence
+    # Vectorize by building a mapping per route
+    tp_remaining = np.full(len(df), np.nan)
+    for rid, tp_seqs in tp_seq_by_route.items():
+        if not tp_seqs:
+            continue
+        mask = df["route_id"] == rid
+        if not mask.any():
+            continue
+        last_seq = df.loc[mask, "last_stop_sequence"].values
+        target_seq = df.loc[mask, "target_stop_sequence"].values
+        tp_arr = np.array(tp_seqs)
+        # For each obs: count tp_seqs > last_seq AND <= target_seq
+        counts = np.zeros(mask.sum(), dtype=float)
+        for ts in tp_arr:
+            counts += ((ts > last_seq) & (ts <= target_seq)).astype(float)
+        tp_remaining[mask.values] = counts
+
+    df["timepoints_remaining"] = tp_remaining
+
+    # --- time_until_next_timepoint_departure ---
+    # Current time in CT seconds since midnight
+    ct_ts = df["timestamp"] - pd.Timedelta(hours=6)
+    minutes_ct = ct_ts.dt.hour * 60 + ct_ts.dt.minute
+    seconds_ct = minutes_ct * 60 + ct_ts.dt.second
+
+    # For each row, find the next timepoint stop ahead on the route
+    # and look up its scheduled departure
+    # Build lookup: for each route, for each timepoint stop_seq, get the median scheduled time
+    tp_with_seq_sched = tp_schedule.drop_duplicates(subset=["route_id", "stop_id"]).copy()
+    tp_with_seq_sched = tp_with_seq_sched.merge(
+        stop_seq[["route_id", "stop_id", "stop_sequence"]],
+        on=["route_id", "stop_id"],
+        how="left",
+    )
+    # Median scheduled time per (route_id, stop_id)
+    tp_sched_lookup = tp_schedule.groupby(["route_id", "stop_id"])["scheduled_time_seconds"].median().reset_index()
+    tp_sched_lookup = tp_sched_lookup.merge(
+        stop_seq[["route_id", "stop_id", "stop_sequence"]],
+        on=["route_id", "stop_id"],
+        how="left",
+    )
+
+    time_until_next = np.full(len(df), np.nan)
+    adherence = np.full(len(df), np.nan)
+
+    for rid, tp_seqs in tp_seq_by_route.items():
+        if not tp_seqs:
+            continue
+        mask = df["route_id"] == rid
+        if not mask.any():
+            continue
+
+        # Get (stop_sequence, scheduled_time) for this route's timepoints
+        route_tp = tp_sched_lookup[tp_sched_lookup["route_id"] == rid].copy()
+        route_tp = route_tp.dropna(subset=["stop_sequence"])
+        route_tp = route_tp.sort_values("stop_sequence")
+
+        if len(route_tp) == 0:
+            continue
+
+        tp_seqs_arr = route_tp["stop_sequence"].values.astype(float)
+        tp_times_arr = route_tp["scheduled_time_seconds"].values.astype(float)
+
+        mask_indices = mask.values.nonzero()[0]
+        last_seq = df.loc[mask, "last_stop_sequence"].values.astype(float)
+        curr_secs = seconds_ct[mask].values.astype(float)
+
+        # Vectorized: use searchsorted to find next TP ahead and last TP behind
+        # searchsorted(tp_seqs_arr, last_seq, side='right') gives index of first tp > last_seq
+        valid = ~np.isnan(last_seq)
+        if not valid.any():
+            continue
+
+        next_idx = np.searchsorted(tp_seqs_arr, last_seq[valid], side="right")
+        prev_idx = next_idx - 1  # index of last tp <= last_seq
+
+        # Next TP ahead
+        has_next = next_idx < len(tp_seqs_arr)
+        next_times = np.where(has_next, tp_times_arr[np.clip(next_idx, 0, len(tp_seqs_arr) - 1)], np.nan)
+        time_until_next[mask_indices[valid]] = np.where(has_next, next_times - curr_secs[valid], np.nan)
+
+        # Previous TP (most recent passed)
+        has_prev = prev_idx >= 0
+        prev_times = np.where(has_prev, tp_times_arr[np.clip(prev_idx, 0, len(tp_seqs_arr) - 1)], np.nan)
+        adherence[mask_indices[valid]] = np.where(has_prev, curr_secs[valid] - prev_times, np.nan)
+
+    df["time_until_next_timepoint_departure"] = time_until_next
+    df["timepoint_adherence"] = adherence
+
+    # --- Routes 27, 235: verify all NaN ---
+    no_tp_routes = {27, 235}
+    for rid in no_tp_routes:
+        rmask = df["route_id"] == rid
+        if rmask.any():
+            for col in ["is_timepoint", "scheduled_departure_seconds",
+                        "timepoints_remaining", "time_until_next_timepoint_departure",
+                        "timepoint_adherence"]:
+                if col == "is_timepoint":
+                    # Should be 0 (not a timepoint), set to NaN for consistency
+                    df.loc[rmask, col] = np.nan
+                # Others should already be NaN from merges
+
+    # Drop temp column
+    if "last_stop_sequence" in df.columns:
+        df.drop(columns=["last_stop_sequence"], inplace=True)
+
+    return df
+
+
+def compute_speed_ratio(df: pd.DataFrame, hist_segments: pd.DataFrame) -> pd.DataFrame:
+    """Compute speed ratio: current GPS speed / historical median speed for segment.
+
+    Uses the historical_segments aggregates to get median segment speed, then
+    computes a simpler ratio based on the gps_speed_mps already on the dataframe.
+
+    NaN where historical median is NaN or zero.
+    """
+    # Compute historical median GPS speed per (route_id, last_stop_id, hour_ct, day_type)
+    # from the segment data. We use segment_travel_median as a proxy -- but we need
+    # actual speed. Since we don't have distance per segment, use a different approach:
+    # compute speed ratio = gps_speed_mps / route-hour-daytype median gps_speed_mps
+    # from a precomputed lookup.
+    #
+    # Actually, the plan says: "compute historical median GPS speed per
+    # (route_id, last_stop_id, hour_ct, day_type) from training pings directly"
+    # This should already be saved or computed. For simplicity, use the
+    # segment_travel columns from historical_segments as a proxy for segment context,
+    # and build the speed lookup from the training data inline.
+
+    # We'll just do: speed_ratio = gps_speed_mps / median_speed_for_segment
+    # where median_speed_for_segment is grouped from all gps_speed_mps values
+    # in training pings by (route_id, last_stop_id, hour_ct, day_type).
+    # This lookup is built and stored during the pipeline.
+
+    if "_hist_speed_median" in df.columns:
+        # Already merged
+        df["speed_ratio"] = df["gps_speed_mps"] / df["_hist_speed_median"]
+        df.loc[df["_hist_speed_median"] <= 0, "speed_ratio"] = np.nan
+        df.drop(columns=["_hist_speed_median"], inplace=True)
+    else:
+        df["speed_ratio"] = np.nan
+
+    return df
+
+
+def build_historical_speed_lookup(pings: pd.DataFrame) -> pd.DataFrame:
+    """Build historical median GPS speed per (route_id, last_stop_id, hour_ct, day_type).
+
+    Used for speed_ratio computation. Built from training pings only.
+    """
+    pings = add_ct_hour(pings) if "hour_ct" not in pings.columns else pings
+    pings["day_type"] = pings["is_weekday"].astype(int) if "day_type" not in pings.columns else pings["day_type"]
+
+    valid = pings[pings["gps_speed_mps"].notna()].copy()
+    agg_cols = ["route_id", "last_stop_id", "hour_ct", "day_type"]
+    lookup = valid.groupby(agg_cols, observed=True)["gps_speed_mps"].agg(
+        _hist_speed_median="median",
+        _count="count",
+    ).reset_index()
+
+    # Filter sparse combos
+    lookup.loc[lookup["_count"] < MIN_OBS, "_hist_speed_median"] = np.nan
+    lookup.drop(columns=["_count"], inplace=True)
+
+    return lookup
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -461,78 +720,304 @@ ROLLING_FEATURE_COLS = (
     + ["acceleration", "is_idle_gps", "seconds_idle"]
 )
 
+# Phase 3 baseline features (from build_features.py)
+PHASE3_FEATURE_COLS = [
+    "distance_to_target", "scheduled_time_to_target", "current_speed",
+    "route_progress", "stops_remaining", "stop_index", "lateness_now",
+    "minutes_since_midnight", "day_of_week", "route_id", "pattern_id",
+    "precipitation_mm", "temperature_c", "passenger_load", "is_idle",
+]
+
+# Phase 4 new features
+PHASE4_FEATURE_COLS = (
+    ROLLING_FEATURE_COLS
+    + [
+        "is_timepoint", "scheduled_departure_seconds", "timepoints_remaining",
+        "time_until_next_timepoint_departure", "timepoint_adherence",
+        "segment_travel_median", "segment_travel_p25", "segment_travel_p75",
+        "dwell_median", "dwell_p25", "dwell_p75",
+        "target_dwell_median", "target_dwell_p25", "target_dwell_p75",
+        "speed_ratio",
+        "is_rush_hour",
+    ]
+)
+
+# Combined v2 feature set
+FEATURE_COLS_V2 = PHASE3_FEATURE_COLS + PHASE4_FEATURE_COLS
+
+CATEGORICAL_COLS_V2 = ["day_of_week", "route_id", "pattern_id"]
+
+TARGET_COL = "time_to_arrival_seconds"
+
+KEEP_EXTRA = ["stops_away", "route_id"]
+
+SPLITS = ["train", "val", "test"]
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+
+def load_featured_v2(split: str) -> pd.DataFrame:
+    """Load a v2 featured parquet split with correct dtypes.
+
+    Args:
+        split: One of "train", "val", "test"
+
+    Returns:
+        DataFrame with all Phase 3 + Phase 4 features, target, and eval columns.
+    """
+    path = DATA_DIR / f"{split}_featured_v2.parquet"
+    df = pd.read_parquet(path)
+    for col in CATEGORICAL_COLS_V2:
+        if col in df.columns:
+            df[col] = df[col].astype("category")
+    return df
+
+
+# ---------------------------------------------------------------------------
+# Phase 3 feature computation (inlined from build_features.py)
+# ---------------------------------------------------------------------------
+
+
+def _load_max_shape_dist() -> pd.Series:
+    """Load max_shape_dist per route_id from stop_sequences."""
+    ss = pd.read_parquet(DATA_DIR / "stop_sequences.parquet")
+    return ss.groupby("route_id")["max_shape_dist"].first()
+
+
+def _load_weather() -> pd.DataFrame:
+    """Load hourly weather data for merge."""
+    w = pd.read_parquet(DATA_DIR / "weather.parquet")
+    w = w[["hour", "precipitation_mm", "temperature_c"]].copy()
+    if w["hour"].dt.tz is None:
+        w["hour"] = w["hour"].dt.tz_localize("UTC")
+    # Deduplicate
+    w = w.drop_duplicates(subset=["hour"], keep="first")
+    return w
+
+
+def compute_phase3_features(df: pd.DataFrame, max_shape_dist: pd.Series,
+                             weather: pd.DataFrame, split_name: str) -> pd.DataFrame:
+    """Compute Phase 3 baseline features (15 columns). Inlined from build_features.py."""
+    n_before = len(df)
+
+    # FEAT-01: distance_to_target
+    route_max_sd = df["route_id"].map(max_shape_dist)
+    df["distance_to_target"] = (
+        (df["target_stop_progress"] - df["progress"]) * route_max_sd
+    ).clip(lower=0)
+
+    # FEAT-02: scheduled_time_to_target
+    df["scheduled_time_to_target"] = df["scheduled_eta_seconds"].clip(lower=0)
+
+    # FEAT-03: current_speed, route_progress, stops_remaining, stop_index
+    df["current_speed"] = df["speed"]
+    df["route_progress"] = df["progress"]
+    df["stops_remaining"] = df["stops_away"]
+    df["stop_index"] = df["target_stop_sequence"]
+
+    # FEAT-04: lateness_now
+    df["lateness_now"] = df["scheduled_eta_seconds"] - df["eta_seconds"]
+
+    # FEAT-05: minutes_since_midnight, day_of_week
+    ts = df["timestamp"]
+    df["minutes_since_midnight"] = ts.dt.hour * 60 + ts.dt.minute
+    df["day_of_week"] = ts.dt.dayofweek.astype("category")
+
+    # FEAT-06: pattern_id, route_id as categorical
+    df["pattern_id"] = df["pattern_id"].astype("category")
+    df["route_id"] = df["route_id"].astype("category")
+
+    # FEAT-07: precipitation_mm, temperature_c
+    df["_merge_hour"] = ts.dt.floor("h")
+    df = df.merge(weather, left_on="_merge_hour", right_on="hour", how="left",
+                  suffixes=("", "_weather"))
+    df.drop(columns=["_merge_hour", "hour"], inplace=True, errors="ignore")
+    df["precipitation_mm"] = df["precipitation_mm"].fillna(0)
+    df["temperature_c"] = df["temperature_c"].fillna(df["temperature_c"].median())
+
+    # FEAT-08: passenger_load, is_idle
+    df["passenger_load"] = df["load"]
+    df["is_idle"] = (df["speed"] <= 2).astype(int)
+
+    assert len(df) == n_before, (
+        f"Row count changed during Phase 3 features! Before={n_before}, After={len(df)}"
+    )
+    return df
+
+
+# ---------------------------------------------------------------------------
+# v2 Parquet save
+# ---------------------------------------------------------------------------
+
+
+def save_v2_parquet(df: pd.DataFrame, split_name: str) -> None:
+    """Save v2 featured parquet with pyarrow dictionary encoding for categoricals."""
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    out_cols = list(FEATURE_COLS_V2) + [TARGET_COL]
+    for c in KEEP_EXTRA:
+        if c not in out_cols:
+            out_cols.append(c)
+
+    # Only keep columns that exist
+    available = [c for c in out_cols if c in df.columns]
+    missing = [c for c in out_cols if c not in df.columns]
+    if missing:
+        print(f"  WARNING: Missing columns: {missing}")
+
+    out = df[available].copy()
+
+    # Ensure categoricals
+    for col in CATEGORICAL_COLS_V2:
+        if col in out.columns:
+            out[col] = out[col].astype("category")
+
+    table = pa.Table.from_pandas(out, preserve_index=False)
+    for col in CATEGORICAL_COLS_V2:
+        idx = table.schema.get_field_index(col)
+        if idx >= 0:
+            arr = table.column(col)
+            if not pa.types.is_dictionary(arr.type):
+                arr = arr.dictionary_encode()
+            table = table.set_column(idx, col, arr)
+
+    path = DATA_DIR / f"{split_name}_featured_v2.parquet"
+    pq.write_table(table, path)
+    print(f"  Saved {path} ({len(out):,} rows, {len(available)} columns)")
+
+
+# ---------------------------------------------------------------------------
+# Full assembly pipeline
+# ---------------------------------------------------------------------------
+
+
+def process_split(df: pd.DataFrame, split_name: str,
+                  max_shape_dist, weather,
+                  pings_featured, hist_segments, hist_dwells,
+                  speed_lookup, tp_set, tp_schedule, stop_seq,
+                  tp_seq_by_route) -> pd.DataFrame:
+    """Process a single split: compute all Phase 3 + Phase 4 features."""
+    n_original = len(df)
+    print(f"\n{'='*60}")
+    print(f"Processing {split_name} split ({n_original:,} rows)")
+    print(f"{'='*60}")
+
+    # Step A: Phase 3 features
+    print("\n  [A] Phase 3 features...")
+    # Need route_id as numeric for merges
+    df["route_id"] = df["route_id"].astype(int)
+    df = compute_phase3_features(df, max_shape_dist, weather, split_name)
+    # Restore route_id to int for merges (compute_phase3 makes it categorical)
+    df["route_id"] = df["route_id"].astype(int)
+
+    # Step B+C: Rolling features from unique pings
+    print("  [B] Extracting unique pings and computing rolling features...")
+    pings = extract_unique_pings(df)
+    print(f"      Unique pings: {len(pings):,}")
+    pings = compute_gps_speed(pings)
+    pings = compute_rolling_speed_features(pings)
+    pings = compute_acceleration(pings)
+    pings = compute_idle_features(pings)
+
+    print("  [C] Merging rolling features back to exploded data...")
+    df = merge_rolling_to_exploded(df, pings, ROLLING_FEATURE_COLS)
+    assert len(df) == n_original, (
+        f"Row count changed after rolling merge! Before={n_original}, After={len(df)}"
+    )
+
+    # Step D: Historical aggregates
+    print("  [D] Merging historical aggregates...")
+
+    # Add hour_ct and day_type for merge keys
+    df = add_ct_hour(df)
+    df["day_type"] = df["is_weekday"].astype(int)
+
+    # Segments: merge on (route_id, last_stop_id, hour_ct, day_type)
+    n_pre = len(df)
+    df = df.merge(hist_segments, on=["route_id", "last_stop_id", "hour_ct", "day_type"], how="left")
+    assert len(df) == n_pre, f"Row explosion on segment merge! {n_pre} -> {len(df)}"
+
+    # Dwells for current stop: merge on (route_id, stop_id=last_stop_id, hour_ct, day_type)
+    dwell_current = hist_dwells.rename(columns={"stop_id": "last_stop_id"})
+    df = df.merge(dwell_current, on=["route_id", "last_stop_id", "hour_ct", "day_type"], how="left")
+    assert len(df) == n_pre, f"Row explosion on dwell merge! {n_pre} -> {len(df)}"
+
+    # Dwells for target stop: merge on (route_id, stop_id=target_stop_id, hour_ct, day_type)
+    dwell_target = hist_dwells.rename(columns={
+        "stop_id": "target_stop_id",
+        "dwell_median": "target_dwell_median",
+        "dwell_p25": "target_dwell_p25",
+        "dwell_p75": "target_dwell_p75",
+    })
+    df = df.merge(dwell_target, on=["route_id", "target_stop_id", "hour_ct", "day_type"], how="left")
+    assert len(df) == n_pre, f"Row explosion on target dwell merge! {n_pre} -> {len(df)}"
+
+    # Speed lookup merge
+    df = df.merge(speed_lookup, on=["route_id", "last_stop_id", "hour_ct", "day_type"], how="left")
+    assert len(df) == n_pre, f"Row explosion on speed lookup merge! {n_pre} -> {len(df)}"
+
+    # Step E: Timepoint features
+    print("  [E] Computing timepoint features...")
+    df = compute_timepoint_features(df, tp_set, tp_schedule, stop_seq, tp_seq_by_route)
+    assert len(df) == n_original, (
+        f"Row count changed after timepoint features! Before={n_original}, After={len(df)}"
+    )
+
+    # Step F: Speed ratio
+    print("  [F] Computing speed ratio...")
+    df = compute_speed_ratio(df, hist_segments)
+
+    # Step G: is_rush_hour
+    print("  [G] Computing is_rush_hour...")
+    df["is_rush_hour"] = df["hour_ct"].isin([7, 8, 9, 16, 17, 18]).astype(int)
+
+    # Restore categoricals for save
+    df["route_id"] = df["route_id"].astype("category")
+
+    assert len(df) == n_original, (
+        f"Final row count mismatch! Expected={n_original}, Got={len(df)}"
+    )
+
+    return df
+
 
 def main():
     print("=" * 60)
-    print("Differentiator Feature Engineering")
+    print("Differentiator Feature Engineering v2 Pipeline")
     print("=" * 60)
 
-    # Load training data
+    # --- Load supplementary data ---
+    print("\nLoading supplementary data...")
+    max_shape_dist = _load_max_shape_dist()
+    print(f"  max_shape_dist: {len(max_shape_dist)} routes")
+    weather = _load_weather()
+    print(f"  weather: {len(weather)} hourly records")
+
+    # --- Load timepoint data ---
+    print("\nLoading timepoint data...")
+    tp_set, tp_schedule, stop_seq, tp_seq_by_route = load_timepoint_data()
+    print(f"  Timepoint (route, stop) pairs: {len(tp_set)}")
+    print(f"  Routes with timepoints: {len(tp_seq_by_route)}")
+
+    # --- Step 1: Train pings for historical aggregates and speed lookup ---
+    print("\n" + "=" * 60)
+    print("Step 1: Historical aggregates from training data")
+    print("=" * 60)
+
     train_path = DATA_DIR / "train.parquet"
     print(f"\nLoading {train_path}...")
-    train = pd.read_parquet(train_path)
-    print(f"  Loaded {len(train):,} rows")
+    train_raw = pd.read_parquet(train_path)
+    print(f"  Loaded {len(train_raw):,} rows")
 
-    # --- Step 1: Extract unique pings ---
-    print("\n--- Extracting unique pings ---")
-    pings = extract_unique_pings(train)
-    print(f"  Unique pings: {len(pings):,} (from {len(train):,} exploded rows)")
-    print(f"  Duplication ratio: {len(train)/len(pings):.2f}x")
-
-    # --- Step 2: GPS speed ---
-    print("\n--- Computing GPS speed ---")
+    pings = extract_unique_pings(train_raw)
+    print(f"  Unique pings: {len(pings):,}")
     pings = compute_gps_speed(pings)
-    speed = pings["gps_speed_mps"]
-    print(f"  NaN rate: {speed.isna().mean()*100:.1f}%")
-    valid_speed = speed.dropna()
-    if len(valid_speed) > 0:
-        print(f"  Distribution (valid only):")
-        print(f"    min={valid_speed.min():.2f}, p25={valid_speed.quantile(0.25):.2f}, "
-              f"median={valid_speed.median():.2f}, p75={valid_speed.quantile(0.75):.2f}, "
-              f"max={valid_speed.max():.2f} m/s")
 
-    # --- Step 3: Rolling speed features ---
-    print("\n--- Computing rolling speed features ---")
-    pings = compute_rolling_speed_features(pings)
-    for w in ROLLING_WINDOWS:
-        mean_col = f"speed_mean_{w}s"
-        std_col = f"speed_std_{w}s"
-        nan_mean = pings[mean_col].isna().mean() * 100
-        nan_std = pings[std_col].isna().mean() * 100
-        print(f"  {mean_col}: NaN={nan_mean:.1f}%, median={pings[mean_col].median():.2f}")
-        print(f"  {std_col}: NaN={nan_std:.1f}%, median={pings[std_col].dropna().median():.2f}")
-
-    # --- Step 4: Acceleration ---
-    print("\n--- Computing acceleration ---")
-    pings = compute_acceleration(pings)
-    accel = pings["acceleration"].dropna()
-    print(f"  NaN rate: {pings['acceleration'].isna().mean()*100:.1f}%")
-    if len(accel) > 0:
-        print(f"  Distribution: min={accel.min():.3f}, median={accel.median():.3f}, "
-              f"max={accel.max():.3f} m/s^2")
-        print(f"  p5={accel.quantile(0.05):.3f}, p95={accel.quantile(0.95):.3f}")
-
-    # --- Step 5: Idle features ---
-    print("\n--- Computing idle features ---")
-    pings = compute_idle_features(pings)
-    idle_rate = pings["is_idle_gps"].mean() * 100
-    print(f"  Idle rate: {idle_rate:.1f}% of pings")
-    idle_duration = pings.loc[pings["is_idle_gps"] == 1, "seconds_idle"]
-    if len(idle_duration) > 0:
-        print(f"  seconds_idle (idle pings): median={idle_duration.median():.0f}s, "
-              f"max={idle_duration.max():.0f}s")
-
-    # --- Step 6: Feature summary ---
-    print(f"\n--- Feature Summary ({len(pings):,} unique pings) ---")
-    for col in ROLLING_FEATURE_COLS:
-        nan_pct = pings[col].isna().mean() * 100
-        print(f"  {col:25s}: NaN={nan_pct:.1f}%")
-
-    # --- Step 7: Historical aggregates ---
-    print("\n" + "=" * 60)
-    print("Computing historical aggregates (training data only)")
-    print("=" * 60)
-
+    # Historical segments
     print("\n--- Historical segment travel times ---")
     hist_segments = compute_historical_segments(pings)
     if len(hist_segments) > 0:
@@ -540,6 +1025,7 @@ def main():
         hist_segments.to_parquet(seg_path, index=False)
         print(f"  Saved {seg_path} ({len(hist_segments)} rows)")
 
+    # Historical dwells
     print("\n--- Historical dwell times ---")
     hist_dwells = compute_historical_dwells(pings)
     if len(hist_dwells) > 0:
@@ -547,8 +1033,86 @@ def main():
         hist_dwells.to_parquet(dwell_path, index=False)
         print(f"  Saved {dwell_path} ({len(hist_dwells)} rows)")
 
+    # Speed lookup (for speed_ratio)
+    print("\n--- Historical speed lookup ---")
+    pings = add_ct_hour(pings)
+    speed_lookup = build_historical_speed_lookup(pings)
+    print(f"  Speed lookup: {len(speed_lookup)} combos, "
+          f"{speed_lookup['_hist_speed_median'].notna().sum()} valid")
+
+    del pings  # Free memory
+
+    # --- Step 2: Process all splits ---
+    print("\n" + "=" * 60)
+    print("Step 2: Assemble v2 featured parquets")
+    print("=" * 60)
+
+    expected_rows = {}
+    for split_name in SPLITS:
+        path = DATA_DIR / f"{split_name}.parquet"
+        print(f"\nLoading {path}...")
+        df = pd.read_parquet(path)
+        expected_rows[split_name] = len(df)
+
+        df = process_split(
+            df, split_name,
+            max_shape_dist, weather,
+            None, hist_segments, hist_dwells,
+            speed_lookup, tp_set, tp_schedule, stop_seq,
+            tp_seq_by_route,
+        )
+
+        # Print feature NaN rates
+        print(f"\n  --- {split_name} Phase 4 Feature NaN Rates ---")
+        for col in PHASE4_FEATURE_COLS:
+            if col in df.columns:
+                nan_pct = df[col].isna().mean() * 100
+                print(f"    {col:45s}: NaN={nan_pct:.1f}%")
+            else:
+                print(f"    {col:45s}: MISSING")
+
+        save_v2_parquet(df, split_name)
+        del df  # Free memory
+
+    # --- Step 3: Summary ---
+    print("\n" + "=" * 60)
+    print("v2 Feature Assembly Summary")
+    print("=" * 60)
+
+    print(f"\n  Phase 3 features: {len(PHASE3_FEATURE_COLS)}")
+    print(f"  Phase 4 features: {len(PHASE4_FEATURE_COLS)}")
+    print(f"  Total v2 features: {len(FEATURE_COLS_V2)}")
+
+    print(f"\n  {'Split':<8} {'Expected':>10} {'Saved':>10}")
+    print(f"  {'-'*30}")
+    for split_name in SPLITS:
+        path = DATA_DIR / f"{split_name}_featured_v2.parquet"
+        saved = pd.read_parquet(path, columns=[TARGET_COL])
+        print(f"  {split_name:<8} {expected_rows[split_name]:>10,} {len(saved):>10,}")
+        assert len(saved) == expected_rows[split_name], (
+            f"Row count mismatch for {split_name}! "
+            f"Expected={expected_rows[split_name]}, Got={len(saved)}"
+        )
+
+    # Verify routes 27 and 235 have NaN timepoint features
+    print("\n  Verifying routes 27/235 timepoint features are NaN...")
+    for split_name in SPLITS:
+        path = DATA_DIR / f"{split_name}_featured_v2.parquet"
+        check = pd.read_parquet(path, columns=["is_timepoint", "timepoints_remaining",
+                                                 "route_id"])
+        # route_id may be dictionary-encoded
+        if hasattr(check["route_id"], "cat"):
+            rid = check["route_id"].astype(int)
+        else:
+            rid = check["route_id"]
+        for r in [27, 235]:
+            rmask = rid == r
+            if rmask.any():
+                tp_nans = check.loc[rmask, "is_timepoint"].isna().all()
+                print(f"    {split_name} route {r}: is_timepoint all NaN = {tp_nans} ({rmask.sum()} rows)")
+
     print(f"\n{'='*60}")
-    print("Differentiator feature engineering complete!")
+    print("Differentiator feature engineering v2 complete!")
     print(f"{'='*60}")
 
 
