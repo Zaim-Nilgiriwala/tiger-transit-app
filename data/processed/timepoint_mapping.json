@@ -64,10 +64,10 @@
     ]
   },
   "HUB": {
-    "stop_id": null,
-    "stop_name": null,
-    "match_type": "unmatched",
-    "confidence": "none",
+    "stop_id": 153,
+    "stop_name": "The Hub Apartments",
+    "match_type": "manual",
+    "confidence": "high",
     "alternatives": []
   },
   "Highland Condos": {
@@ -82,12 +82,9 @@
   "Industry Park": {
     "stop_id": 176,
     "stop_name": "Gentilly Park",
-    "match_type": "fuzzy",
-    "confidence": "low",
-    "alternatives": [
-      "Gentilly Park",
-      "Madison Park"
-    ]
+    "match_type": "manual",
+    "confidence": "medium",
+    "alternatives": []
   },
   "Intramural Field": {
     "stop_id": 42,
@@ -99,14 +96,11 @@
     ]
   },
   "Marathon Gas Staion": {
-    "stop_id": 196,
-    "stop_name": "Mell St Station",
-    "match_type": "fuzzy",
-    "confidence": "low",
-    "alternatives": [
-      "Mell St Station",
-      "Martin Ave & North Gay St"
-    ]
+    "stop_id": null,
+    "stop_name": null,
+    "match_type": "manual",
+    "confidence": "none",
+    "alternatives": ["Outdated stop - no GTFS match"]
   },
   "Mary Lane and Harris": {
     "stop_id": 199,
@@ -137,15 +131,11 @@
     ]
   },
   "Museum": {
-    "stop_id": null,
-    "stop_name": null,
-    "match_type": "unmatched",
-    "confidence": "none",
-    "alternatives": [
-      "Recruitment 2",
-      "Recruitment 1",
-      "Jule Collins Smith Museum of Art"
-    ]
+    "stop_id": 105,
+    "stop_name": "Jule Collins Smith Museum of Art",
+    "match_type": "manual",
+    "confidence": "high",
+    "alternatives": []
   },
   "Peachtree Apts": {
     "stop_id": 77,
@@ -158,15 +148,11 @@
     ]
   },
   "Savannah Square": {
-    "stop_id": 191,
-    "stop_name": "Samford Square",
-    "match_type": "fuzzy",
-    "confidence": "low",
-    "alternatives": [
-      "Samford Square",
-      "Savannah Sq & Williamsburg Pl",
-      "Asian Supermarket"
-    ]
+    "stop_id": 148,
+    "stop_name": "Savannah Sq & Williamsburg Pl",
+    "match_type": "manual",
+    "confidence": "high",
+    "alternatives": []
   },
   "South Quad": {
     "stop_id": 30,
@@ -186,15 +172,11 @@
     "alternatives": []
   },
   "Student Center": {
-    "stop_id": 129,
-    "stop_name": "AU Alumni Center",
-    "match_type": "fuzzy",
-    "confidence": "low",
-    "alternatives": [
-      "AU Alumni Center",
-      "Student Center Greenspace Pavilion",
-      "Student Center Haley Center Pavillion"
-    ]
+    "stop_id": 47,
+    "stop_name": "Student Center Greenspace Pavilion",
+    "match_type": "manual",
+    "confidence": "high",
+    "alternatives": []
   },
   "Student Center Middle Pavilon": {
     "stop_id": 47,

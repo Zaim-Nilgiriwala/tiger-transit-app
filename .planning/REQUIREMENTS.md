@@ -7,11 +7,11 @@
 
 ### Data Pipeline
 
-- [ ] **DATA-01**: Parse raw JSONL telemetry files into clean filtered DataFrames (exclude jAUnt, Shuttle, inactive vehicles)
-- [ ] **DATA-02**: Parse arrivals CSV with stop name-to-GTFS stop ID mapping for ground truth labels
-- [ ] **DATA-03**: Integrate GTFS data for route distances (shape_dist_traveled), stop sequences, and schedule lookup
-- [ ] **DATA-04**: Parse timepoint Excel spreadsheet (23 routes) and map human-readable stop names to numeric stop IDs and route IDs
-- [ ] **DATA-05**: Join weather data (temperature, precipitation) by hour from weather_data.csv
+- [x] **DATA-01**: Parse raw JSONL telemetry files into clean filtered DataFrames (exclude jAUnt, Shuttle, inactive vehicles)
+- [x] **DATA-02**: Parse arrivals CSV with stop name-to-GTFS stop ID mapping for ground truth labels
+- [x] **DATA-03**: Integrate GTFS data for route distances (shape_dist_traveled), stop sequences, and schedule lookup
+- [x] **DATA-04**: Parse timepoint Excel spreadsheet (23 routes) and map human-readable stop names to numeric stop IDs and route IDs
+- [x] **DATA-05**: Join weather data (temperature, precipitation) by hour from weather_data.csv
 - [ ] **DATA-06**: Per-stop row explosion with chunked-by-day Parquet processing (each observation x remaining stops = N rows)
 - [ ] **DATA-07**: Vectorized label creation via merge_asof joining telemetry with arrivals for time_to_arrival_seconds ground truth
 - [ ] **DATA-08**: Temporal train/val/test split by calendar date with gap period (no random splitting)
@@ -81,11 +81,11 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | Phase 1 | Pending |
-| DATA-02 | Phase 1 | Pending |
-| DATA-03 | Phase 1 | Pending |
-| DATA-04 | Phase 1 | Pending |
-| DATA-05 | Phase 1 | Pending |
+| DATA-01 | Phase 1 | Complete |
+| DATA-02 | Phase 1 | Complete |
+| DATA-03 | Phase 1 | Complete |
+| DATA-04 | Phase 1 | Complete |
+| DATA-05 | Phase 1 | Complete |
 | DATA-06 | Phase 2 | Pending |
 | DATA-07 | Phase 2 | Pending |
 | DATA-08 | Phase 2 | Pending |
