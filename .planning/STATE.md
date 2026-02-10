@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-03)
 
 **Core value:** Accurate arrival time predictions for all remaining stops on a bus route, accounting for timepoint holds, schedule adherence, and real-world conditions.
-**Current focus:** Phase 4 complete. Differentiator model trained with 175.7s MAE (55.5% over baseline). Ready for Phase 5 advanced training.
+**Current focus:** Phase 5 complete. All advanced training models built: Optuna-tuned (123.1s MAE), asymmetric loss (126.5s MAE, median_residual=-16.5s), and P20/P50/P75 quantile models. Ready for Phase 6 evaluation.
 
 ## Current Position
 
-Phase: 4 of 6 (Differentiator Features) -- COMPLETE
-Plan: 3 of 3 in current phase (all complete)
+Phase: 5 of 6 (Advanced Training) -- COMPLETE
+Plan: 2 of 2 in current phase (all complete)
 Status: Phase complete
-Last activity: 2026-02-04 -- Completed 04-03-PLAN.md (Differentiator Model Training)
+Last activity: 2026-02-09 -- Completed 05-02-PLAN.md (Asymmetric + Quantile Training)
 
-Progress: [████████░░] ~75%
+Progress: [█████████░] ~86%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: 8m
-- Total execution time: 1.3 hours
+- Total plans completed: 12
+- Average duration: ~8m
+- Total execution time: ~1.6 hours
 
 **By Phase:**
 
@@ -31,9 +31,10 @@ Progress: [████████░░] ~75%
 | 02-row-explosion-labels | 2/2 | ~6m | ~3m |
 | 03-baseline-model | 2/2 | ~23m | ~12m |
 | 04-differentiator-features | 3/3 | ~23m | ~8m |
+| 05-advanced-training | 2/2 | ~20m | ~10m |
 
 **Recent Trend:**
-- Last 5 plans: 04-03 (~12m), 04-02 (~5m), 04-01 (~6m), 03-02 (~19m), 03-01 (~4m)
+- Last 5 plans: 05-02 (~10m), 05-01 (~10m), 04-03 (~12m), 04-02 (~5m), 04-01 (~6m)
 
 *Updated after each plan completion*
 
@@ -81,6 +82,12 @@ Recent decisions affecting current work:
 - [04-03]: 5 Phase 4 features in top 10: timepoint departure, segment travel (median/p25/p75), speed_mean_180s
 - [04-03]: Model used all 3000 rounds without early stopping -- still improving, needs Optuna tuning in Phase 5
 - [04-03]: Hyperparameters kept identical to baseline (reg_lambda=5.0) to isolate feature impact
+- [05-01]: Optuna 50 trials (25 pruned). Best: max_depth=8, lr=0.201, 435 rounds. CV MAE 138.7s, test MAE 123.1s
+- [05-01]: 10% subsample for Optuna search, 5x rounds with early stopping for final retrain (best_iter=1239)
+- [05-02]: Asymmetric loss alpha=3.0, threshold=480s. Median residual=-16.54s (conservative predictions)
+- [05-02]: Quantile models trained on 25% subsample. 32.3% monotonicity violations corrected by sorting
+- [05-02]: Calibration 49.9% (actuals in [P20, P75]), mean range 311s (5.2 min)
+- [05-02]: Separate script train_asymmetric_quantile.py for Plan 02 (cleaner separation from Optuna pipeline)
 
 ### Pending Todos
 
@@ -91,7 +98,8 @@ None.
 - ~~Timepoint Excel parsing (23 sheets, human-readable stop names) may require fuzzy matching to GTFS stop IDs -- validate in Phase 1.~~ RESOLVED: 27/28 matched after user review.
 - ~~Label join success rate target (60%+ minimum, 70%+ ideal) -- validate in Phase 2 Plan 02-02.~~ RESOLVED: 88.8% success rate.
 - Only 5 weeks of data -- aggressive regularization needed throughout.
-- Model still improving at 3000 rounds -- Phase 5 should explore higher learning rates and/or more rounds via Optuna.
+- ~~Model still improving at 3000 rounds -- Phase 5 should explore higher learning rates and/or more rounds via Optuna.~~ RESOLVED: Optuna found optimal lr=0.201, max_depth=8, best iteration 1239 with early stopping.
+- Quantile model monotonicity violations (32.3%) suggest independent quantile training on subsampled data has limitations. Consider joint quantile training or full-data retrain if higher quality intervals needed.
 
 ## Model Performance Tracker
 
@@ -100,26 +108,27 @@ None.
 | Naive (schedule) | 708.9s | 883.4s | -- | 1 | -- |
 | Baseline (P3) | 394.7s | 514.9s | 44.3% | 15 | 2000 |
 | Differentiator (P4) | 175.7s | 279.7s | 75.2% | 43 | 3000 |
+| Tuned (P5) | 123.1s | 202.8s | 82.6% | 43 | 1239 |
+| Asymmetric (P5) | 126.5s | 210.8s | 82.2% | 43 | 2174 |
 
-## Phase 4 Data Artifacts
+## Phase 5 Model Artifacts
 
-Phase 1-3 artifacts remain available. Phase 4 artifacts:
+Phase 1-4 artifacts remain available. Phase 5 artifacts:
 
-| Artifact | Script | Rows | Key Columns |
-|----------|--------|------|-------------|
-| historical_segments.parquet | build_differentiator_features.py | 1,953 | route_id, last_stop_id, hour_ct, day_type, segment_travel_median/p25/p75 |
-| historical_dwells.parquet | build_differentiator_features.py | 588 | route_id, stop_id, hour_ct, day_type, dwell_median/p25/p75 |
-| train_featured_v2.parquet | build_differentiator_features.py | 1,206,181 | 43 features + target + stops_away (45 cols) |
-| val_featured_v2.parquet | build_differentiator_features.py | 384,002 | 43 features + target + stops_away (45 cols) |
-| test_featured_v2.parquet | build_differentiator_features.py | 296,608 | 43 features + target + stops_away (45 cols) |
-| differentiator_v1.ubj | train_differentiator.py | -- | 3000-tree XGBoost model |
-| differentiator_metrics.json | train_differentiator.py | -- | Full metrics + baseline comparison |
-| differentiator_shap.png | train_differentiator.py | -- | Feature importance bar chart |
-
-v2 features = 15 Phase 3 + 28 Phase 4 (rolling speed, dynamics, historical, timepoint, speed_ratio, is_rush_hour).
+| Artifact | Script | Description |
+|----------|--------|-------------|
+| tuned_v1.ubj | train_advanced.py | Optuna-tuned XGBoost (MAE 123.1s) |
+| tuned_metrics.json | train_advanced.py | Best params, study summary, sliced metrics |
+| asymmetric_v1.ubj | train_asymmetric_quantile.py | 3:1 asymmetric loss model (MAE 126.5s, med_resid=-16.5s) |
+| asymmetric_metrics.json | train_asymmetric_quantile.py | Residual distribution, overestimation rate |
+| quantile_p20_v1.ubj | train_asymmetric_quantile.py | P20 quantile (optimistic lower bound) |
+| quantile_p50_v1.ubj | train_asymmetric_quantile.py | P50 quantile (median prediction) |
+| quantile_p75_v1.ubj | train_asymmetric_quantile.py | P75 quantile (conservative upper bound) |
+| quantile_metrics.json | train_asymmetric_quantile.py | Monotonicity, calibration, range stats |
+| phase5_comparison.json | train_asymmetric_quantile.py | Full progressive chain across all phases |
 
 ## Session Continuity
 
-Last session: 2026-02-04
-Stopped at: Completed 04-03-PLAN.md (Differentiator Model Training) -- Phase 4 complete
+Last session: 2026-02-09
+Stopped at: Completed 05-02-PLAN.md (Asymmetric + Quantile Training) -- Phase 5 complete
 Resume file: None
