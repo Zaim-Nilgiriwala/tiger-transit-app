@@ -1,5 +1,5 @@
 """
-train_advanced.py - Optuna hyperparameter tuning for Tiger Transit ETA model.
+train_advanced.py - Phase 5 Advanced Training Pipeline (Plan 01: Optuna Tuning).
 
 Uses Optuna with TimeSeriesSplit cross-validation and MedianPruner to find
 optimal XGBoost hyperparameters. Retrains the best configuration on full
@@ -14,8 +14,18 @@ Strategy: Two-stage tuning for practical runtime.
   Stage 2: Verify best params with 4-fold TimeSeriesSplit CV on train+val
   Final:   Retrain best config on full train, evaluate on held-out test
 
+Phase 5 Pipeline:
+  Plan 01 (this script): Optuna hyperparameter tuning -> models/tuned_v1.ubj
+  Plan 02 (train_asymmetric_quantile.py): Asymmetric loss + quantile models
+    - Loads best_params from models/tuned_metrics.json
+    - Trains asymmetric loss model -> models/asymmetric_v1.ubj
+    - Trains P20/P50/P75 quantile models -> models/quantile_p{20,50,75}_v1.ubj
+    - Generates comparison table -> models/phase5_comparison.json
+
 Usage:
-    python scripts/train_advanced.py
+    python scripts/train_advanced.py                      # Full pipeline
+    python scripts/train_advanced.py --skip-tuning        # Skip Optuna, retrain only
+    python scripts/train_advanced.py --batch 25           # Run 25 Optuna trials
 
 Input:
     data/processed/{train,val,test}_featured_v2.parquet
@@ -57,7 +67,7 @@ from build_differentiator_features import (
 
 MODELS_DIR = Path("models")
 SEED = 42
-N_TRIALS = 50
+N_TRIALS = 150
 N_CV_SPLITS = 4
 EARLY_STOPPING_ROUNDS_CV = 15
 EARLY_STOPPING_ROUNDS_FINAL = 100
@@ -66,6 +76,7 @@ FIXED_PARAMS = {
     "objective": "reg:squarederror",
     "eval_metric": "mae",
     "tree_method": "hist",
+    "device": "cuda",
     "max_cat_to_onehot": 10,
     "seed": SEED,
 }
