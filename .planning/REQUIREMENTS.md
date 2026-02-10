@@ -39,9 +39,9 @@
 ### Model Training
 
 - [x] **TRAIN-01**: Baseline XGBoost model with reg:squarederror, conservative regularization (max_depth=3-4, min_child_weight=10-50), early stopping on validation MAE
-- [ ] **TRAIN-02**: Asymmetric loss implementation — custom XGBoost objective or quantile regression to replicate 5x overestimation penalty from existing PyTorch model
-- [ ] **TRAIN-03**: Optuna hyperparameter tuning (100-200 trials) with TimeSeriesSplit/GroupKFold cross-validation
-- [ ] **TRAIN-04**: Multi-quantile predictions (P50, P80) via reg:quantileerror for confidence intervals
+- [x] **TRAIN-02**: Asymmetric loss implementation — custom XGBoost objective or quantile regression to replicate 5x overestimation penalty from existing PyTorch model
+- [x] **TRAIN-03**: Optuna hyperparameter tuning (100-200 trials) with TimeSeriesSplit/GroupKFold cross-validation
+- [x] **TRAIN-04**: Multi-quantile predictions (P50, P80) via reg:quantileerror for confidence intervals
 
 ### Evaluation
 
@@ -104,9 +104,9 @@
 | FEAT-13 | Phase 4 | Complete |
 | FEAT-14 | Phase 4 | Complete |
 | TRAIN-01 | Phase 3 | Complete |
-| TRAIN-02 | Phase 5 | Pending |
-| TRAIN-03 | Phase 5 | Pending |
-| TRAIN-04 | Phase 5 | Pending |
+| TRAIN-02 | Phase 5 | Complete |
+| TRAIN-03 | Phase 5 | Complete |
+| TRAIN-04 | Phase 5 | Complete |
 | EVAL-01 | Phase 6 | Pending |
 | EVAL-02 | Phase 6 | Pending |
 | EVAL-03 | Phase 6 | Pending |

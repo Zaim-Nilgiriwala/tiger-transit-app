@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Row Explosion & Labels** - Explode observations into per-stop rows, create ground truth labels, and split temporally
 - [x] **Phase 3: Baseline Model** - Engineer core features and train first XGBoost model with conservative hyperparameters
 - [x] **Phase 4: Differentiator Features** - Add timepoint, rolling speed, historical, and Auburn-specific features
-- [ ] **Phase 5: Advanced Training** - Implement asymmetric loss, hyperparameter tuning, and quantile predictions
+- [x] **Phase 5: Advanced Training** - Implement asymmetric loss, hyperparameter tuning, and quantile predictions
 - [ ] **Phase 6: Evaluation & Analysis** - Comprehensive sliced metrics, SHAP explainability, and bias detection
 
 ## Phase Details
@@ -96,8 +96,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md -- Optuna hyperparameter tuning with 150 trials and TimeSeriesSplit CV
-- [ ] 05-02-PLAN.md -- Asymmetric loss retraining, quantile models, and full phase comparison
+- [x] 05-01-PLAN.md -- Optuna hyperparameter tuning with 150 trials and TimeSeriesSplit CV
+- [x] 05-02-PLAN.md -- Asymmetric loss retraining, quantile models, and full phase comparison
 
 ### Phase 6: Evaluation & Analysis
 **Goal**: The final model is comprehensively evaluated with sliced metrics, explainability analysis, and bias detection to confirm it is ready for production consideration
@@ -125,5 +125,5 @@ Phases execute in numeric order: 1 > 2 > 3 > 4 > 5 > 6
 | 2. Row Explosion & Labels | 2/2 | ✓ Complete | 2026-02-04 |
 | 3. Baseline Model | 2/2 | ✓ Complete | 2026-02-04 |
 | 4. Differentiator Features | 3/3 | ✓ Complete | 2026-02-04 |
-| 5. Advanced Training | 0/2 | Not started | - |
+| 5. Advanced Training | 2/2 | ✓ Complete | 2026-02-09 |
 | 6. Evaluation & Analysis | 0/TBD | Not started | - |
