@@ -108,11 +108,11 @@ Plans:
   2. SHAP TreeExplainer produces global feature importance plot and at least 3 sample-level waterfall explanations showing sensible feature contributions
   3. Comparison table shows XGBoost model MAE vs. naive schedule baseline MAE, overall and per-route, with clear wins/losses identified
   4. Residual analysis identifies any systematic bias patterns (routes where model consistently over/under-predicts, time periods with degraded accuracy) and documents them
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
+- [ ] 06-01-PLAN.md -- Full evaluation script: sliced metrics, SHAP explainability, comparison table, residual bias analysis, and master report
+- [ ] 06-02-PLAN.md -- Human review of evaluation artifacts and project state finalization
 
 ## Progress
 
@@ -126,4 +126,4 @@ Phases execute in numeric order: 1 > 2 > 3 > 4 > 5 > 6
 | 3. Baseline Model | 2/2 | ✓ Complete | 2026-02-04 |
 | 4. Differentiator Features | 3/3 | ✓ Complete | 2026-02-04 |
 | 5. Advanced Training | 2/2 | ✓ Complete | 2026-02-09 |
-| 6. Evaluation & Analysis | 0/TBD | Not started | - |
+| 6. Evaluation & Analysis | 0/2 | Not started | - |
