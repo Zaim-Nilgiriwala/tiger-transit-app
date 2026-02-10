@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-03)
 
 **Core value:** Accurate arrival time predictions for all remaining stops on a bus route, accounting for timepoint holds, schedule adherence, and real-world conditions.
-**Current focus:** Phase 5 complete. All advanced training models built: Optuna-tuned (123.1s MAE), asymmetric loss (126.5s MAE, median_residual=-16.5s), and P20/P50/P75 quantile models. Ready for Phase 6 evaluation.
+**Current focus:** Phase 6 in progress. Evaluation pipeline complete (Plan 01): comprehensive sliced metrics, SHAP explainability, baseline comparison (23/23 route wins), and residual bias detection. Plan 02 (visual QA and model card) remaining.
 
 ## Current Position
 
-Phase: 5 of 6 (Advanced Training) -- COMPLETE
-Plan: 2 of 2 in current phase (all complete)
-Status: Phase complete
-Last activity: 2026-02-09 -- Completed 05-02-PLAN.md (Asymmetric + Quantile Training)
+Phase: 6 of 6 (Evaluation and Analysis) -- IN PROGRESS
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-09 -- Completed 06-01-PLAN.md (Comprehensive Evaluation Pipeline)
 
-Progress: [█████████░] ~86%
+Progress: [█████████░] ~93%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
-- Average duration: ~8m
-- Total execution time: ~1.6 hours
+- Total plans completed: 13
+- Average duration: ~9m
+- Total execution time: ~1.8 hours
 
 **By Phase:**
 
@@ -32,9 +32,10 @@ Progress: [█████████░] ~86%
 | 03-baseline-model | 2/2 | ~23m | ~12m |
 | 04-differentiator-features | 3/3 | ~23m | ~8m |
 | 05-advanced-training | 2/2 | ~20m | ~10m |
+| 06-evaluation-and-analysis | 1/2 | ~15m | ~15m |
 
 **Recent Trend:**
-- Last 5 plans: 05-02 (~10m), 05-01 (~10m), 04-03 (~12m), 04-02 (~5m), 04-01 (~6m)
+- Last 5 plans: 06-01 (~15m), 05-02 (~10m), 05-01 (~10m), 04-03 (~12m), 04-02 (~5m)
 
 *Updated after each plan completion*
 
@@ -88,6 +89,10 @@ Recent decisions affecting current work:
 - [05-02]: Quantile models trained on 25% subsample. 32.3% monotonicity violations corrected by sorting
 - [05-02]: Calibration 49.9% (actuals in [P20, P75]), mean range 311s (5.2 min)
 - [05-02]: Separate script train_asymmetric_quantile.py for Plan 02 (cleaner separation from Optuna pipeline)
+- [06-01]: pred_contribs over TreeExplainer for SHAP (2158-iteration model too slow for TreeExplainer)
+- [06-01]: Quantile-based distance bucketing (Q25=0.82, Q50=1.68, Q75=2.70 km) since all distances < 7 km
+- [06-01]: 15s bias threshold for residual analysis (~12% of overall MAE)
+- [06-01]: 2000-row SHAP subsample (balances computation time vs statistical stability)
 
 ### Pending Todos
 
@@ -100,6 +105,9 @@ None.
 - Only 5 weeks of data -- aggressive regularization needed throughout.
 - ~~Model still improving at 3000 rounds -- Phase 5 should explore higher learning rates and/or more rounds via Optuna.~~ RESOLVED: Optuna found optimal lr=0.201, max_depth=8, best iteration 1239 with early stopping.
 - Quantile model monotonicity violations (32.3%) suggest independent quantile training on subsampled data has limitations. Consider joint quantile training or full-data retrain if higher quality intervals needed.
+- 6 routes show overprediction bias (5, 7, 24, 31, 33, 96), 2 routes show underprediction bias (1, 99). Consider route-specific calibration for production.
+- Midday time period shows systematic overprediction bias (+24.93s mean residual).
+- Route 27 has only 96 test samples and MAE=336.9s -- insufficient data for reliable evaluation.
 
 ## Model Performance Tracker
 
@@ -111,24 +119,25 @@ None.
 | Tuned (P5) | 123.1s | 202.8s | 82.6% | 43 | 1239 |
 | Asymmetric (P5) | 126.5s | 210.8s | 82.2% | 43 | 2174 |
 
-## Phase 5 Model Artifacts
+## Phase 6 Evaluation Artifacts
 
-Phase 1-4 artifacts remain available. Phase 5 artifacts:
+All evaluation output is in `models/evaluation/` (gitignored, reproducible via `python scripts/evaluate.py`).
 
-| Artifact | Script | Description |
-|----------|--------|-------------|
-| tuned_v1.ubj | train_advanced.py | Optuna-tuned XGBoost (MAE 123.1s) |
-| tuned_metrics.json | train_advanced.py | Best params, study summary, sliced metrics |
-| asymmetric_v1.ubj | train_asymmetric_quantile.py | 3:1 asymmetric loss model (MAE 126.5s, med_resid=-16.5s) |
-| asymmetric_metrics.json | train_asymmetric_quantile.py | Residual distribution, overestimation rate |
-| quantile_p20_v1.ubj | train_asymmetric_quantile.py | P20 quantile (optimistic lower bound) |
-| quantile_p50_v1.ubj | train_asymmetric_quantile.py | P50 quantile (median prediction) |
-| quantile_p75_v1.ubj | train_asymmetric_quantile.py | P75 quantile (conservative upper bound) |
-| quantile_metrics.json | train_asymmetric_quantile.py | Monotonicity, calibration, range stats |
-| phase5_comparison.json | train_asymmetric_quantile.py | Full progressive chain across all phases |
+| Artifact | EVAL | Description |
+|----------|------|-------------|
+| eval_metrics_sliced.json | EVAL-01 | Sliced metrics: overall + 4 dimensions (route, stops, TOD, distance) |
+| eval_shap_global.png | EVAL-02 | SHAP global importance bar plot (43 features) |
+| eval_shap_waterfall_{1,2,3}.png | EVAL-02 | Waterfall plots (high-error, low-error, typical) |
+| eval_shap_meta.json | EVAL-02 | SHAP computation metadata |
+| eval_comparison.json | EVAL-03 | Full phase comparison + per-route wins/losses |
+| eval_comparison.md | EVAL-03 | Formatted markdown comparison table |
+| eval_residuals.json | EVAL-04 | Signed residual analysis with bias flags |
+| eval_residuals_by_route.png | EVAL-04 | Route bias bar chart |
+| eval_residuals_by_tod.png | EVAL-04 | Time-of-day bias bar chart |
+| eval_report.md | All | Master 244-line synthesis report |
 
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed 05-02-PLAN.md (Asymmetric + Quantile Training) -- Phase 5 complete
+Stopped at: Completed 06-01-PLAN.md (Comprehensive Evaluation Pipeline)
 Resume file: None
