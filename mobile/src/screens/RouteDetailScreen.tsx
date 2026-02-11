@@ -1,10 +1,12 @@
 import React from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import MapView, { Polyline, Marker } from 'react-native-maps';
 import { useGetRouteDetailQuery, useGetRouteShapeQuery } from '../store/api/transitApi';
 import { RootStackParamList } from '../types/navigation.types';
+import { Colors, Typography, Radius, Shadows, Spacing } from '../theme';
 
 type RouteDetailRouteProp = RouteProp<RootStackParamList, 'RouteDetail'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -20,7 +22,7 @@ const RouteDetailScreen: React.FC = () => {
   if (isLoading) {
     return (
       <View style={styles.centerContainer}>
-        <Text>Loading route details...</Text>
+        <ActivityIndicator size="large" color={Colors.orange} />
       </View>
     );
   }
@@ -28,7 +30,8 @@ const RouteDetailScreen: React.FC = () => {
   if (error || !routeDetail) {
     return (
       <View style={styles.centerContainer}>
-        <Text>Error loading route</Text>
+        <Ionicons name="alert-circle-outline" size={40} color={Colors.error} />
+        <Text style={styles.errorText}>Error loading route</Text>
       </View>
     );
   }
@@ -36,14 +39,14 @@ const RouteDetailScreen: React.FC = () => {
   if (!routeDetail.stops || routeDetail.stops.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <Text>No stops available for this route</Text>
+        <Ionicons name="location-outline" size={40} color={Colors.gray400} />
+        <Text style={styles.errorText}>No stops available for this route</Text>
       </View>
     );
   }
 
-  const routeColor = routeDetail.color ? `#${routeDetail.color}` : '#0C2340';
+  const routeColor = routeDetail.color ? `#${routeDetail.color}` : Colors.navy;
 
-  // Calculate map region from stops
   const stops = routeDetail.stops;
   const lats = stops.map(s => s.lat);
   const lons = stops.map(s => s.lon);
@@ -75,16 +78,14 @@ const RouteDetailScreen: React.FC = () => {
           scrollEnabled={false}
           zoomEnabled={false}
         >
-          {/* Route polyline */}
           {polylineCoords.length > 0 && (
             <Polyline
               coordinates={polylineCoords}
               strokeColor={routeColor}
-              strokeWidth={4}
+              strokeWidth={3.5}
             />
           )}
 
-          {/* Stop markers */}
           {stops.map((stop) => (
             <Marker
               key={stop.id}
@@ -106,6 +107,7 @@ const RouteDetailScreen: React.FC = () => {
             key={stop.id}
             style={styles.stopItem}
             onPress={() => navigation.navigate('StopDetail', { stopId: stop.id })}
+            activeOpacity={0.7}
           >
             <View style={styles.stopNumber}>
               <Text style={styles.stopNumberText}>{index + 1}</Text>
@@ -114,6 +116,7 @@ const RouteDetailScreen: React.FC = () => {
               <Text style={styles.stopName}>{stop.name}</Text>
               {stop.code && <Text style={styles.stopCode}>Stop #{stop.code}</Text>}
             </View>
+            <Ionicons name="chevron-forward" size={18} color={Colors.gray400} />
           </TouchableOpacity>
         ))}
       </View>
@@ -124,89 +127,89 @@ const RouteDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: Colors.background,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: Colors.background,
+  },
+  errorText: {
+    fontSize: Typography.size.md,
+    color: Colors.textSecondary,
+    marginTop: Spacing.sm,
   },
   header: {
-    padding: 20,
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
     alignItems: 'center',
   },
   routeShortName: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontSize: Typography.size['3xl'],
+    fontWeight: Typography.weight.bold,
+    color: Colors.white,
   },
   routeLongName: {
-    fontSize: 18,
-    color: '#fff',
-    marginTop: 8,
+    fontSize: Typography.size.lg,
+    color: Colors.white,
+    marginTop: Spacing.sm,
     textAlign: 'center',
+    opacity: 0.9,
   },
   mapContainer: {
-    height: 250,
-    margin: 16,
-    borderRadius: 12,
+    height: 220,
+    margin: Spacing.lg,
+    borderRadius: Radius.lg,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...Shadows.md,
   },
   map: {
     flex: 1,
   },
   stopsSection: {
-    padding: 16,
+    padding: Spacing.lg,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#0C2340',
-    marginBottom: 12,
+    fontSize: Typography.size.xl,
+    fontWeight: Typography.weight.bold,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.md,
   },
   stopItem: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    padding: 16,
-    marginBottom: 8,
-    borderRadius: 8,
+    backgroundColor: Colors.surface,
+    padding: Spacing.lg,
+    marginBottom: Spacing.sm,
+    borderRadius: Radius.md,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    ...Shadows.sm,
   },
   stopNumber: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#E87722',
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: Colors.gray300,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: Spacing.md,
   },
   stopNumberText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
+    color: Colors.gray700,
+    fontWeight: Typography.weight.bold,
+    fontSize: Typography.size.sm,
   },
   stopInfo: {
     flex: 1,
   },
   stopName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#0C2340',
+    fontSize: Typography.size.md,
+    fontWeight: Typography.weight.semibold,
+    color: Colors.textPrimary,
   },
   stopCode: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: Typography.size.xs,
+    color: Colors.textSecondary,
     marginTop: 2,
   },
 });

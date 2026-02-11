@@ -1,5 +1,7 @@
-import { io, Socket } from 'socket.io-client';
 import { EventEmitter } from 'events';
+import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
+
+const { transit_realtime } = GtfsRealtimeBindings;
 
 export interface VehiclePosition {
   vehicleId: string;
@@ -18,132 +20,158 @@ export interface VehiclePosition {
   timestamp: number;
 }
 
-interface SysRptMessage {
-  vid: string;
-  lt: number;
-  ln: number;
-  h: number;
-  v: number;
-  load: number;
-  capacity: number;
-  isDelayed: boolean;
-  ts: number;
-  serviceState?: {
-    rID: number;
-    status: number;
-    patternID: number;
-    tripID: string;
-    nextStopPercentProgress: number;
-  };
-  lastStop?: {
-    stopID: number;
-    time: number;
-    onTime: number;
-  };
-  eta?: {
-    stopID: number;
-    eta: number;
-    onTime: number;
-  };
+interface TripEta {
+  nextStopId: string;
+  etaSeconds: number;
+  delay: number;
 }
 
+const POSITION_FEED_URL = 'https://s3.amazonaws.com/etatransit.gtfs/auburn.etaspot.net/position_updates.pb';
+const TRIP_UPDATES_FEED_URL = 'https://s3.amazonaws.com/etatransit.gtfs/auburn.etaspot.net/trip_updates.pb';
+const POLL_INTERVAL_MS = 5000;
+
 class ETASpotService extends EventEmitter {
-  private socket: Socket | null = null;
   private vehicles: Map<string, VehiclePosition> = new Map();
+  private tripEtas: Map<string, TripEta> = new Map();
   private isConnected: boolean = false;
-  private reconnectAttempts: number = 0;
-  private maxReconnectAttempts: number = 10;
+  private pollTimer: ReturnType<typeof setInterval> | null = null;
 
-  connect(): void {
-    const cookie = process.env.ETASPOT_COOKIE || '';
-
-    if (!cookie) {
-      console.warn('ETASPOT_COOKIE not set - live vehicle tracking will not work');
-      return;
-    }
-
-    console.log('Connecting to ETA SPOT...');
-
-    this.socket = io('https://auburn.etaspot.com', {
-      transports: ['websocket'],
-      extraHeaders: {
-        Cookie: cookie
-      },
-      reconnection: true,
-      reconnectionAttempts: this.maxReconnectAttempts,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-    });
-
-    this.socket.on('connect', () => {
-      console.log('Connected to ETA SPOT WebSocket');
-      this.isConnected = true;
-      this.reconnectAttempts = 0;
-      this.emit('connected');
-    });
-
-    this.socket.on('disconnect', (reason) => {
-      console.log('Disconnected from ETA SPOT:', reason);
-      this.isConnected = false;
-      this.emit('disconnected', reason);
-    });
-
-    this.socket.on('connect_error', (error) => {
-      console.error('ETA SPOT connection error:', error.message);
-      this.reconnectAttempts++;
-      this.emit('error', error);
-    });
-
-    this.socket.on('sysRpt', (msg: SysRptMessage) => {
-      const vehicle = this.transformVehicle(msg);
-      if (vehicle) {
-        this.vehicles.set(vehicle.vehicleId, vehicle);
-        this.emit('vehicle', vehicle);
-      }
-    });
+  start(): void {
+    console.log('Starting GTFS-RT feed polling...');
+    this.poll();
+    this.pollTimer = setInterval(() => this.poll(), POLL_INTERVAL_MS);
   }
 
-  private transformVehicle(msg: SysRptMessage): VehiclePosition | null {
-    // Skip vehicles not on a route
-    if (!msg.serviceState?.rID) {
-      return null;
+  stop(): void {
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer);
+      this.pollTimer = null;
     }
+    this.isConnected = false;
+    this.emit('disconnected', 'stopped');
+  }
 
-    // Skip invalid coordinates
-    if (!msg.lt || !msg.ln || msg.lt === 0 || msg.ln === 0) {
-      return null;
+  private async poll(): Promise<void> {
+    try {
+      const [positions, trips] = await Promise.all([
+        this.fetchFeed(POSITION_FEED_URL),
+        this.fetchFeed(TRIP_UPDATES_FEED_URL),
+      ]);
+
+      // Process trip updates first so ETAs are available for position mapping
+      if (trips) {
+        this.processTripUpdates(trips);
+      }
+
+      if (positions) {
+        this.processPositionUpdates(positions);
+      }
+
+      if (!this.isConnected) {
+        this.isConnected = true;
+        this.emit('connected');
+        console.log('GTFS-RT feeds connected');
+      }
+    } catch (err) {
+      console.error('GTFS-RT poll error:', (err as Error).message);
+      if (this.isConnected) {
+        this.isConnected = false;
+        this.emit('disconnected', (err as Error).message);
+      }
+      this.emit('error', err);
     }
+  }
 
-    return {
-      vehicleId: msg.vid,
-      routeId: String(msg.serviceState.rID),
-      lat: msg.lt,
-      lon: msg.ln,
-      heading: msg.h || 0,
-      speed: msg.v || 0,
-      load: msg.load || 0,
-      capacity: msg.capacity || 25,
-      nextStopId: msg.eta?.stopID ? String(msg.eta.stopID) : '',
-      etaSeconds: msg.eta?.eta || 0,
-      onTime: msg.eta?.onTime || 0,
-      lastStopId: msg.lastStop?.stopID ? String(msg.lastStop.stopID) : '',
-      isDelayed: msg.isDelayed || false,
-      timestamp: msg.ts || Date.now()
-    };
+  private async fetchFeed(url: string): Promise<GtfsRealtimeBindings.transit_realtime.FeedMessage | null> {
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`Feed fetch failed: ${res.status} ${res.statusText} for ${url}`);
+    }
+    const buffer = await res.arrayBuffer();
+    return transit_realtime.FeedMessage.decode(new Uint8Array(buffer));
+  }
+
+  private processTripUpdates(feed: GtfsRealtimeBindings.transit_realtime.FeedMessage): void {
+    for (const entity of feed.entity) {
+      const tu = entity.tripUpdate;
+      if (!tu) continue;
+
+      const tripId = tu.trip?.tripId;
+      if (!tripId) continue;
+
+      // Find the next upcoming stop time update
+      const now = Math.floor(Date.now() / 1000);
+      let nextStop: { stopId: string; eta: number } | null = null;
+
+      for (const stu of tu.stopTimeUpdate || []) {
+        const arrivalTime = stu.arrival?.time;
+        const arrivalSec = arrivalTime ? Number(arrivalTime) : 0;
+        if (arrivalSec > now && stu.stopId) {
+          nextStop = {
+            stopId: stu.stopId,
+            eta: arrivalSec - now,
+          };
+          break;
+        }
+      }
+
+      this.tripEtas.set(tripId, {
+        nextStopId: nextStop?.stopId || '',
+        etaSeconds: nextStop?.eta || 0,
+        delay: Number(tu.delay) || 0,
+      });
+    }
+  }
+
+  private processPositionUpdates(feed: GtfsRealtimeBindings.transit_realtime.FeedMessage): void {
+    for (const entity of feed.entity) {
+      const vp = entity.vehicle;
+      if (!vp?.position) continue;
+
+      const vehicleId = vp.vehicle?.id || entity.id;
+      const routeId = vp.trip?.routeId;
+      if (!routeId) continue;
+
+      const pos = vp.position;
+      if (!pos.latitude || !pos.longitude) continue;
+
+      const tripId = vp.trip?.tripId || '';
+      const tripEta = this.tripEtas.get(tripId);
+
+      const vehicle: VehiclePosition = {
+        vehicleId,
+        routeId,
+        lat: pos.latitude,
+        lon: pos.longitude,
+        heading: pos.bearing || 0,
+        speed: pos.speed || 0,
+        load: 0,
+        capacity: 0,
+        nextStopId: vp.stopId || tripEta?.nextStopId || '',
+        etaSeconds: tripEta?.etaSeconds || 0,
+        onTime: tripEta ? (tripEta.delay <= 0 ? 1 : 0) : 0,
+        lastStopId: '',
+        isDelayed: (tripEta?.delay || 0) > 300,
+        timestamp: vp.timestamp ? Number(vp.timestamp) * 1000 : Date.now(),
+      };
+
+      this.vehicles.set(vehicleId, vehicle);
+      this.emit('vehicle', vehicle);
+    }
+  }
+
+  // Keep legacy method name working
+  connect(): void {
+    this.start();
   }
 
   disconnect(): void {
-    if (this.socket) {
-      this.socket.disconnect();
-      this.socket = null;
-      this.isConnected = false;
-    }
+    this.stop();
   }
 
   getVehicles(): VehiclePosition[] {
-    // Filter out stale vehicles (older than 2 minutes)
     const now = Date.now();
-    const staleThreshold = 2 * 60 * 1000; // 2 minutes
+    const staleThreshold = 2 * 60 * 1000;
 
     return Array.from(this.vehicles.values()).filter(v => {
       return (now - v.timestamp) < staleThreshold;

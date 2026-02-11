@@ -8,6 +8,7 @@ import { useRoutePreferences } from '../../hooks/useRoutePreferences';
 import StopMarker from './StopMarker';
 import RoutePolyline from './RoutePolyline';
 import VehicleMarker from './VehicleMarker';
+import { Colors, Typography, Radius, Shadows, Spacing } from '../../theme';
 
 const TransitMapView: React.FC = () => {
   const mapRef = useRef<MapView>(null);
@@ -35,7 +36,7 @@ const TransitMapView: React.FC = () => {
     if (!routes) return {};
     return routes.reduce((acc, route) => {
       acc[route.id] = {
-        color: route.color ? `#${route.color}` : '#0C2340',
+        color: route.color ? `#${route.color}` : Colors.navy,
         name: route.shortName || route.longName,
       };
       return acc;
@@ -54,11 +55,8 @@ const TransitMapView: React.FC = () => {
   }, [vehicles, isRouteVisible]);
 
   // Filter stops to only show those that serve at least one visible route
-  // Also calculate the color for each stop based on visible routes
   const visibleStopsWithColors = useMemo(() => {
-    // Wait for both stops and mappings to load before showing any stops
     if (!stops || !stopRouteMappings) return [];
-    // If no routes are visible, show no stops
     if (visibleRouteIds.size === 0) return [];
 
     return stops
@@ -66,12 +64,10 @@ const TransitMapView: React.FC = () => {
         const routeIds = stopRouteMappings[stop.id];
         if (!routeIds || routeIds.length === 0) return null;
 
-        // Find the first visible route this stop serves
         const visibleRouteId = routeIds.find(routeId => isRouteVisible(routeId));
         if (!visibleRouteId) return null;
 
-        // Get the color from the route info
-        const color = routeInfo[visibleRouteId]?.color || '#0C2340';
+        const color = routeInfo[visibleRouteId]?.color || Colors.navy;
 
         return { stop, color };
       })
@@ -83,7 +79,7 @@ const TransitMapView: React.FC = () => {
       {/* Connection status banner */}
       {!connected && (
         <View style={styles.connectionBanner}>
-          <View style={[styles.statusDot, { backgroundColor: error ? '#E74C3C' : '#F39C12' }]} />
+          <View style={[styles.statusDot, { backgroundColor: error ? Colors.error : Colors.warning }]} />
           <Text style={styles.connectionText}>
             {error ? 'Connection error' : 'Connecting to live data...'}
           </Text>
@@ -107,17 +103,14 @@ const TransitMapView: React.FC = () => {
         showsMyLocationButton
         showsCompass
       >
-        {/* Render route polylines (only visible routes) */}
         {visibleRoutes.map((route) => (
           <RoutePolyline key={route.id} route={route} />
         ))}
 
-        {/* Render stop markers (only for visible routes, color-coded) */}
         {visibleStopsWithColors.map(({ stop, color }) => (
           <StopMarker key={stop.id} stop={stop} color={color} />
         ))}
 
-        {/* Render live vehicle markers (only on visible routes) */}
         {visibleVehicles.map((vehicle) => (
           <VehicleMarker
             key={vehicle.vehicleId}
@@ -144,57 +137,49 @@ const styles = StyleSheet.create({
     top: 10,
     left: 10,
     right: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
+    backgroundColor: Colors.surface,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    borderRadius: Radius.md,
     flexDirection: 'row',
     alignItems: 'center',
     zIndex: 1000,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...Shadows.md,
   },
   statusDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    marginRight: 8,
+    marginRight: Spacing.sm,
   },
   connectionText: {
-    fontSize: 14,
-    color: '#333',
+    fontSize: Typography.size.sm,
+    color: Colors.gray700,
   },
   liveIndicator: {
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: Colors.surface,
     paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 16,
+    paddingHorizontal: Spacing.md,
+    borderRadius: Radius.full,
     flexDirection: 'row',
     alignItems: 'center',
     zIndex: 1000,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...Shadows.md,
   },
   liveDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#27AE60',
+    backgroundColor: Colors.success,
     marginRight: 6,
   },
   liveText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#27AE60',
+    fontSize: Typography.size.xs,
+    fontWeight: Typography.weight.semibold,
+    color: Colors.success,
   },
 });
 

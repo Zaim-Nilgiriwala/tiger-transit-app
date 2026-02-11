@@ -1,0 +1,58 @@
+# ETA Prediction Model Training Framework Dependencies
+# Tiger Transit - Auburn University
+
+# =============================================================================
+# Core Machine Learning
+# =============================================================================
+torch>=2.0.0
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+
+# =============================================================================
+# Configuration and Utilities
+# =============================================================================
+pyyaml>=6.0           # For training_config.yaml parsing
+tqdm>=4.65.0          # Progress bars during training
+
+# =============================================================================
+# Optional: Weather Data (for historical weather features)
+# =============================================================================
+# openmeteo-requests>=1.0.0  # Uncomment if using weather features
+# requests>=2.31.0
+
+# =============================================================================
+# Optional: API Server (for future deployment)
+# =============================================================================
+# fastapi>=0.100.0
+# uvicorn[standard]>=0.23.0
+# pydantic>=2.0.0
+
+# =============================================================================
+# Development and Testing
+# =============================================================================
+# pytest>=7.0.0
+# pytest-cov>=4.0.0
+
+# =============================================================================
+# GPU Support
+# =============================================================================
+# For CUDA support, install PyTorch with CUDA:
+# pip install torch --index-url https://download.pytorch.org/whl/cu118
+# or for cu121:
+# pip install torch --index-url https://download.pytorch.org/whl/cu121
+
+# =============================================================================
+# Installation Instructions
+# =============================================================================
+# 1. Create virtual environment:
+#    python -m venv venv
+#    source venv/bin/activate  # Linux/Mac
+#    venv\Scripts\activate     # Windows
+#
+# 2. Install requirements:
+#    pip install -r requirements.txt
+#
+# 3. For GPU training (recommended):
+#    pip uninstall torch
+#    pip install torch --index-url https://download.pytorch.org/whl/cu118

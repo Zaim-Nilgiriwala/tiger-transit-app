@@ -2,6 +2,7 @@ import React from 'react';
 import { Polyline } from 'react-native-maps';
 import { Route } from '../../types/gtfs.types';
 import { useGetRouteShapeQuery } from '../../store/api/transitApi';
+import { Colors } from '../../theme';
 
 interface RoutePolylineProps {
   route: Route;
@@ -10,7 +11,7 @@ interface RoutePolylineProps {
 
 const RoutePolyline: React.FC<RoutePolylineProps> = ({
   route,
-  strokeWidth = 3
+  strokeWidth = 3.5
 }) => {
   const { data: shape } = useGetRouteShapeQuery({
     routeId: route.id
@@ -25,7 +26,7 @@ const RoutePolyline: React.FC<RoutePolylineProps> = ({
     longitude: coord.lon,
   }));
 
-  const color = route.color ? `#${route.color}` : '#0C2340';
+  const color = route.color ? `#${route.color}` : Colors.navy;
 
   return (
     <Polyline

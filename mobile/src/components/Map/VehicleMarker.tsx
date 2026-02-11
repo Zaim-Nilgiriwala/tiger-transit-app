@@ -1,7 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Marker, Callout } from 'react-native-maps';
+import { Ionicons } from '@expo/vector-icons';
 import { Vehicle } from '../../hooks/useVehicles';
+import Badge from '../Common/Badge';
+import LoadBar from '../Common/LoadBar';
+import { Colors, Typography, Radius, Shadows, Spacing } from '../../theme';
 
 interface VehicleMarkerProps {
   vehicle: Vehicle;
@@ -11,20 +15,9 @@ interface VehicleMarkerProps {
 
 const VehicleMarker: React.FC<VehicleMarkerProps> = ({
   vehicle,
-  routeColor = '#0C2340',
+  routeColor = Colors.navy,
   routeName,
 }) => {
-  const loadPercent = vehicle.capacity > 0
-    ? Math.round((vehicle.load / vehicle.capacity) * 100)
-    : 0;
-
-  // Determine load status color
-  const getLoadColor = () => {
-    if (loadPercent >= 80) return '#E74C3C'; // Red - nearly full
-    if (loadPercent >= 50) return '#F39C12'; // Orange - filling up
-    return '#27AE60'; // Green - plenty of room
-  };
-
   const formatEta = (seconds: number) => {
     if (seconds <= 0) return 'Arriving';
     const minutes = Math.ceil(seconds / 60);
@@ -42,13 +35,9 @@ const VehicleMarker: React.FC<VehicleMarkerProps> = ({
       flat={true}
       tracksViewChanges={false}
     >
-      {/* Custom bus marker */}
-      <View style={styles.markerContainer}>
-        <View style={[styles.busCircle, { backgroundColor: routeColor }]}>
-          <Text style={styles.busIcon}>🚌</Text>
-        </View>
-        {/* Direction indicator (arrow) */}
-        <View style={[styles.directionArrow, { borderBottomColor: routeColor }]} />
+      {/* Custom bus marker - compact circle with Ionicons bus */}
+      <View style={[styles.busCircle, { backgroundColor: routeColor }]}>
+        <Ionicons name="bus" size={16} color={Colors.white} />
       </View>
 
       {/* Callout with vehicle info */}
@@ -56,11 +45,7 @@ const VehicleMarker: React.FC<VehicleMarkerProps> = ({
         <View style={styles.calloutContainer}>
           <View style={styles.calloutHeader}>
             <Text style={styles.vehicleId}>Bus {vehicle.vehicleId}</Text>
-            {vehicle.isDelayed && (
-              <View style={styles.delayedBadge}>
-                <Text style={styles.delayedText}>DELAYED</Text>
-              </View>
-            )}
+            {vehicle.isDelayed && <Badge label="DELAYED" variant="delayed" />}
           </View>
 
           {routeName && (
@@ -69,23 +54,11 @@ const VehicleMarker: React.FC<VehicleMarkerProps> = ({
 
           <View style={styles.calloutRow}>
             <Text style={styles.label}>Passengers:</Text>
-            <View style={styles.loadContainer}>
-              <Text style={[styles.loadText, { color: getLoadColor() }]}>
-                {vehicle.load}/{vehicle.capacity}
-              </Text>
-              <View style={styles.loadBar}>
-                <View
-                  style={[
-                    styles.loadFill,
-                    {
-                      width: `${loadPercent}%`,
-                      backgroundColor: getLoadColor(),
-                    },
-                  ]}
-                />
-              </View>
-            </View>
+            <Text style={styles.loadText}>
+              {vehicle.load}/{vehicle.capacity}
+            </Text>
           </View>
+          <LoadBar load={vehicle.load} capacity={vehicle.capacity} width={120} />
 
           {vehicle.nextStopId && vehicle.etaSeconds > 0 && (
             <View style={styles.calloutRow}>
@@ -107,74 +80,39 @@ const VehicleMarker: React.FC<VehicleMarkerProps> = ({
 };
 
 const styles = StyleSheet.create({
-  markerContainer: {
-    alignItems: 'center',
-  },
   busCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 3,
-    borderColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
-  },
-  busIcon: {
-    fontSize: 20,
-  },
-  directionArrow: {
-    width: 0,
-    height: 0,
-    borderLeftWidth: 8,
-    borderRightWidth: 8,
-    borderBottomWidth: 12,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    marginTop: -4,
+    borderWidth: 2.5,
+    borderColor: Colors.white,
+    ...Shadows.sm,
   },
   calloutContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
     minWidth: 180,
     maxWidth: 220,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
+    ...Shadows.md,
   },
   calloutHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    marginBottom: Spacing.xs,
   },
   vehicleId: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#0C2340',
-  },
-  delayedBadge: {
-    backgroundColor: '#E74C3C',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  delayedText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: 'bold',
+    fontSize: Typography.size.lg,
+    fontWeight: Typography.weight.bold,
+    color: Colors.textPrimary,
   },
   routeName: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+    fontSize: Typography.size.sm,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.sm,
   },
   calloutRow: {
     flexDirection: 'row',
@@ -183,36 +121,22 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   label: {
-    fontSize: 12,
-    color: '#666',
-  },
-  loadContainer: {
-    alignItems: 'flex-end',
+    fontSize: Typography.size.xs,
+    color: Colors.textSecondary,
   },
   loadText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  loadBar: {
-    width: 60,
-    height: 4,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 2,
-    marginTop: 2,
-    overflow: 'hidden',
-  },
-  loadFill: {
-    height: '100%',
-    borderRadius: 2,
+    fontSize: Typography.size.xs,
+    fontWeight: Typography.weight.semibold,
+    color: Colors.textPrimary,
   },
   etaText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#E87722',
+    fontSize: Typography.size.xs,
+    fontWeight: Typography.weight.semibold,
+    color: Colors.orange,
   },
   speedText: {
-    fontSize: 12,
-    color: '#0C2340',
+    fontSize: Typography.size.xs,
+    color: Colors.textPrimary,
   },
 });
 

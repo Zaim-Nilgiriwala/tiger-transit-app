@@ -1,423 +1,178 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-02-03
+**Analysis Date:** 2026-02-11
 
 ## Test Framework
 
 **Runner:**
-- Jest configured for backend
-- Not detected for mobile
+- Backend: Jest (inferred from `backend/package.json` script `"test": "jest"`)
+- Python ML pipeline: No test framework detected
 
 **Assertion Library:**
-- Jest (built-in assertions)
+- Backend: Jest built-in assertions (assumed)
+- Python: Built-in `assert` statements used for data integrity checks, not formal unit tests
 
 **Run Commands:**
 ```bash
-npm run test              # Run all tests (backend only)
-npm run lint             # Run ESLint on backend
+npm test                   # Backend tests (not implemented yet)
+npm run lint               # Backend linting
 ```
-
-**Config Location:**
-- Backend: `jest.config.ts` or `jest.config.js` (not found in repo - using Jest defaults)
-- Mobile: No test configuration
 
 ## Test File Organization
 
-**Current State:**
-- Backend: No test files found in repository
-- Mobile: No test files found in repository
+**Location:**
+- No test files found in codebase (searched for `*.test.*`, `*.spec.*`, `test_*.py`)
+- Jest configured in `backend/package.json` but no test suite exists
+- Python ML scripts have no corresponding test files
 
-**Convention (not yet established):**
+**Naming:**
+- Expected pattern: `{module}.test.ts` or `{module}.spec.ts` (TypeScript)
+- Expected pattern: `test_{module}.py` (Python)
 
-**Recommended Location Pattern:**
-- Backend: Co-located with source, named `[filename].test.ts` or `__tests__/[filename].test.ts`
-- Mobile: Co-located with source, named `[filename].test.tsx` or `__tests__/[filename].test.tsx`
-
-**Example paths (following TypeScript convention):**
-- `backend/src/routes/__tests__/routes.routes.test.ts`
-- `backend/src/services/__tests__/etaspot.service.test.ts`
-- `mobile/src/hooks/__tests__/useVehicles.test.ts`
-- `mobile/src/components/Map/__tests__/MapView.test.tsx`
+**Structure:**
+```
+Not applicable - no test files exist
+```
 
 ## Test Structure
 
-No existing tests to reference. However, based on codebase patterns, recommended structure:
-
 **Suite Organization:**
-
-Backend route handler:
-```typescript
-import { Router, Request, Response, NextFunction } from 'express';
-
-describe('Routes API', () => {
-  let router: Router;
-
-  beforeEach(() => {
-    // Setup
-  });
-
-  afterEach(() => {
-    // Cleanup
-  });
-
-  describe('GET /routes', () => {
-    it('should return all active routes', async () => {
-      // Test implementation
-    });
-
-    it('should include agency information', async () => {
-      // Test implementation
-    });
-
-    it('should handle errors gracefully', async () => {
-      // Test implementation
-    });
-  });
-
-  describe('GET /routes/:id', () => {
-    it('should return route details with stops', async () => {
-      // Test implementation
-    });
-
-    it('should throw 404 for non-existent route', async () => {
-      // Test implementation
-    });
-  });
-});
-```
-
-Mobile hook:
-```typescript
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { useVehicles } from '../useVehicles';
-
-describe('useVehicles hook', () => {
-  beforeEach(() => {
-    // Setup Socket.IO mock
-  });
-
-  afterEach(() => {
-    // Cleanup
-  });
-
-  it('should connect to WebSocket on mount', () => {
-    // Test implementation
-  });
-
-  it('should filter vehicles by routeId when provided', () => {
-    // Test implementation
-  });
-
-  it('should update vehicles on vehicle event', async () => {
-    // Test implementation
-  });
-});
-```
+- No test suites exist in codebase
 
 **Patterns:**
-- Setup: `beforeEach()` to initialize mocks and state
-- Teardown: `afterEach()` to clean up connections and mocks
-- Assertion: Use Jest matchers (e.g., `expect().toEqual()`, `expect().rejects.toThrow()`)
+- Python ML scripts use inline assertions for data validation:
+```python
+assert len(df) == n_before, f"Row count changed! Before={n_before}, After={len(df)}"
+assert max(train_df["date"]) < min(val_df["date"]), "Train/val date overlap!"
+```
+- These are runtime checks, not unit tests
+
+**Coverage Analysis:**
+- No test coverage for ETA prediction ML algorithm
+- No test coverage for TypeScript backend
+- No test coverage for data processing pipeline
+- Production code relies on runtime assertions and manual verification
 
 ## Mocking
 
-**Framework:** Jest built-in mocking
+**Framework:**
+- Not applicable (no tests exist)
 
-**Patterns to implement:**
-
-Database (Prisma):
-```typescript
-jest.mock('@prisma/client', () => ({
-  PrismaClient: jest.fn().mockImplementation(() => ({
-    route: {
-      findMany: jest.fn(),
-      findUnique: jest.fn(),
-    },
-    stop: {
-      findMany: jest.fn(),
-    },
-    // ... other models
-  })),
-}));
-```
-
-Socket.IO (backend service):
-```typescript
-jest.mock('socket.io-client', () => ({
-  io: jest.fn().mockReturnValue({
-    on: jest.fn(),
-    emit: jest.fn(),
-    disconnect: jest.fn(),
-  }),
-}));
-```
-
-Socket.IO (mobile hook):
-```typescript
-jest.mock('socket.io-client', () => ({
-  io: jest.fn(() => mockSocket),
-}));
-
-const mockSocket = {
-  on: jest.fn(),
-  emit: jest.fn(),
-  disconnect: jest.fn(),
-  connected: true,
-};
-```
-
-Express (request/response):
-```typescript
-import { Request, Response, NextFunction } from 'express';
-
-const mockRequest = {
-  params: { id: '123' },
-  query: { limit: '200' },
-} as unknown as Request;
-
-const mockResponse = {
-  json: jest.fn().mockReturnThis(),
-  status: jest.fn().mockReturnThis(),
-} as unknown as Response;
-
-const mockNext = jest.fn() as NextFunction;
-```
+**Patterns:**
+- No mocking patterns detected
 
 **What to Mock:**
-- Database connections (Prisma)
-- External WebSocket connections (Socket.IO, ETA SPOT)
-- Express Request/Response objects in route tests
-- API calls (fetch, axios)
-- React Navigation (for screens)
+- External APIs: GTFS-RT feeds (`POSITION_FEED_URL`, `TRIP_UPDATES_FEED_URL`)
+- Database: Prisma client queries
+- Redis: Cache operations
+- File I/O: Parquet file reads/writes
 
 **What NOT to Mock:**
-- Core utility functions (e.g., `calculateDistance`, `decodePolyline`)
-- Type definitions
-- Theme/constants
-- Pure data transformation logic
+- Core ML model logic (XGBoost predictions)
+- Data transformations (haversine distance, GPS speed calculations)
+- Feature engineering logic
 
 ## Fixtures and Factories
 
 **Test Data:**
-
-Database fixtures for route testing:
-```typescript
-const mockRoute = {
-  id: 'route-1',
-  shortName: '1',
-  longName: 'Main Street Route',
-  color: 'FF0000',
-  textColor: '000000',
-  routeType: 3,
-  agencyId: 'auburn',
-};
-
-const mockStop = {
-  id: 'stop-123',
-  name: 'Auburn Station',
-  code: 'AUB',
-  lat: 32.609,
-  lon: -85.4809,
-  wheelchairBoarding: 1,
-  isMajorStop: true,
-};
-```
-
-Vehicle data for hook testing:
-```typescript
-const mockVehicle = {
-  vehicleId: 'v-001',
-  routeId: 'route-1',
-  lat: 32.609,
-  lon: -85.4809,
-  heading: 180,
-  speed: 25,
-  load: 15,
-  capacity: 40,
-  nextStopId: 'stop-124',
-  etaSeconds: 300,
-  onTime: 0,
-  lastStopId: 'stop-123',
-  isDelayed: false,
-  timestamp: Date.now(),
-};
-```
-
-API response fixture:
-```typescript
-const mockApiResponse = {
-  success: true,
-  data: [...],
-  meta: {
-    timestamp: new Date().toISOString(),
-    count: 5,
-  },
-};
-```
+- No test fixtures exist
+- ML pipeline uses actual production data from `data/processed/` directory
+- Temporal data splits used for train/val/test (see `scripts/temporal_split.py`)
 
 **Location:**
-- Backend: `backend/src/__fixtures__/` or `backend/src/routes/__fixtures__/`
-- Mobile: `mobile/src/__fixtures__/` or `mobile/src/hooks/__fixtures__/`
+- Not applicable
 
 ## Coverage
 
-**Requirements:** Not enforced (no coverage config found)
-
-**Recommended targets:**
-- Business logic: 80%+
-- Components: 70%+
-- Hooks: 80%+
-- Utilities: 95%+
+**Requirements:**
+- None enforced
 
 **View Coverage:**
 ```bash
-npm run test -- --coverage
+# No coverage tooling configured
 ```
 
 ## Test Types
 
 **Unit Tests:**
-- Scope: Individual functions, services, hooks in isolation
-- Approach: Mock all dependencies; test one unit at a time
-- Examples:
-  - `calculateDistance()` with various coordinates
-  - `decodePolyline()` with encoded polyline string
-  - `transformVehicle()` SysRptMessage transformation
-  - Redux slice reducers with sample payloads
-  - Hook state updates on event emissions
+- Not implemented
 
 **Integration Tests:**
-- Scope: Multiple units working together
-- Approach: Real or closer-to-real dependencies
-- Examples:
-  - Route handler + Prisma + error handler
-  - useVehicles hook + Socket.IO + Redux dispatch
-  - MapView component + useVehicles + useGetStopsQuery
+- Not implemented
 
 **E2E Tests:**
-- Framework: Not implemented
-- Potential: Expo for mobile E2E testing
-- Potential: Supertest or similar for API E2E testing
+- Not implemented
 
 ## Common Patterns
 
 **Async Testing:**
-
-Backend route handler (using Express test pattern):
+- Not applicable (no tests exist)
+- Expected pattern for TypeScript:
 ```typescript
-it('should fetch routes successfully', async () => {
-  // Arrange
-  const mockRoutes = [{ id: '1', shortName: 'A', longName: 'Route A' }];
-  prisma.route.findMany.mockResolvedValue(mockRoutes);
-
-  // Act
-  await request(app).get('/routes');
-
-  // Assert
-  expect(prisma.route.findMany).toHaveBeenCalled();
-});
-```
-
-Mobile hook async state update:
-```typescript
-it('should update vehicles when socket emits vehicle event', async () => {
-  const { result } = renderHook(() => useVehicles());
-
-  act(() => {
-    mockSocket.emit('vehicle', mockVehicle);
-  });
-
-  await waitFor(() => {
-    expect(result.current.vehicles).toContainEqual(mockVehicle);
-  });
+test('should fetch vehicle positions', async () => {
+  const vehicles = await etaSpotService.getVehicles();
+  expect(vehicles).toBeDefined();
 });
 ```
 
 **Error Testing:**
-
-Backend error handler:
+- Not applicable (no tests exist)
+- Expected pattern:
 ```typescript
-it('should return 404 when route not found', async () => {
-  prisma.route.findUnique.mockResolvedValue(null);
-
-  const res = await request(app).get('/routes/invalid-id');
-
-  expect(res.status).toBe(404);
-  expect(res.body.success).toBe(false);
-  expect(res.body.error.code).toBe('ROUTE_NOT_FOUND');
+test('should handle fetch errors', async () => {
+  await expect(fetchFeed('invalid-url')).rejects.toThrow();
 });
 ```
 
-Service error event:
-```typescript
-it('should emit error event on connection failure', (done) => {
-  service.on('error', (error) => {
-    expect(error.message).toContain('Connection failed');
-    done();
-  });
+## ML Pipeline Validation
 
-  // Trigger connection error
-  mockSocket.emit('connect_error', new Error('Connection failed'));
-});
+**Current Approach:**
+- Comprehensive evaluation pipeline in `scripts/evaluate.py` produces 4 deliverables:
+  - EVAL-01: Sliced metrics (overall, per-route, per-stops, per-TOD, per-distance)
+  - EVAL-02: SHAP explainability (global bar + 3 waterfall plots)
+  - EVAL-03: Comparison table vs naive baseline
+  - EVAL-04: Residual bias detection
+- Runtime assertions validate data integrity throughout pipeline
+- Manual inspection of metrics JSON files (e.g., `models/tuned_metrics.json`)
+- Progressive improvement validation: Each phase must beat previous (e.g., Tuned MAE < Differentiator MAE)
+
+**Validation Examples:**
+```python
+# From scripts/train_advanced.py
+if xgb_mae < diff_mae:
+    print(f"PASS: Tuned MAE ({xgb_mae:.1f}s) < Differentiator MAE ({diff_mae:.1f}s)")
+else:
+    print(f"WARN: Tuned MAE ({xgb_mae:.1f}s) >= Differentiator MAE ({diff_mae:.1f}s)")
+
+# From scripts/temporal_split.py
+assert len(train_df) + len(val_df) + len(test_df) + gap_count == total_rows
+assert max(train_df["date"]) < min(val_df["date"]), "Train/val date overlap!"
 ```
 
-Hook error state:
-```typescript
-it('should set error on connection failure', async () => {
-  const { result } = renderHook(() => useVehicles());
+**Data Integrity Checks:**
+- Row count preservation through transformations (e.g., `assert len(df) == n_before`)
+- Date range validation (no temporal leakage between splits)
+- Feature NaN rate reporting after each processing stage
+- Historical aggregate sparsity checks (minimum observation thresholds)
 
-  act(() => {
-    mockSocket.emit('connect_error', new Error('Network error'));
-  });
+## Recommendations for Testing
 
-  await waitFor(() => {
-    expect(result.current.error).toBe('Network error');
-    expect(result.current.connected).toBe(false);
-  });
-});
-```
+**High Priority:**
+1. Unit tests for feature engineering functions (`compute_gps_speed()`, `haversine_meters()`, `compute_rolling_speed_features()`)
+2. Integration tests for ML pipeline stages (feature assembly → training → evaluation)
+3. Backend route tests (health check, vehicle endpoints, WebSocket handlers)
+4. Mock GTFS-RT feed responses for `etaspot.service.ts`
 
-## Testing Utilities Needed
+**Medium Priority:**
+5. Data validation tests (schema checks for parquet files)
+6. Model serialization/deserialization tests (XGBoost model save/load)
+7. Historical aggregate computation tests (edge cases: sparse data, missing routes)
 
-Based on codebase dependencies and patterns, recommended test setup packages:
-
-```json
-{
-  "devDependencies": {
-    "jest": "^29.0.0",
-    "@testing-library/react": "^14.0.0",
-    "@testing-library/react-native": "^12.0.0",
-    "@testing-library/jest-dom": "^6.0.0",
-    "jest-mock-socket": "^0.0.1",
-    "ts-jest": "^29.0.0",
-    "supertest": "^6.0.0"
-  }
-}
-```
-
-**Jest Config (recommended for backend):**
-```javascript
-module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  roots: ['<rootDir>/src'],
-  testMatch: ['**/__tests__/**/*.test.ts', '**/*.test.ts'],
-  collectCoverageFrom: [
-    'src/**/*.ts',
-    '!src/**/*.d.ts',
-    '!src/index.ts'
-  ],
-  coverageThreshold: {
-    global: {
-      branches: 60,
-      functions: 60,
-      lines: 60,
-      statements: 60
-    }
-  }
-};
-```
+**Low Priority:**
+8. E2E tests for full API flows
+9. Performance regression tests for ML training pipeline
+10. Load tests for WebSocket broadcasts
 
 ---
 
-*Testing analysis: 2026-02-03*
+*Testing analysis: 2026-02-11*

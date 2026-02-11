@@ -148,11 +148,7 @@ httpServer.listen(PORT, () => {
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`WebSocket enabled on port ${PORT}`);
 
-  // Connect to ETA SPOT if cookie is configured
-  if (process.env.ETASPOT_COOKIE) {
-    console.log('Connecting to ETA SPOT for live vehicle data...');
-    etaSpotService.connect();
-  } else {
-    console.log('ETASPOT_COOKIE not set - live vehicle tracking disabled');
-  }
+  // Start polling GTFS-RT feeds for live vehicle data
+  console.log('Starting GTFS-RT feed polling for live vehicle data...');
+  etaSpotService.start();
 });

@@ -5,6 +5,7 @@ import TabNavigator from './TabNavigator';
 import RouteDetailScreen from '../screens/RouteDetailScreen';
 import StopDetailScreen from '../screens/StopDetailScreen';
 import { RootStackParamList } from '../types/navigation.types';
+import { Colors, Typography } from '../theme';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -14,12 +15,13 @@ const RootNavigator: React.FC = () => {
       <Stack.Navigator
         screenOptions={{
           headerStyle: {
-            backgroundColor: '#0C2340', // Auburn navy
+            backgroundColor: Colors.navy,
           },
-          headerTintColor: '#fff',
+          headerTintColor: Colors.white,
           headerTitleStyle: {
-            fontWeight: 'bold',
+            fontWeight: Typography.weight.bold,
           },
+          headerShadowVisible: false,
         }}
       >
         <Stack.Screen

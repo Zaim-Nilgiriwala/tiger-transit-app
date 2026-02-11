@@ -1,0 +1,5567 @@
+(node:79864) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/ryanp/OneDrive/Desktop/code/Tiger%20Transit/mobile/src/ETA-Model/liveCollector.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\Users\ryanp\OneDrive\Desktop\code\Tiger Transit\mobile\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+============================================================
+ETA SPOT Live Data Collector
+============================================================
+Started: 2026-01-15T05:56:48.367Z
+Output directory: ./live_data
+Press Ctrl+C to stop
+
+Connecting to ETA SPOT...
+Connected! Socket ID: 4EMA8YnncruhHTlbAAQz
+
+Opened file for 2026-01-14: live_data\live_2026-01-14.jsonl
+
+--- Stats @ 2026-01-15T05:57:48.395Z ---
+  Runtime: 1m 0s
+  Session packets: 70
+  Rate: 70.0 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-14.jsonl
+  Packets: 100
+--- Stats @ 2026-01-15T05:58:48.409Z ---
+  Runtime: 2m 0s
+  Session packets: 143
+  Rate: 71.5 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-14.jsonl
+  Packets: 200
+--- Stats @ 2026-01-15T05:59:48.412Z ---
+  Runtime: 3m 0s
+  Session packets: 221
+  Rate: 73.6 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-14.jsonl
+
+Closed file for 2026-01-14
+
+Opened file for 2026-01-15: live_data\live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:00:48.426Z ---
+  Runtime: 4m 0s
+  Session packets: 299
+  Rate: 74.7 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 300
+--- Stats @ 2026-01-15T06:01:48.428Z ---
+  Runtime: 5m 0s
+  Session packets: 372
+  Rate: 74.4 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 400
+--- Stats @ 2026-01-15T06:02:48.432Z ---
+  Runtime: 6m 0s
+  Session packets: 444
+  Rate: 74.0 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 500
+--- Stats @ 2026-01-15T06:03:48.437Z ---
+  Runtime: 7m 0s
+  Session packets: 516
+  Rate: 73.7 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:04:48.448Z ---
+  Runtime: 8m 0s
+  Session packets: 588
+  Rate: 73.5 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 600
+--- Stats @ 2026-01-15T06:05:48.454Z ---
+  Runtime: 9m 0s
+  Session packets: 658
+  Rate: 73.1 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 700
+--- Stats @ 2026-01-15T06:06:48.460Z ---
+  Runtime: 10m 0s
+  Session packets: 724
+  Rate: 72.4 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:07:48.472Z ---
+  Runtime: 11m 0s
+  Session packets: 790
+  Rate: 71.8 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 800
+--- Stats @ 2026-01-15T06:08:48.475Z ---
+  Runtime: 12m 0s
+  Session packets: 854
+  Rate: 71.2 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 900
+--- Stats @ 2026-01-15T06:09:48.484Z ---
+  Runtime: 13m 0s
+  Session packets: 913
+  Rate: 70.2 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:10:48.487Z ---
+  Runtime: 14m 0s
+  Session packets: 974
+  Rate: 69.6 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 1000
+--- Stats @ 2026-01-15T06:11:48.499Z ---
+  Runtime: 15m 0s
+  Session packets: 1034
+  Rate: 68.9 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:12:48.510Z ---
+  Runtime: 16m 0s
+  Session packets: 1094
+  Rate: 68.4 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 1100
+--- Stats @ 2026-01-15T06:13:48.518Z ---
+  Runtime: 17m 0s
+  Session packets: 1155
+  Rate: 67.9 packets/min
+  Last packet: 2s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 1200
+--- Stats @ 2026-01-15T06:14:48.524Z ---
+  Runtime: 18m 0s
+  Session packets: 1216
+  Rate: 67.5 packets/min
+  Last packet: 2s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:15:48.531Z ---
+  Runtime: 19m 0s
+  Session packets: 1276
+  Rate: 67.1 packets/min
+  Last packet: 2s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 1300
+--- Stats @ 2026-01-15T06:16:48.541Z ---
+  Runtime: 20m 0s
+  Session packets: 1337
+  Rate: 66.8 packets/min
+  Last packet: 2s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:17:48.551Z ---
+  Runtime: 21m 0s
+  Session packets: 1397
+  Rate: 66.5 packets/min
+  Last packet: 2s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 1400
+--- Stats @ 2026-01-15T06:18:48.553Z ---
+  Runtime: 22m 0s
+  Session packets: 1457
+  Rate: 66.2 packets/min
+  Last packet: 2s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 1500
+--- Stats @ 2026-01-15T06:19:48.561Z ---
+  Runtime: 23m 0s
+  Session packets: 1518
+  Rate: 66.0 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:20:48.568Z ---
+  Runtime: 24m 0s
+  Session packets: 1578
+  Rate: 65.7 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 1600
+--- Stats @ 2026-01-15T06:21:48.580Z ---
+  Runtime: 25m 0s
+  Session packets: 1638
+  Rate: 65.5 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:22:48.588Z ---
+  Runtime: 26m 0s
+  Session packets: 1698
+  Rate: 65.3 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 1700
+--- Stats @ 2026-01-15T06:23:48.593Z ---
+  Runtime: 27m 0s
+  Session packets: 1758
+  Rate: 65.1 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 1800
+--- Stats @ 2026-01-15T06:24:48.599Z ---
+  Runtime: 28m 0s
+  Session packets: 1816
+  Rate: 64.8 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:25:48.604Z ---
+  Runtime: 29m 0s
+  Session packets: 1875
+  Rate: 64.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 1900
+--- Stats @ 2026-01-15T06:26:48.606Z ---
+  Runtime: 30m 0s
+  Session packets: 1938
+  Rate: 64.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:27:48.612Z ---
+  Runtime: 31m 0s
+  Session packets: 1998
+  Rate: 64.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 2000
+--- Stats @ 2026-01-15T06:28:48.626Z ---
+  Runtime: 32m 0s
+  Session packets: 2059
+  Rate: 64.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 2100
+--- Stats @ 2026-01-15T06:29:48.633Z ---
+  Runtime: 33m 0s
+  Session packets: 2119
+  Rate: 64.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:30:48.640Z ---
+  Runtime: 34m 0s
+  Session packets: 2179
+  Rate: 64.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 2200
+--- Stats @ 2026-01-15T06:31:48.644Z ---
+  Runtime: 35m 0s
+  Session packets: 2240
+  Rate: 64.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:32:48.655Z ---
+  Runtime: 36m 0s
+  Session packets: 2299
+  Rate: 63.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 2300
+--- Stats @ 2026-01-15T06:33:48.667Z ---
+  Runtime: 37m 0s
+  Session packets: 2360
+  Rate: 63.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 2400
+--- Stats @ 2026-01-15T06:34:48.682Z ---
+  Runtime: 38m 0s
+  Session packets: 2420
+  Rate: 63.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:35:48.686Z ---
+  Runtime: 39m 0s
+  Session packets: 2480
+  Rate: 63.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 2500
+--- Stats @ 2026-01-15T06:36:48.694Z ---
+  Runtime: 40m 0s
+  Session packets: 2539
+  Rate: 63.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 2600
+--- Stats @ 2026-01-15T06:37:48.706Z ---
+  Runtime: 41m 0s
+  Session packets: 2600
+  Rate: 63.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:38:48.714Z ---
+  Runtime: 42m 0s
+  Session packets: 2659
+  Rate: 63.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 2700
+--- Stats @ 2026-01-15T06:39:48.723Z ---
+  Runtime: 43m 0s
+  Session packets: 2719
+  Rate: 63.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:40:48.733Z ---
+  Runtime: 44m 0s
+  Session packets: 2779
+  Rate: 63.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 2800
+--- Stats @ 2026-01-15T06:41:48.738Z ---
+  Runtime: 45m 0s
+  Session packets: 2840
+  Rate: 63.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:42:48.741Z ---
+  Runtime: 46m 0s
+  Session packets: 2899
+  Rate: 63.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 2900
+--- Stats @ 2026-01-15T06:43:48.751Z ---
+  Runtime: 47m 0s
+  Session packets: 2960
+  Rate: 63.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 3000
+--- Stats @ 2026-01-15T06:44:48.756Z ---
+  Runtime: 48m 0s
+  Session packets: 3019
+  Rate: 62.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:45:48.769Z ---
+  Runtime: 49m 0s
+  Session packets: 3080
+  Rate: 62.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 3100
+--- Stats @ 2026-01-15T06:46:48.776Z ---
+  Runtime: 50m 0s
+  Session packets: 3140
+  Rate: 62.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 3200
+--- Stats @ 2026-01-15T06:47:48.778Z ---
+  Runtime: 51m 0s
+  Session packets: 3200
+  Rate: 62.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:48:48.786Z ---
+  Runtime: 52m 0s
+  Session packets: 3259
+  Rate: 62.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 3300
+--- Stats @ 2026-01-15T06:49:48.798Z ---
+  Runtime: 53m 0s
+  Session packets: 3319
+  Rate: 62.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:50:48.802Z ---
+  Runtime: 54m 0s
+  Session packets: 3379
+  Rate: 62.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 3400
+--- Stats @ 2026-01-15T06:51:48.810Z ---
+  Runtime: 55m 0s
+  Session packets: 3438
+  Rate: 62.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:52:48.815Z ---
+  Runtime: 56m 0s
+  Session packets: 3497
+  Rate: 62.4 packets/min
+  Last packet: 3s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 3500
+--- Stats @ 2026-01-15T06:53:48.816Z ---
+  Runtime: 57m 0s
+  Session packets: 3557
+  Rate: 62.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 3600
+--- Stats @ 2026-01-15T06:54:48.818Z ---
+  Runtime: 58m 0s
+  Session packets: 3618
+  Rate: 62.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:55:48.829Z ---
+  Runtime: 59m 0s
+  Session packets: 3678
+  Rate: 62.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 3700
+--- Stats @ 2026-01-15T06:56:48.841Z ---
+  Runtime: 1h 0m 0s
+  Session packets: 3738
+  Rate: 62.3 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T06:57:48.853Z ---
+  Runtime: 1h 1m 0s
+  Session packets: 3798
+  Rate: 62.3 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 3800
+--- Stats @ 2026-01-15T06:58:48.860Z ---
+  Runtime: 1h 2m 0s
+  Session packets: 3858
+  Rate: 62.2 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 3900
+--- Stats @ 2026-01-15T06:59:48.871Z ---
+  Runtime: 1h 3m 0s
+  Session packets: 3918
+  Rate: 62.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 4000
+--- Stats @ 2026-01-15T07:00:48.886Z ---
+  Runtime: 1h 4m 0s
+  Session packets: 4053
+  Rate: 63.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 4100
+--- Stats @ 2026-01-15T07:01:48.896Z ---
+  Runtime: 1h 5m 0s
+  Session packets: 4113
+  Rate: 63.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:02:48.901Z ---
+  Runtime: 1h 6m 0s
+  Session packets: 4173
+  Rate: 63.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 4200
+--- Stats @ 2026-01-15T07:03:48.907Z ---
+  Runtime: 1h 7m 0s
+  Session packets: 4232
+  Rate: 63.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:04:48.918Z ---
+  Runtime: 1h 8m 0s
+  Session packets: 4292
+  Rate: 63.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 4300
+--- Stats @ 2026-01-15T07:05:48.926Z ---
+  Runtime: 1h 9m 0s
+  Session packets: 4353
+  Rate: 63.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 4400
+--- Stats @ 2026-01-15T07:06:48.938Z ---
+  Runtime: 1h 10m 0s
+  Session packets: 4413
+  Rate: 63.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:07:48.944Z ---
+  Runtime: 1h 11m 0s
+  Session packets: 4473
+  Rate: 63.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 4500
+--- Stats @ 2026-01-15T07:08:48.948Z ---
+  Runtime: 1h 12m 0s
+  Session packets: 4532
+  Rate: 62.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:09:48.950Z ---
+  Runtime: 1h 13m 0s
+  Session packets: 4592
+  Rate: 62.9 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 4600
+--- Stats @ 2026-01-15T07:10:48.965Z ---
+  Runtime: 1h 14m 0s
+  Session packets: 4653
+  Rate: 62.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 4700
+--- Stats @ 2026-01-15T07:11:48.965Z ---
+  Runtime: 1h 15m 0s
+  Session packets: 4713
+  Rate: 62.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:12:48.972Z ---
+  Runtime: 1h 16m 0s
+  Session packets: 4773
+  Rate: 62.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 4800
+--- Stats @ 2026-01-15T07:13:48.977Z ---
+  Runtime: 1h 17m 0s
+  Session packets: 4835
+  Rate: 62.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:14:48.990Z ---
+  Runtime: 1h 18m 0s
+  Session packets: 4895
+  Rate: 62.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 4900
+--- Stats @ 2026-01-15T07:15:49.000Z ---
+  Runtime: 1h 19m 0s
+  Session packets: 4954
+  Rate: 62.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 5000
+--- Stats @ 2026-01-15T07:16:49.013Z ---
+  Runtime: 1h 20m 0s
+  Session packets: 5014
+  Rate: 62.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:17:49.015Z ---
+  Runtime: 1h 21m 0s
+  Session packets: 5075
+  Rate: 62.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 5100
+--- Stats @ 2026-01-15T07:18:49.019Z ---
+  Runtime: 1h 22m 0s
+  Session packets: 5135
+  Rate: 62.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:19:49.028Z ---
+  Runtime: 1h 23m 0s
+  Session packets: 5194
+  Rate: 62.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 5200
+--- Stats @ 2026-01-15T07:20:49.034Z ---
+  Runtime: 1h 24m 0s
+  Session packets: 5253
+  Rate: 62.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 5300
+--- Stats @ 2026-01-15T07:21:49.041Z ---
+  Runtime: 1h 25m 0s
+  Session packets: 5315
+  Rate: 62.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:22:49.056Z ---
+  Runtime: 1h 26m 0s
+  Session packets: 5375
+  Rate: 62.5 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 5400
+--- Stats @ 2026-01-15T07:23:49.060Z ---
+  Runtime: 1h 27m 0s
+  Session packets: 5435
+  Rate: 62.5 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:24:49.065Z ---
+  Runtime: 1h 28m 0s
+  Session packets: 5495
+  Rate: 62.4 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 5500
+--- Stats @ 2026-01-15T07:25:49.070Z ---
+  Runtime: 1h 29m 0s
+  Session packets: 5554
+  Rate: 62.4 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 5600
+--- Stats @ 2026-01-15T07:26:49.082Z ---
+  Runtime: 1h 30m 0s
+  Session packets: 5615
+  Rate: 62.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:27:49.095Z ---
+  Runtime: 1h 31m 0s
+  Session packets: 5675
+  Rate: 62.4 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 5700
+--- Stats @ 2026-01-15T07:28:49.106Z ---
+  Runtime: 1h 32m 0s
+  Session packets: 5735
+  Rate: 62.3 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:29:49.120Z ---
+  Runtime: 1h 33m 0s
+  Session packets: 5796
+  Rate: 62.3 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 5800
+--- Stats @ 2026-01-15T07:30:49.135Z ---
+  Runtime: 1h 34m 0s
+  Session packets: 5857
+  Rate: 62.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 5900
+--- Stats @ 2026-01-15T07:31:49.140Z ---
+  Runtime: 1h 35m 0s
+  Session packets: 5917
+  Rate: 62.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:32:49.152Z ---
+  Runtime: 1h 36m 0s
+  Session packets: 5977
+  Rate: 62.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 6000
+--- Stats @ 2026-01-15T07:33:49.160Z ---
+  Runtime: 1h 37m 0s
+  Session packets: 6037
+  Rate: 62.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:34:49.170Z ---
+  Runtime: 1h 38m 0s
+  Session packets: 6097
+  Rate: 62.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 6100
+--- Stats @ 2026-01-15T07:35:49.181Z ---
+  Runtime: 1h 39m 0s
+  Session packets: 6157
+  Rate: 62.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 6200
+--- Stats @ 2026-01-15T07:36:49.187Z ---
+  Runtime: 1h 40m 0s
+  Session packets: 6216
+  Rate: 62.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:37:49.193Z ---
+  Runtime: 1h 41m 0s
+  Session packets: 6277
+  Rate: 62.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 6300
+--- Stats @ 2026-01-15T07:38:49.198Z ---
+  Runtime: 1h 42m 0s
+  Session packets: 6337
+  Rate: 62.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:39:49.208Z ---
+  Runtime: 1h 43m 0s
+  Session packets: 6397
+  Rate: 62.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 6400
+--- Stats @ 2026-01-15T07:40:49.223Z ---
+  Runtime: 1h 44m 0s
+  Session packets: 6457
+  Rate: 62.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 6500
+--- Stats @ 2026-01-15T07:41:49.233Z ---
+  Runtime: 1h 45m 0s
+  Session packets: 6517
+  Rate: 62.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:42:49.247Z ---
+  Runtime: 1h 46m 0s
+  Session packets: 6577
+  Rate: 62.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 6600
+--- Stats @ 2026-01-15T07:43:49.246Z ---
+  Runtime: 1h 47m 0s
+  Session packets: 6637
+  Rate: 62.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:44:49.249Z ---
+  Runtime: 1h 48m 0s
+  Session packets: 6697
+  Rate: 62.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 6700
+--- Stats @ 2026-01-15T07:45:49.257Z ---
+  Runtime: 1h 49m 0s
+  Session packets: 6757
+  Rate: 62.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 6800
+--- Stats @ 2026-01-15T07:46:49.269Z ---
+  Runtime: 1h 50m 0s
+  Session packets: 6817
+  Rate: 62.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:47:49.271Z ---
+  Runtime: 1h 51m 0s
+  Session packets: 6877
+  Rate: 61.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 6900
+--- Stats @ 2026-01-15T07:48:49.273Z ---
+  Runtime: 1h 52m 0s
+  Session packets: 6937
+  Rate: 61.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:49:49.281Z ---
+  Runtime: 1h 53m 0s
+  Session packets: 6997
+  Rate: 61.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 7000
+--- Stats @ 2026-01-15T07:50:49.285Z ---
+  Runtime: 1h 54m 0s
+  Session packets: 7056
+  Rate: 61.9 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 7100
+--- Stats @ 2026-01-15T07:51:49.298Z ---
+  Runtime: 1h 55m 0s
+  Session packets: 7117
+  Rate: 61.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:52:49.303Z ---
+  Runtime: 1h 56m 0s
+  Session packets: 7175
+  Rate: 61.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 7200
+--- Stats @ 2026-01-15T07:53:49.304Z ---
+  Runtime: 1h 57m 0s
+  Session packets: 7233
+  Rate: 61.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:54:49.306Z ---
+  Runtime: 1h 58m 0s
+  Session packets: 7294
+  Rate: 61.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 7300
+--- Stats @ 2026-01-15T07:55:49.313Z ---
+  Runtime: 1h 59m 0s
+  Session packets: 7354
+  Rate: 61.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 7400
+--- Stats @ 2026-01-15T07:56:49.319Z ---
+  Runtime: 2h 0m 0s
+  Session packets: 7414
+  Rate: 61.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:57:49.332Z ---
+  Runtime: 2h 1m 0s
+  Session packets: 7474
+  Rate: 61.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 7500
+--- Stats @ 2026-01-15T07:58:49.349Z ---
+  Runtime: 2h 2m 0s
+  Session packets: 7534
+  Rate: 61.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T07:59:49.362Z ---
+  Runtime: 2h 3m 0s
+  Session packets: 7588
+  Rate: 61.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 7600
+--- Stats @ 2026-01-15T08:00:49.368Z ---
+  Runtime: 2h 4m 1s
+  Session packets: 7642
+  Rate: 61.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:01:49.375Z ---
+  Runtime: 2h 5m 1s
+  Session packets: 7696
+  Rate: 61.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 7700
+--- Stats @ 2026-01-15T08:02:49.381Z ---
+  Runtime: 2h 6m 1s
+  Session packets: 7750
+  Rate: 61.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 7800
+--- Stats @ 2026-01-15T08:03:49.390Z ---
+  Runtime: 2h 7m 1s
+  Session packets: 7804
+  Rate: 61.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:04:49.392Z ---
+  Runtime: 2h 8m 1s
+  Session packets: 7859
+  Rate: 61.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 7900
+--- Stats @ 2026-01-15T08:05:49.405Z ---
+  Runtime: 2h 9m 1s
+  Session packets: 7913
+  Rate: 61.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:06:49.413Z ---
+  Runtime: 2h 10m 1s
+  Session packets: 7967
+  Rate: 61.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 8000
+--- Stats @ 2026-01-15T08:07:49.425Z ---
+  Runtime: 2h 11m 1s
+  Session packets: 8021
+  Rate: 61.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:08:49.439Z ---
+  Runtime: 2h 12m 1s
+  Session packets: 8075
+  Rate: 61.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 8100
+--- Stats @ 2026-01-15T08:09:49.452Z ---
+  Runtime: 2h 13m 1s
+  Session packets: 8133
+  Rate: 61.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:10:49.456Z ---
+  Runtime: 2h 14m 1s
+  Session packets: 8195
+  Rate: 61.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 8200
+--- Stats @ 2026-01-15T08:11:49.459Z ---
+  Runtime: 2h 15m 1s
+  Session packets: 8255
+  Rate: 61.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 8300
+--- Stats @ 2026-01-15T08:12:49.462Z ---
+  Runtime: 2h 16m 1s
+  Session packets: 8314
+  Rate: 61.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:13:49.466Z ---
+  Runtime: 2h 17m 1s
+  Session packets: 8368
+  Rate: 61.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 8400
+--- Stats @ 2026-01-15T08:14:49.474Z ---
+  Runtime: 2h 18m 1s
+  Session packets: 8422
+  Rate: 61.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:15:49.487Z ---
+  Runtime: 2h 19m 1s
+  Session packets: 8476
+  Rate: 61.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 8500
+--- Stats @ 2026-01-15T08:16:49.496Z ---
+  Runtime: 2h 20m 1s
+  Session packets: 8530
+  Rate: 60.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:17:49.500Z ---
+  Runtime: 2h 21m 1s
+  Session packets: 8589
+  Rate: 60.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 8600
+--- Stats @ 2026-01-15T08:18:49.504Z ---
+  Runtime: 2h 22m 1s
+  Session packets: 8647
+  Rate: 60.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 8700
+--- Stats @ 2026-01-15T08:19:49.514Z ---
+  Runtime: 2h 23m 1s
+  Session packets: 8708
+  Rate: 60.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:20:49.520Z ---
+  Runtime: 2h 24m 1s
+  Session packets: 8763
+  Rate: 60.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 8800
+--- Stats @ 2026-01-15T08:21:49.531Z ---
+  Runtime: 2h 25m 1s
+  Session packets: 8826
+  Rate: 60.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:22:49.532Z ---
+  Runtime: 2h 26m 1s
+  Session packets: 8888
+  Rate: 60.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 8900
+--- Stats @ 2026-01-15T08:23:49.535Z ---
+  Runtime: 2h 27m 1s
+  Session packets: 8949
+  Rate: 60.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 9000
+--- Stats @ 2026-01-15T08:24:49.545Z ---
+  Runtime: 2h 28m 1s
+  Session packets: 9006
+  Rate: 60.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:25:49.548Z ---
+  Runtime: 2h 29m 1s
+  Session packets: 9058
+  Rate: 60.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 9100
+--- Stats @ 2026-01-15T08:26:49.551Z ---
+  Runtime: 2h 30m 1s
+  Session packets: 9113
+  Rate: 60.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:27:49.562Z ---
+  Runtime: 2h 31m 1s
+  Session packets: 9173
+  Rate: 60.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 9200
+--- Stats @ 2026-01-15T08:28:49.577Z ---
+  Runtime: 2h 32m 1s
+  Session packets: 9235
+  Rate: 60.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:29:49.580Z ---
+  Runtime: 2h 33m 1s
+  Session packets: 9294
+  Rate: 60.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 9300
+--- Stats @ 2026-01-15T08:30:49.593Z ---
+  Runtime: 2h 34m 1s
+  Session packets: 9353
+  Rate: 60.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 9400
+--- Stats @ 2026-01-15T08:31:49.599Z ---
+  Runtime: 2h 35m 1s
+  Session packets: 9406
+  Rate: 60.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:32:49.610Z ---
+  Runtime: 2h 36m 1s
+  Session packets: 9459
+  Rate: 60.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 9500
+--- Stats @ 2026-01-15T08:33:49.619Z ---
+  Runtime: 2h 37m 1s
+  Session packets: 9513
+  Rate: 60.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:34:49.633Z ---
+  Runtime: 2h 38m 1s
+  Session packets: 9567
+  Rate: 60.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 9600
+--- Stats @ 2026-01-15T08:35:49.644Z ---
+  Runtime: 2h 39m 1s
+  Session packets: 9620
+  Rate: 60.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:36:49.649Z ---
+  Runtime: 2h 40m 1s
+  Session packets: 9673
+  Rate: 60.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 9700
+--- Stats @ 2026-01-15T08:37:49.661Z ---
+  Runtime: 2h 41m 1s
+  Session packets: 9727
+  Rate: 60.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:38:49.671Z ---
+  Runtime: 2h 42m 1s
+  Session packets: 9781
+  Rate: 60.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 9800
+--- Stats @ 2026-01-15T08:39:49.676Z ---
+  Runtime: 2h 43m 1s
+  Session packets: 9835
+  Rate: 60.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:40:49.690Z ---
+  Runtime: 2h 44m 1s
+  Session packets: 9889
+  Rate: 60.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 9900
+--- Stats @ 2026-01-15T08:41:49.693Z ---
+  Runtime: 2h 45m 1s
+  Session packets: 9942
+  Rate: 60.2 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:42:49.708Z ---
+  Runtime: 2h 46m 1s
+  Session packets: 9996
+  Rate: 60.2 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 10000
+--- Stats @ 2026-01-15T08:43:49.722Z ---
+  Runtime: 2h 47m 1s
+  Session packets: 10050
+  Rate: 60.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 10100
+--- Stats @ 2026-01-15T08:44:49.724Z ---
+  Runtime: 2h 48m 1s
+  Session packets: 10104
+  Rate: 60.1 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:45:49.733Z ---
+  Runtime: 2h 49m 1s
+  Session packets: 10158
+  Rate: 60.1 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 10200
+--- Stats @ 2026-01-15T08:46:49.738Z ---
+  Runtime: 2h 50m 1s
+  Session packets: 10212
+  Rate: 60.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:47:49.747Z ---
+  Runtime: 2h 51m 1s
+  Session packets: 10266
+  Rate: 60.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 10300
+--- Stats @ 2026-01-15T08:48:49.753Z ---
+  Runtime: 2h 52m 1s
+  Session packets: 10320
+  Rate: 60.0 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:49:49.765Z ---
+  Runtime: 2h 53m 1s
+  Session packets: 10374
+  Rate: 60.0 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 10400
+--- Stats @ 2026-01-15T08:50:49.776Z ---
+  Runtime: 2h 54m 1s
+  Session packets: 10428
+  Rate: 59.9 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:51:49.780Z ---
+  Runtime: 2h 55m 1s
+  Session packets: 10482
+  Rate: 59.9 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 10500
+--- Stats @ 2026-01-15T08:52:49.786Z ---
+  Runtime: 2h 56m 1s
+  Session packets: 10536
+  Rate: 59.9 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:53:49.799Z ---
+  Runtime: 2h 57m 1s
+  Session packets: 10588
+  Rate: 59.8 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 10600
+--- Stats @ 2026-01-15T08:54:49.812Z ---
+  Runtime: 2h 58m 1s
+  Session packets: 10644
+  Rate: 59.8 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:55:49.815Z ---
+  Runtime: 2h 59m 1s
+  Session packets: 10699
+  Rate: 59.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 10700
+--- Stats @ 2026-01-15T08:56:49.819Z ---
+  Runtime: 3h 0m 1s
+  Session packets: 10752
+  Rate: 59.7 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 10800
+--- Stats @ 2026-01-15T08:57:49.826Z ---
+  Runtime: 3h 1m 1s
+  Session packets: 10807
+  Rate: 59.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+
+--- Stats @ 2026-01-15T08:58:49.835Z ---
+  Runtime: 3h 2m 1s
+  Session packets: 10861
+  Rate: 59.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 10900
+--- Stats @ 2026-01-15T08:59:49.847Z ---
+  Runtime: 3h 3m 1s
+  Session packets: 10914
+  Rate: 59.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: websocket error
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: websocket error
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: websocket error
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: websocket error
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: websocket error
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T09:00:49.853Z ---
+  Runtime: 3h 4m 1s
+  Session packets: 10932
+  Rate: 59.4 packets/min
+  Last packet: 40s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Connection error: websocket error
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:01:49.862Z ---
+  Runtime: 3h 5m 1s
+  Session packets: 10932
+  Rate: 59.1 packets/min
+  Last packet: 100s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:02:49.863Z ---
+  Runtime: 3h 6m 1s
+  Session packets: 10932
+  Rate: 58.8 packets/min
+  Last packet: 160s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:03:49.864Z ---
+  Runtime: 3h 7m 1s
+  Session packets: 10932
+  Rate: 58.5 packets/min
+  Last packet: 220s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:04:49.871Z ---
+  Runtime: 3h 8m 1s
+  Session packets: 10932
+  Rate: 58.1 packets/min
+  Last packet: 280s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:05:49.872Z ---
+  Runtime: 3h 9m 1s
+  Session packets: 10932
+  Rate: 57.8 packets/min
+  Last packet: 340s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:06:49.876Z ---
+  Runtime: 3h 10m 1s
+  Session packets: 10932
+  Rate: 57.5 packets/min
+  Last packet: 400s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:07:49.886Z ---
+  Runtime: 3h 11m 1s
+  Session packets: 10932
+  Rate: 57.2 packets/min
+  Last packet: 460s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:08:49.892Z ---
+  Runtime: 3h 12m 1s
+  Session packets: 10932
+  Rate: 56.9 packets/min
+  Last packet: 520s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:09:49.904Z ---
+  Runtime: 3h 13m 1s
+  Session packets: 10932
+  Rate: 56.6 packets/min
+  Last packet: 580s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:10:49.913Z ---
+  Runtime: 3h 14m 1s
+  Session packets: 10932
+  Rate: 56.3 packets/min
+  Last packet: 640s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T09:11:49.914Z ---
+  Runtime: 3h 15m 1s
+  Session packets: 10932
+  Rate: 56.1 packets/min
+  Last packet: 700s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:12:49.917Z ---
+  Runtime: 3h 16m 1s
+  Session packets: 10932
+  Rate: 55.8 packets/min
+  Last packet: 760s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:13:49.920Z ---
+  Runtime: 3h 17m 1s
+  Session packets: 10932
+  Rate: 55.5 packets/min
+  Last packet: 820s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:14:49.927Z ---
+  Runtime: 3h 18m 1s
+  Session packets: 10932
+  Rate: 55.2 packets/min
+  Last packet: 880s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:15:49.931Z ---
+  Runtime: 3h 19m 1s
+  Session packets: 10932
+  Rate: 54.9 packets/min
+  Last packet: 940s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T09:16:49.936Z ---
+  Runtime: 3h 20m 1s
+  Session packets: 10932
+  Rate: 54.7 packets/min
+  Last packet: 1000s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:17:49.943Z ---
+  Runtime: 3h 21m 1s
+  Session packets: 10932
+  Rate: 54.4 packets/min
+  Last packet: 1060s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:18:49.957Z ---
+  Runtime: 3h 22m 1s
+  Session packets: 10932
+  Rate: 54.1 packets/min
+  Last packet: 1121s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:19:49.962Z ---
+  Runtime: 3h 23m 1s
+  Session packets: 10932
+  Rate: 53.8 packets/min
+  Last packet: 1181s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:20:49.968Z ---
+  Runtime: 3h 24m 1s
+  Session packets: 10932
+  Rate: 53.6 packets/min
+  Last packet: 1241s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T09:21:49.983Z ---
+  Runtime: 3h 25m 1s
+  Session packets: 10932
+  Rate: 53.3 packets/min
+  Last packet: 1301s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:22:49.991Z ---
+  Runtime: 3h 26m 1s
+  Session packets: 10932
+  Rate: 53.1 packets/min
+  Last packet: 1361s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:23:50.006Z ---
+  Runtime: 3h 27m 1s
+  Session packets: 10932
+  Rate: 52.8 packets/min
+  Last packet: 1421s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:24:50.006Z ---
+  Runtime: 3h 28m 1s
+  Session packets: 10932
+  Rate: 52.6 packets/min
+  Last packet: 1481s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:25:50.010Z ---
+  Runtime: 3h 29m 1s
+  Session packets: 10932
+  Rate: 52.3 packets/min
+  Last packet: 1541s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:26:50.020Z ---
+  Runtime: 3h 30m 1s
+  Session packets: 10932
+  Rate: 52.1 packets/min
+  Last packet: 1601s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:27:50.024Z ---
+  Runtime: 3h 31m 1s
+  Session packets: 10932
+  Rate: 51.8 packets/min
+  Last packet: 1661s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:28:50.028Z ---
+  Runtime: 3h 32m 1s
+  Session packets: 10932
+  Rate: 51.6 packets/min
+  Last packet: 1721s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:29:50.038Z ---
+  Runtime: 3h 33m 1s
+  Session packets: 10932
+  Rate: 51.3 packets/min
+  Last packet: 1781s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:30:50.052Z ---
+  Runtime: 3h 34m 1s
+  Session packets: 10932
+  Rate: 51.1 packets/min
+  Last packet: 1841s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:31:50.064Z ---
+  Runtime: 3h 35m 1s
+  Session packets: 10932
+  Rate: 50.8 packets/min
+  Last packet: 1901s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:32:50.073Z ---
+  Runtime: 3h 36m 1s
+  Session packets: 10932
+  Rate: 50.6 packets/min
+  Last packet: 1961s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:33:50.086Z ---
+  Runtime: 3h 37m 1s
+  Session packets: 10932
+  Rate: 50.4 packets/min
+  Last packet: 2021s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:34:50.092Z ---
+  Runtime: 3h 38m 1s
+  Session packets: 10932
+  Rate: 50.1 packets/min
+  Last packet: 2081s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:35:50.104Z ---
+  Runtime: 3h 39m 1s
+  Session packets: 10932
+  Rate: 49.9 packets/min
+  Last packet: 2141s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:36:50.113Z ---
+  Runtime: 3h 40m 1s
+  Session packets: 10932
+  Rate: 49.7 packets/min
+  Last packet: 2201s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:37:50.126Z ---
+  Runtime: 3h 41m 1s
+  Session packets: 10932
+  Rate: 49.5 packets/min
+  Last packet: 2261s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:38:50.137Z ---
+  Runtime: 3h 42m 1s
+  Session packets: 10932
+  Rate: 49.2 packets/min
+  Last packet: 2321s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:39:50.145Z ---
+  Runtime: 3h 43m 1s
+  Session packets: 10932
+  Rate: 49.0 packets/min
+  Last packet: 2381s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:40:50.150Z ---
+  Runtime: 3h 44m 1s
+  Session packets: 10932
+  Rate: 48.8 packets/min
+  Last packet: 2441s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:41:50.156Z ---
+  Runtime: 3h 45m 1s
+  Session packets: 10932
+  Rate: 48.6 packets/min
+  Last packet: 2501s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:42:50.167Z ---
+  Runtime: 3h 46m 1s
+  Session packets: 10932
+  Rate: 48.4 packets/min
+  Last packet: 2561s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:43:50.173Z ---
+  Runtime: 3h 47m 1s
+  Session packets: 10932
+  Rate: 48.2 packets/min
+  Last packet: 2621s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:44:50.172Z ---
+  Runtime: 3h 48m 1s
+  Session packets: 10932
+  Rate: 47.9 packets/min
+  Last packet: 2681s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:45:50.183Z ---
+  Runtime: 3h 49m 1s
+  Session packets: 10932
+  Rate: 47.7 packets/min
+  Last packet: 2741s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:46:50.195Z ---
+  Runtime: 3h 50m 1s
+  Session packets: 10932
+  Rate: 47.5 packets/min
+  Last packet: 2801s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T09:47:50.201Z ---
+  Runtime: 3h 51m 1s
+  Session packets: 10932
+  Rate: 47.3 packets/min
+  Last packet: 2861s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:48:50.202Z ---
+  Runtime: 3h 52m 1s
+  Session packets: 10932
+  Rate: 47.1 packets/min
+  Last packet: 2921s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:49:50.209Z ---
+  Runtime: 3h 53m 1s
+  Session packets: 10932
+  Rate: 46.9 packets/min
+  Last packet: 2981s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:50:50.216Z ---
+  Runtime: 3h 54m 1s
+  Session packets: 10932
+  Rate: 46.7 packets/min
+  Last packet: 3041s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:51:50.230Z ---
+  Runtime: 3h 55m 1s
+  Session packets: 10932
+  Rate: 46.5 packets/min
+  Last packet: 3101s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T09:52:50.243Z ---
+  Runtime: 3h 56m 1s
+  Session packets: 10932
+  Rate: 46.3 packets/min
+  Last packet: 3161s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:53:50.251Z ---
+  Runtime: 3h 57m 1s
+  Session packets: 10932
+  Rate: 46.1 packets/min
+  Last packet: 3221s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:54:50.264Z ---
+  Runtime: 3h 58m 1s
+  Session packets: 10932
+  Rate: 45.9 packets/min
+  Last packet: 3281s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:55:50.265Z ---
+  Runtime: 3h 59m 1s
+  Session packets: 10932
+  Rate: 45.7 packets/min
+  Last packet: 3341s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:56:50.273Z ---
+  Runtime: 4h 0m 1s
+  Session packets: 10932
+  Rate: 45.5 packets/min
+  Last packet: 3401s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T09:57:50.280Z ---
+  Runtime: 4h 1m 1s
+  Session packets: 10932
+  Rate: 45.4 packets/min
+  Last packet: 3461s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:58:50.285Z ---
+  Runtime: 4h 2m 1s
+  Session packets: 10932
+  Rate: 45.2 packets/min
+  Last packet: 3521s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T09:59:50.294Z ---
+  Runtime: 4h 3m 1s
+  Session packets: 10932
+  Rate: 45.0 packets/min
+  Last packet: 3581s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:00:50.298Z ---
+  Runtime: 4h 4m 1s
+  Session packets: 10932
+  Rate: 44.8 packets/min
+  Last packet: 3641s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:01:50.307Z ---
+  Runtime: 4h 5m 1s
+  Session packets: 10932
+  Rate: 44.6 packets/min
+  Last packet: 3701s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T10:02:50.318Z ---
+  Runtime: 4h 6m 1s
+  Session packets: 10932
+  Rate: 44.4 packets/min
+  Last packet: 3761s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:03:50.325Z ---
+  Runtime: 4h 7m 1s
+  Session packets: 10932
+  Rate: 44.3 packets/min
+  Last packet: 3821s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:04:50.331Z ---
+  Runtime: 4h 8m 1s
+  Session packets: 10932
+  Rate: 44.1 packets/min
+  Last packet: 3881s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: timeout
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T10:05:50.336Z ---
+  Runtime: 4h 9m 1s
+  Session packets: 10932
+  Rate: 43.9 packets/min
+  Last packet: 3941s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Connection error: timeout
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: timeout
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:06:50.343Z ---
+  Runtime: 4h 10m 1s
+  Session packets: 10932
+  Rate: 43.7 packets/min
+  Last packet: 4001s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:07:50.355Z ---
+  Runtime: 4h 11m 1s
+  Session packets: 10932
+  Rate: 43.5 packets/min
+  Last packet: 4061s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:08:50.365Z ---
+  Runtime: 4h 12m 1s
+  Session packets: 10932
+  Rate: 43.4 packets/min
+  Last packet: 4121s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:09:50.364Z ---
+  Runtime: 4h 13m 1s
+  Session packets: 10932
+  Rate: 43.2 packets/min
+  Last packet: 4181s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:10:50.371Z ---
+  Runtime: 4h 14m 2s
+  Session packets: 10932
+  Rate: 43.0 packets/min
+  Last packet: 4241s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:11:50.379Z ---
+  Runtime: 4h 15m 2s
+  Session packets: 10932
+  Rate: 42.9 packets/min
+  Last packet: 4301s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:12:50.380Z ---
+  Runtime: 4h 16m 2s
+  Session packets: 10932
+  Rate: 42.7 packets/min
+  Last packet: 4361s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:13:50.391Z ---
+  Runtime: 4h 17m 2s
+  Session packets: 10932
+  Rate: 42.5 packets/min
+  Last packet: 4421s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:14:50.406Z ---
+  Runtime: 4h 18m 2s
+  Session packets: 10932
+  Rate: 42.4 packets/min
+  Last packet: 4481s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:15:50.408Z ---
+  Runtime: 4h 19m 2s
+  Session packets: 10932
+  Rate: 42.2 packets/min
+  Last packet: 4541s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:16:50.414Z ---
+  Runtime: 4h 20m 2s
+  Session packets: 10932
+  Rate: 42.0 packets/min
+  Last packet: 4601s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:17:50.422Z ---
+  Runtime: 4h 21m 2s
+  Session packets: 10932
+  Rate: 41.9 packets/min
+  Last packet: 4661s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:18:50.436Z ---
+  Runtime: 4h 22m 2s
+  Session packets: 10932
+  Rate: 41.7 packets/min
+  Last packet: 4721s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:19:50.448Z ---
+  Runtime: 4h 23m 2s
+  Session packets: 10932
+  Rate: 41.6 packets/min
+  Last packet: 4781s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:20:50.461Z ---
+  Runtime: 4h 24m 2s
+  Session packets: 10932
+  Rate: 41.4 packets/min
+  Last packet: 4841s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:21:50.465Z ---
+  Runtime: 4h 25m 2s
+  Session packets: 10932
+  Rate: 41.2 packets/min
+  Last packet: 4901s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:22:50.478Z ---
+  Runtime: 4h 26m 2s
+  Session packets: 10932
+  Rate: 41.1 packets/min
+  Last packet: 4961s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:23:50.489Z ---
+  Runtime: 4h 27m 2s
+  Session packets: 10932
+  Rate: 40.9 packets/min
+  Last packet: 5021s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:24:50.491Z ---
+  Runtime: 4h 28m 2s
+  Session packets: 10932
+  Rate: 40.8 packets/min
+  Last packet: 5081s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:25:50.504Z ---
+  Runtime: 4h 29m 2s
+  Session packets: 10932
+  Rate: 40.6 packets/min
+  Last packet: 5141s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:26:50.516Z ---
+  Runtime: 4h 30m 2s
+  Session packets: 10932
+  Rate: 40.5 packets/min
+  Last packet: 5201s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T10:27:50.520Z ---
+  Runtime: 4h 31m 2s
+  Session packets: 10932
+  Rate: 40.3 packets/min
+  Last packet: 5261s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:28:50.532Z ---
+  Runtime: 4h 32m 2s
+  Session packets: 10932
+  Rate: 40.2 packets/min
+  Last packet: 5321s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:29:50.540Z ---
+  Runtime: 4h 33m 2s
+  Session packets: 10932
+  Rate: 40.0 packets/min
+  Last packet: 5381s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:30:50.547Z ---
+  Runtime: 4h 34m 2s
+  Session packets: 10932
+  Rate: 39.9 packets/min
+  Last packet: 5441s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:31:50.547Z ---
+  Runtime: 4h 35m 2s
+  Session packets: 10932
+  Rate: 39.7 packets/min
+  Last packet: 5501s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T10:32:50.550Z ---
+  Runtime: 4h 36m 2s
+  Session packets: 10932
+  Rate: 39.6 packets/min
+  Last packet: 5561s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:33:50.561Z ---
+  Runtime: 4h 37m 2s
+  Session packets: 10932
+  Rate: 39.5 packets/min
+  Last packet: 5621s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:34:50.565Z ---
+  Runtime: 4h 38m 2s
+  Session packets: 10932
+  Rate: 39.3 packets/min
+  Last packet: 5681s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:35:50.568Z ---
+  Runtime: 4h 39m 2s
+  Session packets: 10932
+  Rate: 39.2 packets/min
+  Last packet: 5741s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:36:50.570Z ---
+  Runtime: 4h 40m 2s
+  Session packets: 10932
+  Rate: 39.0 packets/min
+  Last packet: 5801s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:37:50.579Z ---
+  Runtime: 4h 41m 2s
+  Session packets: 10932
+  Rate: 38.9 packets/min
+  Last packet: 5861s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:38:50.585Z ---
+  Runtime: 4h 42m 2s
+  Session packets: 10932
+  Rate: 38.8 packets/min
+  Last packet: 5921s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:39:50.597Z ---
+  Runtime: 4h 43m 2s
+  Session packets: 10932
+  Rate: 38.6 packets/min
+  Last packet: 5981s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:40:50.603Z ---
+  Runtime: 4h 44m 2s
+  Session packets: 10932
+  Rate: 38.5 packets/min
+  Last packet: 6041s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:41:50.608Z ---
+  Runtime: 4h 45m 2s
+  Session packets: 10932
+  Rate: 38.4 packets/min
+  Last packet: 6101s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:42:50.621Z ---
+  Runtime: 4h 46m 2s
+  Session packets: 10932
+  Rate: 38.2 packets/min
+  Last packet: 6161s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:43:50.622Z ---
+  Runtime: 4h 47m 2s
+  Session packets: 10932
+  Rate: 38.1 packets/min
+  Last packet: 6221s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T10:44:50.626Z ---
+  Runtime: 4h 48m 2s
+  Session packets: 10932
+  Rate: 38.0 packets/min
+  Last packet: 6281s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:45:50.639Z ---
+  Runtime: 4h 49m 2s
+  Session packets: 10932
+  Rate: 37.8 packets/min
+  Last packet: 6341s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:46:50.651Z ---
+  Runtime: 4h 50m 2s
+  Session packets: 10932
+  Rate: 37.7 packets/min
+  Last packet: 6401s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:47:50.664Z ---
+  Runtime: 4h 51m 2s
+  Session packets: 10932
+  Rate: 37.6 packets/min
+  Last packet: 6461s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:48:50.670Z ---
+  Runtime: 4h 52m 2s
+  Session packets: 10932
+  Rate: 37.4 packets/min
+  Last packet: 6521s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T10:49:50.679Z ---
+  Runtime: 4h 53m 2s
+  Session packets: 10932
+  Rate: 37.3 packets/min
+  Last packet: 6581s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:50:50.691Z ---
+  Runtime: 4h 54m 2s
+  Session packets: 10932
+  Rate: 37.2 packets/min
+  Last packet: 6641s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:51:50.700Z ---
+  Runtime: 4h 55m 2s
+  Session packets: 10932
+  Rate: 37.1 packets/min
+  Last packet: 6701s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:52:50.713Z ---
+  Runtime: 4h 56m 2s
+  Session packets: 10932
+  Rate: 36.9 packets/min
+  Last packet: 6761s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:53:50.713Z ---
+  Runtime: 4h 57m 2s
+  Session packets: 10932
+  Rate: 36.8 packets/min
+  Last packet: 6821s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:54:50.721Z ---
+  Runtime: 4h 58m 2s
+  Session packets: 10932
+  Rate: 36.7 packets/min
+  Last packet: 6881s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:55:50.722Z ---
+  Runtime: 4h 59m 2s
+  Session packets: 10932
+  Rate: 36.6 packets/min
+  Last packet: 6941s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:56:50.727Z ---
+  Runtime: 5h 0m 2s
+  Session packets: 10932
+  Rate: 36.4 packets/min
+  Last packet: 7001s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:57:50.735Z ---
+  Runtime: 5h 1m 2s
+  Session packets: 10932
+  Rate: 36.3 packets/min
+  Last packet: 7061s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:58:50.740Z ---
+  Runtime: 5h 2m 2s
+  Session packets: 10932
+  Rate: 36.2 packets/min
+  Last packet: 7121s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T10:59:50.753Z ---
+  Runtime: 5h 3m 2s
+  Session packets: 10932
+  Rate: 36.1 packets/min
+  Last packet: 7181s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T11:00:50.758Z ---
+  Runtime: 5h 4m 2s
+  Session packets: 10932
+  Rate: 36.0 packets/min
+  Last packet: 7241s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:01:50.765Z ---
+  Runtime: 5h 5m 2s
+  Session packets: 10932
+  Rate: 35.8 packets/min
+  Last packet: 7301s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:02:50.779Z ---
+  Runtime: 5h 6m 2s
+  Session packets: 10932
+  Rate: 35.7 packets/min
+  Last packet: 7361s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:03:50.791Z ---
+  Runtime: 5h 7m 2s
+  Session packets: 10932
+  Rate: 35.6 packets/min
+  Last packet: 7421s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:04:50.801Z ---
+  Runtime: 5h 8m 2s
+  Session packets: 10932
+  Rate: 35.5 packets/min
+  Last packet: 7481s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:05:50.806Z ---
+  Runtime: 5h 9m 2s
+  Session packets: 10932
+  Rate: 35.4 packets/min
+  Last packet: 7541s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:06:50.816Z ---
+  Runtime: 5h 10m 2s
+  Session packets: 10932
+  Rate: 35.3 packets/min
+  Last packet: 7601s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:07:50.819Z ---
+  Runtime: 5h 11m 2s
+  Session packets: 10932
+  Rate: 35.1 packets/min
+  Last packet: 7661s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:08:50.825Z ---
+  Runtime: 5h 12m 2s
+  Session packets: 10932
+  Rate: 35.0 packets/min
+  Last packet: 7721s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:09:50.836Z ---
+  Runtime: 5h 13m 2s
+  Session packets: 10932
+  Rate: 34.9 packets/min
+  Last packet: 7781s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:10:50.851Z ---
+  Runtime: 5h 14m 2s
+  Session packets: 10932
+  Rate: 34.8 packets/min
+  Last packet: 7841s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T11:11:50.860Z ---
+  Runtime: 5h 15m 2s
+  Session packets: 10932
+  Rate: 34.7 packets/min
+  Last packet: 7901s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:12:50.872Z ---
+  Runtime: 5h 16m 2s
+  Session packets: 10932
+  Rate: 34.6 packets/min
+  Last packet: 7961s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:13:50.877Z ---
+  Runtime: 5h 17m 2s
+  Session packets: 10932
+  Rate: 34.5 packets/min
+  Last packet: 8021s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:14:50.883Z ---
+  Runtime: 5h 18m 2s
+  Session packets: 10932
+  Rate: 34.4 packets/min
+  Last packet: 8081s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:15:50.897Z ---
+  Runtime: 5h 19m 2s
+  Session packets: 10932
+  Rate: 34.3 packets/min
+  Last packet: 8141s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T11:16:50.905Z ---
+  Runtime: 5h 20m 2s
+  Session packets: 10932
+  Rate: 34.2 packets/min
+  Last packet: 8201s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:17:50.912Z ---
+  Runtime: 5h 21m 2s
+  Session packets: 10932
+  Rate: 34.1 packets/min
+  Last packet: 8261s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:18:50.924Z ---
+  Runtime: 5h 22m 2s
+  Session packets: 10932
+  Rate: 33.9 packets/min
+  Last packet: 8321s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:19:50.938Z ---
+  Runtime: 5h 23m 2s
+  Session packets: 10932
+  Rate: 33.8 packets/min
+  Last packet: 8381s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:20:50.938Z ---
+  Runtime: 5h 24m 2s
+  Session packets: 10932
+  Rate: 33.7 packets/min
+  Last packet: 8441s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T11:21:50.940Z ---
+  Runtime: 5h 25m 2s
+  Session packets: 10932
+  Rate: 33.6 packets/min
+  Last packet: 8501s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:22:50.955Z ---
+  Runtime: 5h 26m 2s
+  Session packets: 10932
+  Rate: 33.5 packets/min
+  Last packet: 8562s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:23:50.958Z ---
+  Runtime: 5h 27m 2s
+  Session packets: 10932
+  Rate: 33.4 packets/min
+  Last packet: 8622s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:24:50.967Z ---
+  Runtime: 5h 28m 2s
+  Session packets: 10932
+  Rate: 33.3 packets/min
+  Last packet: 8682s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:25:50.981Z ---
+  Runtime: 5h 29m 2s
+  Session packets: 10932
+  Rate: 33.2 packets/min
+  Last packet: 8742s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T11:26:50.996Z ---
+  Runtime: 5h 30m 2s
+  Session packets: 10932
+  Rate: 33.1 packets/min
+  Last packet: 8802s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:27:51.003Z ---
+  Runtime: 5h 31m 2s
+  Session packets: 10932
+  Rate: 33.0 packets/min
+  Last packet: 8862s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:28:51.015Z ---
+  Runtime: 5h 32m 2s
+  Session packets: 10932
+  Rate: 32.9 packets/min
+  Last packet: 8922s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:29:51.030Z ---
+  Runtime: 5h 33m 2s
+  Session packets: 10932
+  Rate: 32.8 packets/min
+  Last packet: 8982s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:30:51.036Z ---
+  Runtime: 5h 34m 2s
+  Session packets: 10932
+  Rate: 32.7 packets/min
+  Last packet: 9042s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:31:51.042Z ---
+  Runtime: 5h 35m 2s
+  Session packets: 10932
+  Rate: 32.6 packets/min
+  Last packet: 9102s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:32:51.050Z ---
+  Runtime: 5h 36m 2s
+  Session packets: 10932
+  Rate: 32.5 packets/min
+  Last packet: 9162s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:33:51.062Z ---
+  Runtime: 5h 37m 2s
+  Session packets: 10932
+  Rate: 32.4 packets/min
+  Last packet: 9222s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:34:51.063Z ---
+  Runtime: 5h 38m 2s
+  Session packets: 10932
+  Rate: 32.3 packets/min
+  Last packet: 9282s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:35:51.072Z ---
+  Runtime: 5h 39m 2s
+  Session packets: 10932
+  Rate: 32.2 packets/min
+  Last packet: 9342s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:36:51.076Z ---
+  Runtime: 5h 40m 2s
+  Session packets: 10932
+  Rate: 32.1 packets/min
+  Last packet: 9402s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:37:51.090Z ---
+  Runtime: 5h 41m 2s
+  Session packets: 10932
+  Rate: 32.1 packets/min
+  Last packet: 9462s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:38:51.097Z ---
+  Runtime: 5h 42m 2s
+  Session packets: 10932
+  Rate: 32.0 packets/min
+  Last packet: 9522s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:39:51.111Z ---
+  Runtime: 5h 43m 2s
+  Session packets: 10932
+  Rate: 31.9 packets/min
+  Last packet: 9582s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:40:51.119Z ---
+  Runtime: 5h 44m 2s
+  Session packets: 10932
+  Rate: 31.8 packets/min
+  Last packet: 9642s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:41:51.123Z ---
+  Runtime: 5h 45m 2s
+  Session packets: 10932
+  Rate: 31.7 packets/min
+  Last packet: 9702s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:42:51.136Z ---
+  Runtime: 5h 46m 2s
+  Session packets: 10932
+  Rate: 31.6 packets/min
+  Last packet: 9762s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:43:51.140Z ---
+  Runtime: 5h 47m 2s
+  Session packets: 10932
+  Rate: 31.5 packets/min
+  Last packet: 9822s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:44:51.151Z ---
+  Runtime: 5h 48m 2s
+  Session packets: 10932
+  Rate: 31.4 packets/min
+  Last packet: 9882s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:45:51.164Z ---
+  Runtime: 5h 49m 2s
+  Session packets: 10932
+  Rate: 31.3 packets/min
+  Last packet: 9942s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:46:51.176Z ---
+  Runtime: 5h 50m 2s
+  Session packets: 10932
+  Rate: 31.2 packets/min
+  Last packet: 10002s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:47:51.187Z ---
+  Runtime: 5h 51m 2s
+  Session packets: 10932
+  Rate: 31.1 packets/min
+  Last packet: 10062s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:48:51.202Z ---
+  Runtime: 5h 52m 2s
+  Session packets: 10932
+  Rate: 31.1 packets/min
+  Last packet: 10122s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:49:51.208Z ---
+  Runtime: 5h 53m 2s
+  Session packets: 10932
+  Rate: 31.0 packets/min
+  Last packet: 10182s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:50:51.214Z ---
+  Runtime: 5h 54m 2s
+  Session packets: 10932
+  Rate: 30.9 packets/min
+  Last packet: 10242s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:51:51.222Z ---
+  Runtime: 5h 55m 2s
+  Session packets: 10932
+  Rate: 30.8 packets/min
+  Last packet: 10302s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T11:52:51.236Z ---
+  Runtime: 5h 56m 2s
+  Session packets: 10932
+  Rate: 30.7 packets/min
+  Last packet: 10362s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:53:51.249Z ---
+  Runtime: 5h 57m 2s
+  Session packets: 10932
+  Rate: 30.6 packets/min
+  Last packet: 10422s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:54:51.261Z ---
+  Runtime: 5h 58m 2s
+  Session packets: 10932
+  Rate: 30.5 packets/min
+  Last packet: 10482s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:55:51.263Z ---
+  Runtime: 5h 59m 2s
+  Session packets: 10932
+  Rate: 30.4 packets/min
+  Last packet: 10542s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:56:51.271Z ---
+  Runtime: 6h 0m 2s
+  Session packets: 10932
+  Rate: 30.4 packets/min
+  Last packet: 10602s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T11:57:51.279Z ---
+  Runtime: 6h 1m 2s
+  Session packets: 10932
+  Rate: 30.3 packets/min
+  Last packet: 10662s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:58:51.292Z ---
+  Runtime: 6h 2m 2s
+  Session packets: 10932
+  Rate: 30.2 packets/min
+  Last packet: 10722s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T11:59:51.298Z ---
+  Runtime: 6h 3m 2s
+  Session packets: 10932
+  Rate: 30.1 packets/min
+  Last packet: 10782s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:00:51.308Z ---
+  Runtime: 6h 4m 2s
+  Session packets: 10932
+  Rate: 30.0 packets/min
+  Last packet: 10842s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:01:51.320Z ---
+  Runtime: 6h 5m 2s
+  Session packets: 10932
+  Rate: 29.9 packets/min
+  Last packet: 10902s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T12:02:51.320Z ---
+  Runtime: 6h 6m 2s
+  Session packets: 10932
+  Rate: 29.9 packets/min
+  Last packet: 10962s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:03:51.333Z ---
+  Runtime: 6h 7m 2s
+  Session packets: 10932
+  Rate: 29.8 packets/min
+  Last packet: 11022s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:04:51.334Z ---
+  Runtime: 6h 8m 2s
+  Session packets: 10932
+  Rate: 29.7 packets/min
+  Last packet: 11082s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:05:51.339Z ---
+  Runtime: 6h 9m 2s
+  Session packets: 10932
+  Rate: 29.6 packets/min
+  Last packet: 11142s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:06:51.353Z ---
+  Runtime: 6h 10m 2s
+  Session packets: 10932
+  Rate: 29.5 packets/min
+  Last packet: 11202s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:07:51.368Z ---
+  Runtime: 6h 11m 3s
+  Session packets: 10932
+  Rate: 29.5 packets/min
+  Last packet: 11262s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:08:51.380Z ---
+  Runtime: 6h 12m 3s
+  Session packets: 10932
+  Rate: 29.4 packets/min
+  Last packet: 11322s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:09:51.390Z ---
+  Runtime: 6h 13m 3s
+  Session packets: 10932
+  Rate: 29.3 packets/min
+  Last packet: 11382s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:10:51.398Z ---
+  Runtime: 6h 14m 3s
+  Session packets: 10932
+  Rate: 29.2 packets/min
+  Last packet: 11442s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:11:51.404Z ---
+  Runtime: 6h 15m 3s
+  Session packets: 10932
+  Rate: 29.1 packets/min
+  Last packet: 11502s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:12:51.407Z ---
+  Runtime: 6h 16m 3s
+  Session packets: 10932
+  Rate: 29.1 packets/min
+  Last packet: 11562s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:13:51.420Z ---
+  Runtime: 6h 17m 3s
+  Session packets: 10932
+  Rate: 29.0 packets/min
+  Last packet: 11622s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:14:51.429Z ---
+  Runtime: 6h 18m 3s
+  Session packets: 10932
+  Rate: 28.9 packets/min
+  Last packet: 11682s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:15:51.432Z ---
+  Runtime: 6h 19m 3s
+  Session packets: 10932
+  Rate: 28.8 packets/min
+  Last packet: 11742s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:16:51.445Z ---
+  Runtime: 6h 20m 3s
+  Session packets: 10932
+  Rate: 28.8 packets/min
+  Last packet: 11802s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:17:51.449Z ---
+  Runtime: 6h 21m 3s
+  Session packets: 10932
+  Rate: 28.7 packets/min
+  Last packet: 11862s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:18:51.462Z ---
+  Runtime: 6h 22m 3s
+  Session packets: 10932
+  Rate: 28.6 packets/min
+  Last packet: 11922s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:19:51.476Z ---
+  Runtime: 6h 23m 3s
+  Session packets: 10932
+  Rate: 28.5 packets/min
+  Last packet: 11982s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:20:51.478Z ---
+  Runtime: 6h 24m 3s
+  Session packets: 10932
+  Rate: 28.5 packets/min
+  Last packet: 12042s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:21:51.482Z ---
+  Runtime: 6h 25m 3s
+  Session packets: 10932
+  Rate: 28.4 packets/min
+  Last packet: 12102s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:22:51.490Z ---
+  Runtime: 6h 26m 3s
+  Session packets: 10932
+  Rate: 28.3 packets/min
+  Last packet: 12162s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T12:23:51.501Z ---
+  Runtime: 6h 27m 3s
+  Session packets: 10932
+  Rate: 28.2 packets/min
+  Last packet: 12222s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:24:51.511Z ---
+  Runtime: 6h 28m 3s
+  Session packets: 10932
+  Rate: 28.2 packets/min
+  Last packet: 12282s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:25:51.513Z ---
+  Runtime: 6h 29m 3s
+  Session packets: 10932
+  Rate: 28.1 packets/min
+  Last packet: 12342s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:26:51.528Z ---
+  Runtime: 6h 30m 3s
+  Session packets: 10932
+  Rate: 28.0 packets/min
+  Last packet: 12402s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:27:51.529Z ---
+  Runtime: 6h 31m 3s
+  Session packets: 10932
+  Rate: 28.0 packets/min
+  Last packet: 12462s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T12:28:51.541Z ---
+  Runtime: 6h 32m 3s
+  Session packets: 10932
+  Rate: 27.9 packets/min
+  Last packet: 12522s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:29:51.549Z ---
+  Runtime: 6h 33m 3s
+  Session packets: 10932
+  Rate: 27.8 packets/min
+  Last packet: 12582s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:30:51.556Z ---
+  Runtime: 6h 34m 3s
+  Session packets: 10932
+  Rate: 27.7 packets/min
+  Last packet: 12642s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:31:51.557Z ---
+  Runtime: 6h 35m 3s
+  Session packets: 10932
+  Rate: 27.7 packets/min
+  Last packet: 12702s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:32:51.568Z ---
+  Runtime: 6h 36m 3s
+  Session packets: 10932
+  Rate: 27.6 packets/min
+  Last packet: 12762s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T12:33:51.575Z ---
+  Runtime: 6h 37m 3s
+  Session packets: 10932
+  Rate: 27.5 packets/min
+  Last packet: 12822s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:34:51.588Z ---
+  Runtime: 6h 38m 3s
+  Session packets: 10932
+  Rate: 27.5 packets/min
+  Last packet: 12882s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:35:51.603Z ---
+  Runtime: 6h 39m 3s
+  Session packets: 10932
+  Rate: 27.4 packets/min
+  Last packet: 12942s ago
+  Current file: live_2026-01-15.jsonl
+Connection error: timeout
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: websocket error
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: websocket error
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: websocket error
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: websocket error
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: websocket error
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: websocket error
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:36:51.608Z ---
+  Runtime: 6h 40m 3s
+  Session packets: 10932
+  Rate: 27.3 packets/min
+  Last packet: 13002s ago
+  Current file: live_2026-01-15.jsonl
+Connection error: timeout
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: timeout
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:37:51.621Z ---
+  Runtime: 6h 41m 3s
+  Session packets: 10932
+  Rate: 27.3 packets/min
+  Last packet: 13062s ago
+  Current file: live_2026-01-15.jsonl
+Connection error: websocket error
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: websocket error
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: websocket error
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: websocket error
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: websocket error
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connection error: websocket error
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:38:51.626Z ---
+  Runtime: 6h 42m 3s
+  Session packets: 10932
+  Rate: 27.2 packets/min
+  Last packet: 13122s ago
+  Current file: live_2026-01-15.jsonl
+Connection error: websocket error
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T12:39:51.629Z ---
+  Runtime: 6h 43m 3s
+  Session packets: 10932
+  Rate: 27.1 packets/min
+  Last packet: 13182s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:40:51.633Z ---
+  Runtime: 6h 44m 3s
+  Session packets: 10932
+  Rate: 27.1 packets/min
+  Last packet: 13242s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:41:51.642Z ---
+  Runtime: 6h 45m 3s
+  Session packets: 10932
+  Rate: 27.0 packets/min
+  Last packet: 13302s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:42:51.642Z ---
+  Runtime: 6h 46m 3s
+  Session packets: 10932
+  Rate: 26.9 packets/min
+  Last packet: 13362s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:43:51.647Z ---
+  Runtime: 6h 47m 3s
+  Session packets: 10932
+  Rate: 26.9 packets/min
+  Last packet: 13422s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T12:44:51.647Z ---
+  Runtime: 6h 48m 3s
+  Session packets: 10932
+  Rate: 26.8 packets/min
+  Last packet: 13482s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:45:51.648Z ---
+  Runtime: 6h 49m 3s
+  Session packets: 10932
+  Rate: 26.7 packets/min
+  Last packet: 13542s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:46:51.659Z ---
+  Runtime: 6h 50m 3s
+  Session packets: 10932
+  Rate: 26.7 packets/min
+  Last packet: 13602s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:47:51.670Z ---
+  Runtime: 6h 51m 3s
+  Session packets: 10932
+  Rate: 26.6 packets/min
+  Last packet: 13662s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:48:51.677Z ---
+  Runtime: 6h 52m 3s
+  Session packets: 10932
+  Rate: 26.5 packets/min
+  Last packet: 13722s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T12:49:51.682Z ---
+  Runtime: 6h 53m 3s
+  Session packets: 10932
+  Rate: 26.5 packets/min
+  Last packet: 13782s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:50:51.698Z ---
+  Runtime: 6h 54m 3s
+  Session packets: 10932
+  Rate: 26.4 packets/min
+  Last packet: 13842s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:51:51.704Z ---
+  Runtime: 6h 55m 3s
+  Session packets: 10932
+  Rate: 26.3 packets/min
+  Last packet: 13902s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:52:51.705Z ---
+  Runtime: 6h 56m 3s
+  Session packets: 10932
+  Rate: 26.3 packets/min
+  Last packet: 13962s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:53:51.715Z ---
+  Runtime: 6h 57m 3s
+  Session packets: 10932
+  Rate: 26.2 packets/min
+  Last packet: 14022s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T12:54:51.725Z ---
+  Runtime: 6h 58m 3s
+  Session packets: 10932
+  Rate: 26.1 packets/min
+  Last packet: 14082s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:55:51.732Z ---
+  Runtime: 6h 59m 3s
+  Session packets: 10932
+  Rate: 26.1 packets/min
+  Last packet: 14142s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:56:51.733Z ---
+  Runtime: 7h 0m 3s
+  Session packets: 10932
+  Rate: 26.0 packets/min
+  Last packet: 14202s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:57:51.748Z ---
+  Runtime: 7h 1m 3s
+  Session packets: 10932
+  Rate: 26.0 packets/min
+  Last packet: 14262s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:58:51.759Z ---
+  Runtime: 7h 2m 3s
+  Session packets: 10932
+  Rate: 25.9 packets/min
+  Last packet: 14322s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T12:59:51.767Z ---
+  Runtime: 7h 3m 3s
+  Session packets: 10932
+  Rate: 25.8 packets/min
+  Last packet: 14382s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:00:51.771Z ---
+  Runtime: 7h 4m 3s
+  Session packets: 10932
+  Rate: 25.8 packets/min
+  Last packet: 14442s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:01:51.779Z ---
+  Runtime: 7h 5m 3s
+  Session packets: 10932
+  Rate: 25.7 packets/min
+  Last packet: 14502s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:02:51.782Z ---
+  Runtime: 7h 6m 3s
+  Session packets: 10932
+  Rate: 25.7 packets/min
+  Last packet: 14562s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:03:51.791Z ---
+  Runtime: 7h 7m 3s
+  Session packets: 10932
+  Rate: 25.6 packets/min
+  Last packet: 14622s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:04:51.806Z ---
+  Runtime: 7h 8m 3s
+  Session packets: 10932
+  Rate: 25.5 packets/min
+  Last packet: 14682s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:05:51.817Z ---
+  Runtime: 7h 9m 3s
+  Session packets: 10932
+  Rate: 25.5 packets/min
+  Last packet: 14742s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:06:51.825Z ---
+  Runtime: 7h 10m 3s
+  Session packets: 10932
+  Rate: 25.4 packets/min
+  Last packet: 14802s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:07:51.832Z ---
+  Runtime: 7h 11m 3s
+  Session packets: 10932
+  Rate: 25.4 packets/min
+  Last packet: 14862s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:08:51.840Z ---
+  Runtime: 7h 12m 3s
+  Session packets: 10932
+  Rate: 25.3 packets/min
+  Last packet: 14922s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:09:51.853Z ---
+  Runtime: 7h 13m 3s
+  Session packets: 10932
+  Rate: 25.2 packets/min
+  Last packet: 14982s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:10:51.857Z ---
+  Runtime: 7h 14m 3s
+  Session packets: 10932
+  Rate: 25.2 packets/min
+  Last packet: 15042s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:11:51.860Z ---
+  Runtime: 7h 15m 3s
+  Session packets: 10932
+  Rate: 25.1 packets/min
+  Last packet: 15102s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:12:51.868Z ---
+  Runtime: 7h 16m 3s
+  Session packets: 10932
+  Rate: 25.1 packets/min
+  Last packet: 15162s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:13:51.871Z ---
+  Runtime: 7h 17m 3s
+  Session packets: 10932
+  Rate: 25.0 packets/min
+  Last packet: 15222s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:14:51.876Z ---
+  Runtime: 7h 18m 3s
+  Session packets: 10932
+  Rate: 25.0 packets/min
+  Last packet: 15282s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T13:15:51.880Z ---
+  Runtime: 7h 19m 3s
+  Session packets: 10932
+  Rate: 24.9 packets/min
+  Last packet: 15342s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:16:51.890Z ---
+  Runtime: 7h 20m 3s
+  Session packets: 10932
+  Rate: 24.8 packets/min
+  Last packet: 15402s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:17:51.897Z ---
+  Runtime: 7h 21m 3s
+  Session packets: 10932
+  Rate: 24.8 packets/min
+  Last packet: 15462s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:18:51.905Z ---
+  Runtime: 7h 22m 3s
+  Session packets: 10932
+  Rate: 24.7 packets/min
+  Last packet: 15522s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:19:51.911Z ---
+  Runtime: 7h 23m 3s
+  Session packets: 10932
+  Rate: 24.7 packets/min
+  Last packet: 15582s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T13:20:51.926Z ---
+  Runtime: 7h 24m 3s
+  Session packets: 10932
+  Rate: 24.6 packets/min
+  Last packet: 15642s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:21:51.941Z ---
+  Runtime: 7h 25m 3s
+  Session packets: 10932
+  Rate: 24.6 packets/min
+  Last packet: 15702s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:22:51.947Z ---
+  Runtime: 7h 26m 3s
+  Session packets: 10932
+  Rate: 24.5 packets/min
+  Last packet: 15762s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:23:51.961Z ---
+  Runtime: 7h 27m 3s
+  Session packets: 10932
+  Rate: 24.5 packets/min
+  Last packet: 15823s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:24:51.973Z ---
+  Runtime: 7h 28m 3s
+  Session packets: 10932
+  Rate: 24.4 packets/min
+  Last packet: 15883s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T13:25:51.982Z ---
+  Runtime: 7h 29m 3s
+  Session packets: 10932
+  Rate: 24.3 packets/min
+  Last packet: 15943s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:26:51.993Z ---
+  Runtime: 7h 30m 3s
+  Session packets: 10932
+  Rate: 24.3 packets/min
+  Last packet: 16003s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:27:51.993Z ---
+  Runtime: 7h 31m 3s
+  Session packets: 10932
+  Rate: 24.2 packets/min
+  Last packet: 16063s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:28:52.005Z ---
+  Runtime: 7h 32m 3s
+  Session packets: 10932
+  Rate: 24.2 packets/min
+  Last packet: 16123s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:29:52.018Z ---
+  Runtime: 7h 33m 3s
+  Session packets: 10932
+  Rate: 24.1 packets/min
+  Last packet: 16183s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T13:30:52.021Z ---
+  Runtime: 7h 34m 3s
+  Session packets: 10932
+  Rate: 24.1 packets/min
+  Last packet: 16243s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:31:52.028Z ---
+  Runtime: 7h 35m 3s
+  Session packets: 10932
+  Rate: 24.0 packets/min
+  Last packet: 16303s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:32:52.033Z ---
+  Runtime: 7h 36m 3s
+  Session packets: 10932
+  Rate: 24.0 packets/min
+  Last packet: 16363s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:33:52.035Z ---
+  Runtime: 7h 37m 3s
+  Session packets: 10932
+  Rate: 23.9 packets/min
+  Last packet: 16423s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:34:52.045Z ---
+  Runtime: 7h 38m 3s
+  Session packets: 10932
+  Rate: 23.9 packets/min
+  Last packet: 16483s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:35:52.052Z ---
+  Runtime: 7h 39m 3s
+  Session packets: 10932
+  Rate: 23.8 packets/min
+  Last packet: 16543s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:36:52.067Z ---
+  Runtime: 7h 40m 3s
+  Session packets: 10932
+  Rate: 23.8 packets/min
+  Last packet: 16603s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:37:52.071Z ---
+  Runtime: 7h 41m 3s
+  Session packets: 10932
+  Rate: 23.7 packets/min
+  Last packet: 16663s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:38:52.086Z ---
+  Runtime: 7h 42m 3s
+  Session packets: 10932
+  Rate: 23.7 packets/min
+  Last packet: 16723s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:39:52.093Z ---
+  Runtime: 7h 43m 3s
+  Session packets: 10932
+  Rate: 23.6 packets/min
+  Last packet: 16783s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:40:52.099Z ---
+  Runtime: 7h 44m 3s
+  Session packets: 10932
+  Rate: 23.6 packets/min
+  Last packet: 16843s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:41:52.107Z ---
+  Runtime: 7h 45m 3s
+  Session packets: 10932
+  Rate: 23.5 packets/min
+  Last packet: 16903s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:42:52.120Z ---
+  Runtime: 7h 46m 3s
+  Session packets: 10932
+  Rate: 23.5 packets/min
+  Last packet: 16963s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:43:52.130Z ---
+  Runtime: 7h 47m 3s
+  Session packets: 10932
+  Rate: 23.4 packets/min
+  Last packet: 17023s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:44:52.131Z ---
+  Runtime: 7h 48m 3s
+  Session packets: 10932
+  Rate: 23.4 packets/min
+  Last packet: 17083s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:45:52.134Z ---
+  Runtime: 7h 49m 3s
+  Session packets: 10932
+  Rate: 23.3 packets/min
+  Last packet: 17143s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:46:52.141Z ---
+  Runtime: 7h 50m 3s
+  Session packets: 10932
+  Rate: 23.3 packets/min
+  Last packet: 17203s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:47:52.148Z ---
+  Runtime: 7h 51m 3s
+  Session packets: 10932
+  Rate: 23.2 packets/min
+  Last packet: 17263s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:48:52.155Z ---
+  Runtime: 7h 52m 3s
+  Session packets: 10932
+  Rate: 23.2 packets/min
+  Last packet: 17323s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:49:52.159Z ---
+  Runtime: 7h 53m 3s
+  Session packets: 10932
+  Rate: 23.1 packets/min
+  Last packet: 17383s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:50:52.161Z ---
+  Runtime: 7h 54m 3s
+  Session packets: 10932
+  Rate: 23.1 packets/min
+  Last packet: 17443s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T13:51:52.174Z ---
+  Runtime: 7h 55m 3s
+  Session packets: 10932
+  Rate: 23.0 packets/min
+  Last packet: 17503s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:52:52.185Z ---
+  Runtime: 7h 56m 3s
+  Session packets: 10932
+  Rate: 23.0 packets/min
+  Last packet: 17563s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:53:52.200Z ---
+  Runtime: 7h 57m 3s
+  Session packets: 10932
+  Rate: 22.9 packets/min
+  Last packet: 17623s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:54:52.207Z ---
+  Runtime: 7h 58m 3s
+  Session packets: 10932
+  Rate: 22.9 packets/min
+  Last packet: 17683s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+
+--- Stats @ 2026-01-15T13:55:52.216Z ---
+  Runtime: 7h 59m 3s
+  Session packets: 10932
+  Rate: 22.8 packets/min
+  Last packet: 17743s ago
+  Current file: live_2026-01-15.jsonl
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+
+--- Stats @ 2026-01-15T13:56:52.220Z ---
+  Runtime: 8h 0m 3s
+  Session packets: 10932
+  Rate: 22.8 packets/min
+  Last packet: 17803s ago
+  Current file: live_2026-01-15.jsonl
+Connecting to ETA SPOT...
+Disconnected: transport close
+Reconnecting in 5s...
+Connecting to ETA SPOT...
+Connected! Socket ID: bZoKXV1SIL57HrgrAAOw
+
+--- Stats @ 2026-01-15T13:57:52.221Z ---
+  Runtime: 8h 1m 3s
+  Session packets: 10974
+  Rate: 22.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 11000  Packets: 11100  Packets: 11200  Packets: 11300
+--- Stats @ 2026-01-15T13:58:52.233Z ---
+  Runtime: 8h 2m 3s
+  Session packets: 11397
+  Rate: 23.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 11400  Packets: 11500  Packets: 11600  Packets: 11700  Packets: 11800
+--- Stats @ 2026-01-15T13:59:52.234Z ---
+  Runtime: 8h 3m 3s
+  Session packets: 11823
+  Rate: 24.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 11900  Packets: 12000  Packets: 12100  Packets: 12200
+--- Stats @ 2026-01-15T14:00:52.246Z ---
+  Runtime: 8h 4m 3s
+  Session packets: 12296
+  Rate: 25.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 12300  Packets: 12400  Packets: 12500  Packets: 12600  Packets: 12700
+--- Stats @ 2026-01-15T14:01:52.252Z ---
+  Runtime: 8h 5m 3s
+  Session packets: 12739
+  Rate: 26.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 12800  Packets: 12900  Packets: 13000  Packets: 13100
+--- Stats @ 2026-01-15T14:02:52.255Z ---
+  Runtime: 8h 6m 3s
+  Session packets: 13189
+  Rate: 27.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 13200  Packets: 13300  Packets: 13400  Packets: 13500  Packets: 13600
+--- Stats @ 2026-01-15T14:03:52.256Z ---
+  Runtime: 8h 7m 3s
+  Session packets: 13628
+  Rate: 28.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 13700  Packets: 13800  Packets: 13900  Packets: 14000
+--- Stats @ 2026-01-15T14:04:52.270Z ---
+  Runtime: 8h 8m 3s
+  Session packets: 14051
+  Rate: 28.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 14100  Packets: 14200  Packets: 14300  Packets: 14400
+--- Stats @ 2026-01-15T14:05:52.276Z ---
+  Runtime: 8h 9m 3s
+  Session packets: 14499
+  Rate: 29.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 14500  Packets: 14600  Packets: 14700  Packets: 14800  Packets: 14900
+--- Stats @ 2026-01-15T14:06:52.284Z ---
+  Runtime: 8h 10m 3s
+  Session packets: 14924
+  Rate: 30.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 15000  Packets: 15100  Packets: 15200  Packets: 15300
+--- Stats @ 2026-01-15T14:07:52.296Z ---
+  Runtime: 8h 11m 3s
+  Session packets: 15342
+  Rate: 31.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 15400  Packets: 15500  Packets: 15600  Packets: 15700
+--- Stats @ 2026-01-15T14:08:52.309Z ---
+  Runtime: 8h 12m 3s
+  Session packets: 15740
+  Rate: 32.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 15800  Packets: 15900  Packets: 16000  Packets: 16100
+--- Stats @ 2026-01-15T14:09:52.312Z ---
+  Runtime: 8h 13m 3s
+  Session packets: 16150
+  Rate: 32.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 16200  Packets: 16300  Packets: 16400  Packets: 16500
+--- Stats @ 2026-01-15T14:10:52.324Z ---
+  Runtime: 8h 14m 3s
+  Session packets: 16571
+  Rate: 33.5 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 16600  Packets: 16700  Packets: 16800  Packets: 16900  Packets: 17000
+--- Stats @ 2026-01-15T14:11:52.330Z ---
+  Runtime: 8h 15m 3s
+  Session packets: 17013
+  Rate: 34.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 17100  Packets: 17200  Packets: 17300  Packets: 17400
+--- Stats @ 2026-01-15T14:12:52.333Z ---
+  Runtime: 8h 16m 3s
+  Session packets: 17438
+  Rate: 35.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 17500  Packets: 17600  Packets: 17700  Packets: 17800
+--- Stats @ 2026-01-15T14:13:52.334Z ---
+  Runtime: 8h 17m 3s
+  Session packets: 17850
+  Rate: 35.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 17900  Packets: 18000  Packets: 18100  Packets: 18200
+--- Stats @ 2026-01-15T14:14:52.344Z ---
+  Runtime: 8h 18m 3s
+  Session packets: 18286
+  Rate: 36.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 18300  Packets: 18400  Packets: 18500  Packets: 18600  Packets: 18700
+--- Stats @ 2026-01-15T14:15:52.344Z ---
+  Runtime: 8h 19m 3s
+  Session packets: 18794
+  Rate: 37.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 18800  Packets: 18900  Packets: 19000  Packets: 19100  Packets: 19200
+--- Stats @ 2026-01-15T14:16:52.357Z ---
+  Runtime: 8h 20m 3s
+  Session packets: 19241
+  Rate: 38.5 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 19300  Packets: 19400  Packets: 19500  Packets: 19600
+--- Stats @ 2026-01-15T14:17:52.368Z ---
+  Runtime: 8h 21m 4s
+  Session packets: 19652
+  Rate: 39.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 19700  Packets: 19800  Packets: 19900  Packets: 20000
+--- Stats @ 2026-01-15T14:18:52.379Z ---
+  Runtime: 8h 22m 4s
+  Session packets: 20049
+  Rate: 39.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 20100  Packets: 20200  Packets: 20300  Packets: 20400
+--- Stats @ 2026-01-15T14:19:52.383Z ---
+  Runtime: 8h 23m 4s
+  Session packets: 20472
+  Rate: 40.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 20500  Packets: 20600  Packets: 20700  Packets: 20800  Packets: 20900
+--- Stats @ 2026-01-15T14:20:52.399Z ---
+  Runtime: 8h 24m 4s
+  Session packets: 20938
+  Rate: 41.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 21000  Packets: 21100  Packets: 21200  Packets: 21300
+--- Stats @ 2026-01-15T14:21:52.403Z ---
+  Runtime: 8h 25m 4s
+  Session packets: 21374
+  Rate: 42.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 21400  Packets: 21500  Packets: 21600  Packets: 21700
+--- Stats @ 2026-01-15T14:22:52.417Z ---
+  Runtime: 8h 26m 4s
+  Session packets: 21787
+  Rate: 43.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 21800  Packets: 21900  Packets: 22000  Packets: 22100
+--- Stats @ 2026-01-15T14:23:52.430Z ---
+  Runtime: 8h 27m 4s
+  Session packets: 22197
+  Rate: 43.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 22200  Packets: 22300  Packets: 22400  Packets: 22500  Packets: 22600
+--- Stats @ 2026-01-15T14:24:52.438Z ---
+  Runtime: 8h 28m 4s
+  Session packets: 22630
+  Rate: 44.5 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 22700  Packets: 22800  Packets: 22900  Packets: 23000
+--- Stats @ 2026-01-15T14:25:52.439Z ---
+  Runtime: 8h 29m 4s
+  Session packets: 23092
+  Rate: 45.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 23100  Packets: 23200  Packets: 23300  Packets: 23400  Packets: 23500
+--- Stats @ 2026-01-15T14:26:52.450Z ---
+  Runtime: 8h 30m 4s
+  Session packets: 23526
+  Rate: 46.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 23600  Packets: 23700  Packets: 23800  Packets: 23900
+--- Stats @ 2026-01-15T14:27:52.455Z ---
+  Runtime: 8h 31m 4s
+  Session packets: 23947
+  Rate: 46.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 24000  Packets: 24100  Packets: 24200  Packets: 24300
+--- Stats @ 2026-01-15T14:28:52.456Z ---
+  Runtime: 8h 32m 4s
+  Session packets: 24371
+  Rate: 47.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 24400  Packets: 24500  Packets: 24600  Packets: 24700
+--- Stats @ 2026-01-15T14:29:52.460Z ---
+  Runtime: 8h 33m 4s
+  Session packets: 24797
+  Rate: 48.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 24800  Packets: 24900  Packets: 25000  Packets: 25100  Packets: 25200
+--- Stats @ 2026-01-15T14:30:52.474Z ---
+  Runtime: 8h 34m 4s
+  Session packets: 25271
+  Rate: 49.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 25300  Packets: 25400  Packets: 25500  Packets: 25600  Packets: 25700
+--- Stats @ 2026-01-15T14:31:52.485Z ---
+  Runtime: 8h 35m 4s
+  Session packets: 25709
+  Rate: 49.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 25800  Packets: 25900  Packets: 26000  Packets: 26100
+--- Stats @ 2026-01-15T14:32:52.487Z ---
+  Runtime: 8h 36m 4s
+  Session packets: 26168
+  Rate: 50.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 26200  Packets: 26300  Packets: 26400  Packets: 26500  Packets: 26600
+--- Stats @ 2026-01-15T14:33:52.496Z ---
+  Runtime: 8h 37m 4s
+  Session packets: 26610
+  Rate: 51.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 26700  Packets: 26800  Packets: 26900  Packets: 27000
+--- Stats @ 2026-01-15T14:34:52.498Z ---
+  Runtime: 8h 38m 4s
+  Session packets: 27058
+  Rate: 52.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 27100  Packets: 27200  Packets: 27300  Packets: 27400
+--- Stats @ 2026-01-15T14:35:52.504Z ---
+  Runtime: 8h 39m 4s
+  Session packets: 27492
+  Rate: 53.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 27500  Packets: 27600  Packets: 27700  Packets: 27800  Packets: 27900
+--- Stats @ 2026-01-15T14:36:52.513Z ---
+  Runtime: 8h 40m 4s
+  Session packets: 27926
+  Rate: 53.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 28000  Packets: 28100  Packets: 28200  Packets: 28300
+--- Stats @ 2026-01-15T14:37:52.524Z ---
+  Runtime: 8h 41m 4s
+  Session packets: 28387
+  Rate: 54.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 28400  Packets: 28500  Packets: 28600  Packets: 28700  Packets: 28800
+--- Stats @ 2026-01-15T14:38:52.536Z ---
+  Runtime: 8h 42m 4s
+  Session packets: 28841
+  Rate: 55.2 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 28900  Packets: 29000  Packets: 29100  Packets: 29200
+--- Stats @ 2026-01-15T14:39:52.536Z ---
+  Runtime: 8h 43m 4s
+  Session packets: 29282
+  Rate: 56.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 29300  Packets: 29400  Packets: 29500  Packets: 29600  Packets: 29700
+--- Stats @ 2026-01-15T14:40:52.541Z ---
+  Runtime: 8h 44m 4s
+  Session packets: 29765
+  Rate: 56.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 29800  Packets: 29900  Packets: 30000  Packets: 30100  Packets: 30200
+--- Stats @ 2026-01-15T14:41:52.543Z ---
+  Runtime: 8h 45m 4s
+  Session packets: 30254
+  Rate: 57.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 30300  Packets: 30400  Packets: 30500  Packets: 30600  Packets: 30700
+--- Stats @ 2026-01-15T14:42:52.546Z ---
+  Runtime: 8h 46m 4s
+  Session packets: 30715
+  Rate: 58.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 30800  Packets: 30900  Packets: 31000  Packets: 31100
+--- Stats @ 2026-01-15T14:43:52.550Z ---
+  Runtime: 8h 47m 4s
+  Session packets: 31145
+  Rate: 59.1 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 31200  Packets: 31300  Packets: 31400  Packets: 31500
+--- Stats @ 2026-01-15T14:44:52.562Z ---
+  Runtime: 8h 48m 4s
+  Session packets: 31596
+  Rate: 59.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 31600  Packets: 31700  Packets: 31800  Packets: 31900  Packets: 32000
+--- Stats @ 2026-01-15T14:45:52.569Z ---
+  Runtime: 8h 49m 4s
+  Session packets: 32060
+  Rate: 60.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 32100  Packets: 32200  Packets: 32300  Packets: 32400  Packets: 32500
+--- Stats @ 2026-01-15T14:46:52.573Z ---
+  Runtime: 8h 50m 4s
+  Session packets: 32511
+  Rate: 61.3 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 32600  Packets: 32700  Packets: 32800  Packets: 32900
+--- Stats @ 2026-01-15T14:47:52.583Z ---
+  Runtime: 8h 51m 4s
+  Session packets: 32987
+  Rate: 62.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 33000  Packets: 33100  Packets: 33200  Packets: 33300  Packets: 33400
+--- Stats @ 2026-01-15T14:48:52.586Z ---
+  Runtime: 8h 52m 4s
+  Session packets: 33426
+  Rate: 62.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 33500  Packets: 33600  Packets: 33700  Packets: 33800
+--- Stats @ 2026-01-15T14:49:52.595Z ---
+  Runtime: 8h 53m 4s
+  Session packets: 33889
+  Rate: 63.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 33900  Packets: 34000  Packets: 34100  Packets: 34200  Packets: 34300
+--- Stats @ 2026-01-15T14:50:52.602Z ---
+  Runtime: 8h 54m 4s
+  Session packets: 34388
+  Rate: 64.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 34400  Packets: 34500  Packets: 34600  Packets: 34700  Packets: 34800  Packets: 34900
+--- Stats @ 2026-01-15T14:51:52.603Z ---
+  Runtime: 8h 55m 4s
+  Session packets: 34901
+  Rate: 65.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 35000  Packets: 35100  Packets: 35200  Packets: 35300
+--- Stats @ 2026-01-15T14:52:52.612Z ---
+  Runtime: 8h 56m 4s
+  Session packets: 35369
+  Rate: 66.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 35400  Packets: 35500  Packets: 35600  Packets: 35700  Packets: 35800
+--- Stats @ 2026-01-15T14:53:52.619Z ---
+  Runtime: 8h 57m 4s
+  Session packets: 35810
+  Rate: 66.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 35900  Packets: 36000  Packets: 36100  Packets: 36200
+--- Stats @ 2026-01-15T14:54:52.626Z ---
+  Runtime: 8h 58m 4s
+  Session packets: 36254
+  Rate: 67.4 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 36300  Packets: 36400  Packets: 36500  Packets: 36600  Packets: 36700
+--- Stats @ 2026-01-15T14:55:52.630Z ---
+  Runtime: 8h 59m 4s
+  Session packets: 36724
+  Rate: 68.1 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 36800  Packets: 36900  Packets: 37000  Packets: 37100
+--- Stats @ 2026-01-15T14:56:52.635Z ---
+  Runtime: 9h 0m 4s
+  Session packets: 37164
+  Rate: 68.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 37200  Packets: 37300  Packets: 37400  Packets: 37500  Packets: 37600
+--- Stats @ 2026-01-15T14:57:52.637Z ---
+  Runtime: 9h 1m 4s
+  Session packets: 37674
+  Rate: 69.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 37700  Packets: 37800  Packets: 37900  Packets: 38000  Packets: 38100
+--- Stats @ 2026-01-15T14:58:52.642Z ---
+  Runtime: 9h 2m 4s
+  Session packets: 38128
+  Rate: 70.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 38200  Packets: 38300  Packets: 38400  Packets: 38500  Packets: 38600
+--- Stats @ 2026-01-15T14:59:52.656Z ---
+  Runtime: 9h 3m 4s
+  Session packets: 38609
+  Rate: 71.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 38700  Packets: 38800  Packets: 38900  Packets: 39000  Packets: 39100
+--- Stats @ 2026-01-15T15:00:52.668Z ---
+  Runtime: 9h 4m 4s
+  Session packets: 39113
+  Rate: 71.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 39200  Packets: 39300  Packets: 39400  Packets: 39500  Packets: 39600
+--- Stats @ 2026-01-15T15:01:52.679Z ---
+  Runtime: 9h 5m 4s
+  Session packets: 39619
+  Rate: 72.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 39700  Packets: 39800  Packets: 39900  Packets: 40000
+--- Stats @ 2026-01-15T15:02:52.686Z ---
+  Runtime: 9h 6m 4s
+  Session packets: 40090
+  Rate: 73.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 40100  Packets: 40200  Packets: 40300  Packets: 40400  Packets: 40500
+--- Stats @ 2026-01-15T15:03:52.697Z ---
+  Runtime: 9h 7m 4s
+  Session packets: 40560
+  Rate: 74.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 40600  Packets: 40700  Packets: 40800  Packets: 40900  Packets: 41000
+--- Stats @ 2026-01-15T15:04:52.702Z ---
+  Runtime: 9h 8m 4s
+  Session packets: 41033
+  Rate: 74.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 41100  Packets: 41200  Packets: 41300  Packets: 41400  Packets: 41500
+--- Stats @ 2026-01-15T15:05:52.705Z ---
+  Runtime: 9h 9m 4s
+  Session packets: 41523
+  Rate: 75.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 41600  Packets: 41700  Packets: 41800  Packets: 41900  Packets: 42000
+--- Stats @ 2026-01-15T15:06:52.716Z ---
+  Runtime: 9h 10m 4s
+  Session packets: 42021
+  Rate: 76.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 42100  Packets: 42200  Packets: 42300  Packets: 42400  Packets: 42500
+--- Stats @ 2026-01-15T15:07:52.731Z ---
+  Runtime: 9h 11m 4s
+  Session packets: 42508
+  Rate: 77.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 42600  Packets: 42700  Packets: 42800  Packets: 42900
+--- Stats @ 2026-01-15T15:08:52.738Z ---
+  Runtime: 9h 12m 4s
+  Session packets: 42980
+  Rate: 77.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 43000  Packets: 43100  Packets: 43200  Packets: 43300  Packets: 43400
+--- Stats @ 2026-01-15T15:09:52.750Z ---
+  Runtime: 9h 13m 4s
+  Session packets: 43449
+  Rate: 78.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 43500  Packets: 43600  Packets: 43700  Packets: 43800  Packets: 43900
+--- Stats @ 2026-01-15T15:10:52.753Z ---
+  Runtime: 9h 14m 4s
+  Session packets: 43960
+  Rate: 79.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 44000  Packets: 44100  Packets: 44200  Packets: 44300  Packets: 44400
+--- Stats @ 2026-01-15T15:11:52.759Z ---
+  Runtime: 9h 15m 4s
+  Session packets: 44454
+  Rate: 80.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 44500  Packets: 44600  Packets: 44700  Packets: 44800  Packets: 44900
+--- Stats @ 2026-01-15T15:12:52.766Z ---
+  Runtime: 9h 16m 4s
+  Session packets: 44914
+  Rate: 80.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 45000  Packets: 45100  Packets: 45200  Packets: 45300
+--- Stats @ 2026-01-15T15:13:52.779Z ---
+  Runtime: 9h 17m 4s
+  Session packets: 45390
+  Rate: 81.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 45400  Packets: 45500  Packets: 45600  Packets: 45700  Packets: 45800
+--- Stats @ 2026-01-15T15:14:52.785Z ---
+  Runtime: 9h 18m 4s
+  Session packets: 45849
+  Rate: 82.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 45900  Packets: 46000  Packets: 46100  Packets: 46200  Packets: 46300
+--- Stats @ 2026-01-15T15:15:52.793Z ---
+  Runtime: 9h 19m 4s
+  Session packets: 46347
+  Rate: 82.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 46400  Packets: 46500  Packets: 46600  Packets: 46700  Packets: 46800
+--- Stats @ 2026-01-15T15:16:52.808Z ---
+  Runtime: 9h 20m 4s
+  Session packets: 46844
+  Rate: 83.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 46900  Packets: 47000  Packets: 47100  Packets: 47200  Packets: 47300
+--- Stats @ 2026-01-15T15:17:52.816Z ---
+  Runtime: 9h 21m 4s
+  Session packets: 47326
+  Rate: 84.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 47400  Packets: 47500  Packets: 47600  Packets: 47700  Packets: 47800
+--- Stats @ 2026-01-15T15:18:52.823Z ---
+  Runtime: 9h 22m 4s
+  Session packets: 47800
+  Rate: 85.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 47900  Packets: 48000  Packets: 48100  Packets: 48200
+--- Stats @ 2026-01-15T15:19:52.828Z ---
+  Runtime: 9h 23m 4s
+  Session packets: 48273
+  Rate: 85.7 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 48300  Packets: 48400  Packets: 48500  Packets: 48600  Packets: 48700
+--- Stats @ 2026-01-15T15:20:52.839Z ---
+  Runtime: 9h 24m 4s
+  Session packets: 48781
+  Rate: 86.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 48800  Packets: 48900  Packets: 49000  Packets: 49100  Packets: 49200
+--- Stats @ 2026-01-15T15:21:52.843Z ---
+  Runtime: 9h 25m 4s
+  Session packets: 49265
+  Rate: 87.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 49300  Packets: 49400  Packets: 49500  Packets: 49600  Packets: 49700
+--- Stats @ 2026-01-15T15:22:52.856Z ---
+  Runtime: 9h 26m 4s
+  Session packets: 49755
+  Rate: 87.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 49800  Packets: 49900  Packets: 50000  Packets: 50100  Packets: 50200
+--- Stats @ 2026-01-15T15:23:52.863Z ---
+  Runtime: 9h 27m 4s
+  Session packets: 50256
+  Rate: 88.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 50300  Packets: 50400  Packets: 50500  Packets: 50600  Packets: 50700
+--- Stats @ 2026-01-15T15:24:52.875Z ---
+  Runtime: 9h 28m 4s
+  Session packets: 50740
+  Rate: 89.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 50800  Packets: 50900  Packets: 51000  Packets: 51100  Packets: 51200
+--- Stats @ 2026-01-15T15:25:52.887Z ---
+  Runtime: 9h 29m 4s
+  Session packets: 51247
+  Rate: 90.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 51300  Packets: 51400  Packets: 51500  Packets: 51600  Packets: 51700
+--- Stats @ 2026-01-15T15:26:52.886Z ---
+  Runtime: 9h 30m 4s
+  Session packets: 51732
+  Rate: 90.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 51800  Packets: 51900  Packets: 52000  Packets: 52100  Packets: 52200
+--- Stats @ 2026-01-15T15:27:52.895Z ---
+  Runtime: 9h 31m 4s
+  Session packets: 52221
+  Rate: 91.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 52300  Packets: 52400  Packets: 52500  Packets: 52600
+--- Stats @ 2026-01-15T15:28:52.902Z ---
+  Runtime: 9h 32m 4s
+  Session packets: 52690
+  Rate: 92.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 52700  Packets: 52800  Packets: 52900  Packets: 53000  Packets: 53100
+--- Stats @ 2026-01-15T15:29:52.902Z ---
+  Runtime: 9h 33m 4s
+  Session packets: 53163
+  Rate: 92.8 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 53200  Packets: 53300  Packets: 53400  Packets: 53500  Packets: 53600
+--- Stats @ 2026-01-15T15:30:52.910Z ---
+  Runtime: 9h 34m 4s
+  Session packets: 53698
+  Rate: 93.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 53700  Packets: 53800  Packets: 53900  Packets: 54000  Packets: 54100
+--- Stats @ 2026-01-15T15:31:52.914Z ---
+  Runtime: 9h 35m 4s
+  Session packets: 54173
+  Rate: 94.2 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 54200  Packets: 54300  Packets: 54400  Packets: 54500  Packets: 54600
+--- Stats @ 2026-01-15T15:32:52.926Z ---
+  Runtime: 9h 36m 4s
+  Session packets: 54684
+  Rate: 94.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 54700  Packets: 54800  Packets: 54900  Packets: 55000  Packets: 55100
+--- Stats @ 2026-01-15T15:33:52.927Z ---
+  Runtime: 9h 37m 4s
+  Session packets: 55157
+  Rate: 95.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 55200  Packets: 55300  Packets: 55400  Packets: 55500  Packets: 55600
+--- Stats @ 2026-01-15T15:34:52.936Z ---
+  Runtime: 9h 38m 4s
+  Session packets: 55627
+  Rate: 96.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 55700  Packets: 55800  Packets: 55900  Packets: 56000  Packets: 56100
+--- Stats @ 2026-01-15T15:35:52.940Z ---
+  Runtime: 9h 39m 4s
+  Session packets: 56122
+  Rate: 96.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 56200  Packets: 56300  Packets: 56400  Packets: 56500  Packets: 56600
+--- Stats @ 2026-01-15T15:36:52.955Z ---
+  Runtime: 9h 40m 4s
+  Session packets: 56612
+  Rate: 97.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 56700  Packets: 56800  Packets: 56900  Packets: 57000
+--- Stats @ 2026-01-15T15:37:52.966Z ---
+  Runtime: 9h 41m 4s
+  Session packets: 57078
+  Rate: 98.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 57100  Packets: 57200  Packets: 57300  Packets: 57400  Packets: 57500
+--- Stats @ 2026-01-15T15:38:52.969Z ---
+  Runtime: 9h 42m 4s
+  Session packets: 57538
+  Rate: 98.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 57600  Packets: 57700  Packets: 57800  Packets: 57900  Packets: 58000
+--- Stats @ 2026-01-15T15:39:52.977Z ---
+  Runtime: 9h 43m 4s
+  Session packets: 58015
+  Rate: 99.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 58100  Packets: 58200  Packets: 58300  Packets: 58400  Packets: 58500
+--- Stats @ 2026-01-15T15:40:52.984Z ---
+  Runtime: 9h 44m 4s
+  Session packets: 58502
+  Rate: 100.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 58600  Packets: 58700  Packets: 58800  Packets: 58900
+--- Stats @ 2026-01-15T15:41:52.994Z ---
+  Runtime: 9h 45m 4s
+  Session packets: 58962
+  Rate: 100.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 59000  Packets: 59100  Packets: 59200  Packets: 59300  Packets: 59400
+--- Stats @ 2026-01-15T15:42:53.008Z ---
+  Runtime: 9h 46m 4s
+  Session packets: 59404
+  Rate: 101.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 59500  Packets: 59600  Packets: 59700  Packets: 59800
+--- Stats @ 2026-01-15T15:43:53.015Z ---
+  Runtime: 9h 47m 4s
+  Session packets: 59880
+  Rate: 102.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 59900  Packets: 60000  Packets: 60100  Packets: 60200  Packets: 60300
+--- Stats @ 2026-01-15T15:44:53.021Z ---
+  Runtime: 9h 48m 4s
+  Session packets: 60338
+  Rate: 102.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 60400  Packets: 60500  Packets: 60600  Packets: 60700  Packets: 60800
+--- Stats @ 2026-01-15T15:45:53.026Z ---
+  Runtime: 9h 49m 4s
+  Session packets: 60840
+  Rate: 103.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 60900  Packets: 61000  Packets: 61100  Packets: 61200
+--- Stats @ 2026-01-15T15:46:53.035Z ---
+  Runtime: 9h 50m 4s
+  Session packets: 61291
+  Rate: 103.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 61300  Packets: 61400  Packets: 61500  Packets: 61600  Packets: 61700
+--- Stats @ 2026-01-15T15:47:53.046Z ---
+  Runtime: 9h 51m 4s
+  Session packets: 61740
+  Rate: 104.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 61800  Packets: 61900  Packets: 62000  Packets: 62100
+--- Stats @ 2026-01-15T15:48:53.059Z ---
+  Runtime: 9h 52m 4s
+  Session packets: 62167
+  Rate: 105.0 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 62200  Packets: 62300  Packets: 62400  Packets: 62500  Packets: 62600
+--- Stats @ 2026-01-15T15:49:53.063Z ---
+  Runtime: 9h 53m 4s
+  Session packets: 62630
+  Rate: 105.6 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 62700  Packets: 62800  Packets: 62900  Packets: 63000  Packets: 63100
+--- Stats @ 2026-01-15T15:50:53.071Z ---
+  Runtime: 9h 54m 4s
+  Session packets: 63104
+  Rate: 106.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 63200  Packets: 63300  Packets: 63400  Packets: 63500
+--- Stats @ 2026-01-15T15:51:53.077Z ---
+  Runtime: 9h 55m 4s
+  Session packets: 63566
+  Rate: 106.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 63600  Packets: 63700  Packets: 63800  Packets: 63900  Packets: 64000
+--- Stats @ 2026-01-15T15:52:53.090Z ---
+  Runtime: 9h 56m 4s
+  Session packets: 64021
+  Rate: 107.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 64100  Packets: 64200  Packets: 64300  Packets: 64400
+--- Stats @ 2026-01-15T15:53:53.100Z ---
+  Runtime: 9h 57m 4s
+  Session packets: 64447
+  Rate: 107.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 64500  Packets: 64600  Packets: 64700  Packets: 64800
+--- Stats @ 2026-01-15T15:54:53.109Z ---
+  Runtime: 9h 58m 4s
+  Session packets: 64873
+  Rate: 108.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 64900  Packets: 65000  Packets: 65100  Packets: 65200  Packets: 65300
+--- Stats @ 2026-01-15T15:55:53.111Z ---
+  Runtime: 9h 59m 4s
+  Session packets: 65324
+  Rate: 109.0 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 65400  Packets: 65500  Packets: 65600  Packets: 65700  Packets: 65800
+--- Stats @ 2026-01-15T15:56:53.114Z ---
+  Runtime: 10h 0m 4s
+  Session packets: 65805
+  Rate: 109.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 65900  Packets: 66000  Packets: 66100  Packets: 66200
+--- Stats @ 2026-01-15T15:57:53.120Z ---
+  Runtime: 10h 1m 4s
+  Session packets: 66242
+  Rate: 110.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 66300  Packets: 66400  Packets: 66500  Packets: 66600
+--- Stats @ 2026-01-15T15:58:53.121Z ---
+  Runtime: 10h 2m 4s
+  Session packets: 66685
+  Rate: 110.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 66700  Packets: 66800  Packets: 66900  Packets: 67000  Packets: 67100
+--- Stats @ 2026-01-15T15:59:53.128Z ---
+  Runtime: 10h 3m 4s
+  Session packets: 67155
+  Rate: 111.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 67200  Packets: 67300  Packets: 67400  Packets: 67500  Packets: 67600
+--- Stats @ 2026-01-15T16:00:53.130Z ---
+  Runtime: 10h 4m 4s
+  Session packets: 67647
+  Rate: 112.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 67700  Packets: 67800  Packets: 67900  Packets: 68000  Packets: 68100
+--- Stats @ 2026-01-15T16:01:53.133Z ---
+  Runtime: 10h 5m 4s
+  Session packets: 68104
+  Rate: 112.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 68200  Packets: 68300  Packets: 68400  Packets: 68500
+--- Stats @ 2026-01-15T16:02:53.146Z ---
+  Runtime: 10h 6m 4s
+  Session packets: 68554
+  Rate: 113.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 68600  Packets: 68700  Packets: 68800  Packets: 68900  Packets: 69000
+--- Stats @ 2026-01-15T16:03:53.149Z ---
+  Runtime: 10h 7m 4s
+  Session packets: 69012
+  Rate: 113.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 69100  Packets: 69200  Packets: 69300  Packets: 69400
+--- Stats @ 2026-01-15T16:04:53.157Z ---
+  Runtime: 10h 8m 4s
+  Session packets: 69457
+  Rate: 114.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 69500  Packets: 69600  Packets: 69700  Packets: 69800  Packets: 69900
+--- Stats @ 2026-01-15T16:05:53.165Z ---
+  Runtime: 10h 9m 4s
+  Session packets: 69921
+  Rate: 114.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 70000  Packets: 70100  Packets: 70200  Packets: 70300  Packets: 70400
+--- Stats @ 2026-01-15T16:06:53.168Z ---
+  Runtime: 10h 10m 4s
+  Session packets: 70400
+  Rate: 115.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 70500  Packets: 70600  Packets: 70700  Packets: 70800
+--- Stats @ 2026-01-15T16:07:53.175Z ---
+  Runtime: 10h 11m 4s
+  Session packets: 70865
+  Rate: 116.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 70900  Packets: 71000  Packets: 71100  Packets: 71200  Packets: 71300
+--- Stats @ 2026-01-15T16:08:53.182Z ---
+  Runtime: 10h 12m 4s
+  Session packets: 71302
+  Rate: 116.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 71400  Packets: 71500  Packets: 71600  Packets: 71700
+--- Stats @ 2026-01-15T16:09:53.183Z ---
+  Runtime: 10h 13m 4s
+  Session packets: 71745
+  Rate: 117.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 71800  Packets: 71900  Packets: 72000  Packets: 72100  Packets: 72200
+--- Stats @ 2026-01-15T16:10:53.195Z ---
+  Runtime: 10h 14m 4s
+  Session packets: 72249
+  Rate: 117.7 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 72300  Packets: 72400  Packets: 72500  Packets: 72600  Packets: 72700
+--- Stats @ 2026-01-15T16:11:53.195Z ---
+  Runtime: 10h 15m 4s
+  Session packets: 72717
+  Rate: 118.2 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 72800  Packets: 72900  Packets: 73000  Packets: 73100
+--- Stats @ 2026-01-15T16:12:53.206Z ---
+  Runtime: 10h 16m 4s
+  Session packets: 73172
+  Rate: 118.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 73200  Packets: 73300  Packets: 73400  Packets: 73500
+--- Stats @ 2026-01-15T16:13:53.212Z ---
+  Runtime: 10h 17m 4s
+  Session packets: 73597
+  Rate: 119.3 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 73600  Packets: 73700  Packets: 73800  Packets: 73900  Packets: 74000
+--- Stats @ 2026-01-15T16:14:53.224Z ---
+  Runtime: 10h 18m 4s
+  Session packets: 74039
+  Rate: 119.8 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 74100  Packets: 74200  Packets: 74300  Packets: 74400  Packets: 74500
+--- Stats @ 2026-01-15T16:15:53.226Z ---
+  Runtime: 10h 19m 4s
+  Session packets: 74515
+  Rate: 120.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 74600  Packets: 74700  Packets: 74800  Packets: 74900
+--- Stats @ 2026-01-15T16:16:53.228Z ---
+  Runtime: 10h 20m 4s
+  Session packets: 74954
+  Rate: 120.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 75000  Packets: 75100  Packets: 75200  Packets: 75300
+--- Stats @ 2026-01-15T16:17:53.235Z ---
+  Runtime: 10h 21m 4s
+  Session packets: 75399
+  Rate: 121.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 75400  Packets: 75500  Packets: 75600  Packets: 75700  Packets: 75800
+--- Stats @ 2026-01-15T16:18:53.244Z ---
+  Runtime: 10h 22m 4s
+  Session packets: 75827
+  Rate: 121.9 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 75900  Packets: 76000  Packets: 76100  Packets: 76200
+--- Stats @ 2026-01-15T16:19:53.255Z ---
+  Runtime: 10h 23m 4s
+  Session packets: 76276
+  Rate: 122.4 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 76300  Packets: 76400  Packets: 76500  Packets: 76600  Packets: 76700
+--- Stats @ 2026-01-15T16:20:53.268Z ---
+  Runtime: 10h 24m 4s
+  Session packets: 76752
+  Rate: 123.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 76800  Packets: 76900  Packets: 77000  Packets: 77100  Packets: 77200
+--- Stats @ 2026-01-15T16:21:53.274Z ---
+  Runtime: 10h 25m 4s
+  Session packets: 77222
+  Rate: 123.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 77300  Packets: 77400  Packets: 77500  Packets: 77600
+--- Stats @ 2026-01-15T16:22:53.274Z ---
+  Runtime: 10h 26m 4s
+  Session packets: 77667
+  Rate: 124.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 77700  Packets: 77800  Packets: 77900  Packets: 78000  Packets: 78100
+--- Stats @ 2026-01-15T16:23:53.275Z ---
+  Runtime: 10h 27m 4s
+  Session packets: 78104
+  Rate: 124.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 78200  Packets: 78300  Packets: 78400  Packets: 78500
+--- Stats @ 2026-01-15T16:24:53.286Z ---
+  Runtime: 10h 28m 4s
+  Session packets: 78539
+  Rate: 125.0 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 78600  Packets: 78700  Packets: 78800  Packets: 78900
+--- Stats @ 2026-01-15T16:25:53.286Z ---
+  Runtime: 10h 29m 4s
+  Session packets: 78987
+  Rate: 125.6 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 79000  Packets: 79100  Packets: 79200  Packets: 79300  Packets: 79400
+--- Stats @ 2026-01-15T16:26:53.288Z ---
+  Runtime: 10h 30m 4s
+  Session packets: 79425
+  Rate: 126.1 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 79500  Packets: 79600  Packets: 79700  Packets: 79800
+--- Stats @ 2026-01-15T16:27:53.289Z ---
+  Runtime: 10h 31m 4s
+  Session packets: 79848
+  Rate: 126.5 packets/min
+  Last packet: 0s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 79900  Packets: 80000  Packets: 80100  Packets: 80200
+--- Stats @ 2026-01-15T16:28:53.302Z ---
+  Runtime: 10h 32m 4s
+  Session packets: 80288
+  Rate: 127.0 packets/min
+  Last packet: 1s ago
+  Current file: live_2026-01-15.jsonl
+  Packets: 80300  Packets: 80400

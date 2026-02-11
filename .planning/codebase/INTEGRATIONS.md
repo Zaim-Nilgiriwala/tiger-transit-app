@@ -1,176 +1,151 @@
 # External Integrations
 
-**Analysis Date:** 2026-02-03
+**Analysis Date:** 2026-02-11
 
 ## APIs & External Services
 
-**ETA SPOT Live Vehicle Tracking:**
-- Service: ETA SPOT (auburn.etaspot.com)
-  - What it's used for: Real-time vehicle position, speed, heading, occupancy, and ETA data
-  - SDK/Client: socket.io-client 4.8.3
-  - Auth: Cookie-based via `ETASPOT_COOKIE` environment variable
-  - Connection: `backend/src/services/etaspot.service.ts` connects to `https://auburn.etaspot.com` via WebSocket
-  - Protocol: Custom binary protocol with `sysRpt` messages containing vehicle telemetry
-  - Implementation: ETASpotService singleton emits vehicle position events to backend Socket.IO
+**Transit Data:**
+- ETA SPOT GTFS-RT Feed - Live vehicle positions and trip updates
+  - Position feed: `https://s3.amazonaws.com/etatransit.gtfs/auburn.etaspot.net/position_updates.pb`
+  - Trip updates feed: `https://s3.amazonaws.com/etatransit.gtfs/auburn.etaspot.net/trip_updates.pb`
+  - SDK/Client: `gtfs-realtime-bindings` 1.1.1 (Protocol Buffers decoder)
+  - Polling: 5-second interval (`backend/src/services/etaspot.service.ts`)
+  - Auth: None (public S3 endpoints)
 
-**Open-Meteo Weather API:**
-- Service: api.open-meteo.com/v1/forecast
-  - What it's used for: Historical and forecast weather data (precipitation, temperature)
-  - SDK/Client: openmeteo 1.2.3
-  - Auth: None (free public API)
-  - Implementation: `mobile/src/ETA-Model/getWeatherData.ts` fetches Auburn coordinates weather data
-  - Data: Hourly precipitation, precipitation probability, temperature (Auburn, AL)
+**Weather:**
+- Open-Meteo API - Historical weather data for ETA model features
+  - SDK/Client: `openmeteo` 1.2.3 (mobile app), custom fetch in Python scripts
+  - Auth: None (free API)
+  - Used for: `precipitation_mm`, `temperature_c` features in ML pipeline (`scripts/parse_weather.py`)
 
 ## Data Storage
 
 **Databases:**
-- PostgreSQL 15 + PostGIS
-  - Connection: `DATABASE_URL` environment variable
-  - Host (docker): postgres:5432
-  - Host (local): localhost:5432
-  - Credentials: `transit:transit_dev`
-  - Database: `tigertransit`
-  - Client: Prisma ORM (`@prisma/client` 5.20.0)
-  - Models: Agency, Route, Stop, Trip, StopTime, Shape, Calendar, CalendarDate, RouteGeometry, VehiclePosition, ServiceAlert
-  - Extension: PostGIS for geospatial queries (points, distance calculations)
+- PostgreSQL 15 with PostGIS 3.3
+  - Connection: `DATABASE_URL` env var (`postgresql://transit:transit_dev@localhost:5432/tigertransit`)
+  - Client: Prisma ORM 5.20.0 (`@prisma/client`)
+  - Schema: GTFS tables (routes, stops, trips, stop_times, shapes, calendar) + real-time tables (vehicle_positions, service_alerts, route_geometries)
+  - PostGIS extension: Geospatial queries for nearby stops, route shapes
+
+**File Storage:**
+- Local filesystem - Parquet files for ML pipeline
+  - Data location: `data/processed/` (gitignored, reproducible)
+  - Formats: `.parquet` (PyArrow), `.ubj` (XGBoost binary), `.json` (metrics)
+  - Model artifacts: `models/` directory (gitignored)
+- GTFS static data: `gtfs_data/` (committed)
 
 **Caching:**
 - Redis 7
-  - Connection: `REDIS_URL` environment variable
-  - Host (docker): redis:6379
-  - Host (local): localhost:6379
-  - Client: ioredis 5.4.1
-  - Purpose: Session storage, real-time vehicle position cache (implied by service architecture)
-
-**File Storage:**
-- Local filesystem only
-  - GTFS static feed files: `backend/` directory (imported via `scripts/import-gtfs.ts`)
-  - CSV import: Uses csv-parse 5.5.6 for parsing GTFS files
-  - Route polylines: Encoded as `polyline` format in `RouteGeometry` model
-
-**Mobile Local Storage:**
-- React Native Async Storage (`@react-native-async-storage/async-storage` 2.2.0)
-  - Purpose: Persist user preferences and cached API responses
+  - Connection: `REDIS_URL` env var (`redis://localhost:6379`)
+  - Client: `ioredis` 5.4.1
+  - Purpose: Real-time vehicle position caching, API response caching
 
 ## Authentication & Identity
 
 **Auth Provider:**
-- Custom/None - Application uses environment-based authentication
-  - ETA SPOT: Cookie-based authentication (session ID)
-  - Backend API: No authentication layer (development mode)
-  - CORS: Configured per environment via `CORS_ORIGIN` variable
+- None (public transit app)
+  - Implementation: No authentication system implemented
+  - Future consideration: User accounts for saved routes, notifications
 
 ## Monitoring & Observability
 
 **Error Tracking:**
-- Not detected - No Sentry, Rollbar, or similar configured
+- None (console logging only)
+  - Current: `console.log` and `console.error` in backend (`backend/src/index.ts`)
+  - Future: Sentry or similar recommended
 
 **Logs:**
-- Console-based logging
-  - Backend: `console.log()` calls for HTTP requests, WebSocket connections, ETA SPOT events
-  - Mobile: No explicit logging framework detected
-  - Implementation: `backend/src/index.ts` logs all requests with ISO timestamp
-
-**Health Check:**
-- HTTP: `GET /health` endpoint (`backend/src/routes/health.routes.ts`)
-- WebSocket status: ETA SPOT connection status tracked in `etaSpotService.isServiceConnected()`
+- Console output with timestamps
+  - Backend: Request logging middleware in `backend/src/index.ts`
+  - ML pipeline: Print statements in Python scripts
+  - No log aggregation or persistence
 
 ## CI/CD & Deployment
 
 **Hosting:**
-- Docker & Docker Compose (local development)
-  - `docker-compose.yml` orchestrates: PostgreSQL, Redis, Node.js backend
-  - Backend: node:20-alpine image
-  - Production deployment: Not specified (intended for Docker)
+- Not deployed (development only)
+  - Local Docker Compose environment (`docker-compose.yml`)
+  - Services: Postgres (port 5432), Redis (port 6379), Backend (port 3000)
 
 **CI Pipeline:**
-- Not detected - No GitHub Actions, GitLab CI, or similar
-
-**Package Management:**
-- npm for dependencies
-- Prisma migrations: `prisma migrate dev` command in backend scripts
+- None
+  - No GitHub Actions, CircleCI, or similar
+  - No automated testing or deployment
 
 ## Environment Configuration
 
 **Required env vars:**
 
-Backend (`backend/.env.example`):
-- `DATABASE_URL` - PostgreSQL connection string (CRITICAL)
-- `REDIS_URL` - Redis connection string (CRITICAL)
-- `PORT` - Server port (default 3000)
-- `NODE_ENV` - development/production
-- `GPS_ENABLED` - Enable GPS provider (false for mock data)
-- `GPS_PROVIDER` - mock or actual provider
-- `CORS_ORIGIN` - Allowed origins (default http://localhost:19006)
-- `ETASPOT_COOKIE` - Authentication for live vehicle data (optional but required for real tracking)
-  - Format: `express.sid=s%3A...` cookie string
-  - Default fallback: Hardcoded example cookie in `etaspot.service.ts` line 58
+Backend (`backend/.env`):
+- `DATABASE_URL` - PostgreSQL connection string
+- `REDIS_URL` - Redis connection string
+- `PORT` - API server port (default 3000)
+- `NODE_ENV` - Environment (development/production)
+- `GPS_ENABLED` - Enable/disable GPS features (boolean)
+- `CORS_ORIGIN` - CORS allowed origin (default *)
 
 Mobile:
-- API base URL: Hardcoded in `mobile/src/config/api.config.ts` as `http://10.2.1.96:3001`
+- None (API base URL hardcoded in `mobile/src/config/api.config.ts`)
 
 **Secrets location:**
-- Backend: `.env` file (NOT committed, use `.env.example` as template)
-- Mobile: Hardcoded URL in config file (security concern for production)
+- `.env` files (gitignored)
+- No secrets management system (Vault, AWS Secrets Manager, etc.)
 
 ## Webhooks & Callbacks
 
 **Incoming:**
-- Not detected - No webhook receivers configured
+- None
+  - No webhook endpoints implemented
 
 **Outgoing:**
-- ETA SPOT WebSocket: Bidirectional communication
-  - Client events: `subscribe:all`, `subscribe:route`, `subscribe:stop`, `unsubscribe:route`, `unsubscribe:stop`
-  - Server events: `sysRpt` (vehicle telemetry)
+- None
+  - No outbound webhooks to external services
 
-**Socket.IO Rooms:**
-Backend broadcasts vehicle data through Socket.IO rooms:
-- `all-vehicles` - All active vehicles
-- `route:{routeId}` - Vehicles on specific route
-- `stop:{stopId}` - Vehicles approaching specific stop
+## Real-Time Communication
 
-Mobile subscription:
-- `subscribe:all` - Get all vehicle updates
-- `subscribe:route` - Get vehicles on specific route
-- `subscribe:stop` - Get vehicles approaching stop
-- Events received: `vehicles` (batch), `vehicle` (single update), `arrival`, `vehicle:removed`
+**WebSocket:**
+- Socket.IO 4.8.3 - Bidirectional real-time updates
+  - Server: Backend (`backend/src/index.ts`)
+  - Clients: Mobile app (`mobile/`), root-level socket client
+  - Channels:
+    - `all-vehicles` - Subscribe to all vehicle position updates
+    - `route:{routeId}` - Subscribe to specific route vehicles
+    - `stop:{stopId}` - Subscribe to arrivals at specific stop
+  - Events emitted:
+    - `vehicles` - Vehicle position array
+    - `arrivals` - Arrival predictions for stop
+    - `connected` / `disconnected` - Connection status
 
-## Real-time Data Flow
+## ML Model Data Pipeline
 
-**Vehicle Position Updates:**
-1. ETA SPOT sends `sysRpt` WebSocket message to backend service
-2. ETASpotService transforms raw ETA SPOT message format to normalized VehiclePosition
-3. Backend emits events:
-   - `io.to('all-vehicles').emit('vehicle', vehicle)` - All subscribers
-   - `io.to('route:{routeId}').emit('vehicle', vehicle)` - Route subscribers
-   - `io.to('stop:{stopId}').emit('arrival', vehicle)` - Stop subscribers
-4. Mobile receives via `socket.io-client` hooks (`useVehicles`, `useStopArrivals`)
-5. Mobile displays on map (`react-native-maps`) with real-time updates
+**Input Data Sources:**
+- ETA SPOT IRM API (historical playback)
+  - Collector: `batchCollector.js` (Node.js script)
+  - Output: JSONL files (`sysRpt_*.jsonl`) with telemetry records
+  - Gitignored (reproduced by running collector)
 
-**Periodic Broadcasts:**
-- Every 3 seconds: Backend broadcasts all active vehicles to `all-vehicles` room
-- Vehicle data filtered by 2-minute staleness threshold
+**Processing Pipeline:**
+1. Parse raw JSONL → Parquet (`scripts/parse_telemetry.py`, `parse_arrivals.py`, `parse_timepoints.py`, `parse_weather.py`)
+2. Build features → `{train,val,test}_featured_v2.parquet` (`scripts/build_features.py`, `build_differentiator_features.py`)
+3. Train XGBoost models (`scripts/train_baseline.py`, `train_advanced.py`, `train_asymmetric_quantile.py`)
+4. Evaluate → JSON metrics + PNG plots (`scripts/evaluate.py`)
 
-## GTFS Data Integration
+**Model Serving:**
+- Not implemented (models saved as `.ubj` files, no inference endpoint)
+- Future: FastAPI server or integration into backend Express API
+
+## GTFS Static Data
 
 **Source:**
-- Static GTFS feed files (location not specified in codebase)
-- Assumed: Auburn Transit agency GTFS data
+- Auburn University GTFS feed
+  - Format: ZIP archive (`gtfs_109.zip`, gitignored)
+  - Extracted to: `gtfs_data/` (CSV files, committed)
+  - Import script: `backend/scripts/import-gtfs.ts` (loads into Postgres via Prisma)
 
-**Import Process:**
-- Backend script: `backend/scripts/import-gtfs.ts`
-- Tools: csv-parse 5.5.6 for CSV parsing
-- Destination: PostgreSQL via Prisma
-- Tables populated: Agency, Route, Stop, Trip, StopTime, Shape, Calendar, CalendarDate
-
-**Tables Queried by API:**
-- `routes` - GET /routes, /routes/:id
-- `stops` - GET /stops, /stops/:id, /stops/nearby
-- `trips` - Referenced in route details
-- `stop_times` - Stop arrival schedules
-- `shapes` - Route geometry/polylines
-- `calendar` - Service schedules
+**Contents:**
+- 40+ routes, 178 stops, 1,041+ trips, 8,269+ stop times, 16,638+ shape points
+- Files: `routes.txt`, `stops.txt`, `trips.txt`, `stop_times.txt`, `shapes.txt`, `calendar.txt`, `calendar_dates.txt`, `agency.txt`
 
 ---
 
-*Integration audit: 2026-02-03*
+*Integration audit: 2026-02-11*

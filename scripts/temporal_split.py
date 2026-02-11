@@ -5,11 +5,11 @@ Reads:  data/processed/labeled.parquet
 Writes: data/processed/train.parquet, data/processed/val.parquet, data/processed/test.parquet
 
 Temporal splits (Nov 6 - Dec 20):
-  Train: Nov 6 - Dec 1  (26 days)
-  Gap:   Dec 2           (1 day, discarded)
-  Val:   Dec 3 - Dec 8   (6 days)
-  Gap:   Dec 9           (1 day, discarded)
-  Test:  Dec 10 - Dec 20 (11 days)
+  Train: Nov 6 - Nov 29  (24 days)
+  Gap:   Nov 30           (1 day, discarded)
+  Val:   Dec 1 - Dec 6    (6 days)
+  Gap:   Dec 7            (1 day, discarded)
+  Test:  Dec 8 - Dec 18   (11 days)
 """
 
 import datetime
@@ -25,13 +25,13 @@ LABELED_PATH = OUTPUT_DIR / "labeled.parquet"
 
 # Temporal split boundaries
 TRAIN_START = datetime.date(2025, 11, 6)
-TRAIN_END = datetime.date(2025, 12, 1)  # inclusive
-GAP1 = datetime.date(2025, 12, 2)
-VAL_START = datetime.date(2025, 12, 3)
-VAL_END = datetime.date(2025, 12, 8)    # inclusive
-GAP2 = datetime.date(2025, 12, 9)
-TEST_START = datetime.date(2025, 12, 10)
-TEST_END = datetime.date(2025, 12, 20)  # inclusive
+TRAIN_END = datetime.date(2025, 11, 29)  # inclusive
+GAP1 = datetime.date(2025, 11, 30)
+VAL_START = datetime.date(2025, 12, 1)
+VAL_END = datetime.date(2025, 12, 6)    # inclusive
+GAP2 = datetime.date(2025, 12, 7)
+TEST_START = datetime.date(2025, 12, 8)
+TEST_END = datetime.date(2025, 12, 18)  # inclusive
 
 
 def main() -> None:
