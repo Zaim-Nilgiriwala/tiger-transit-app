@@ -1,0 +1,1255 @@
+[
+  {
+    "id": "20",
+    "name": "160 Ross",
+    "lat": 32.60857773,
+    "lon": -85.47303772,
+    "code": "20"
+  },
+  {
+    "id": "170",
+    "name": "319 Bragg",
+    "lat": 32.61083984,
+    "lon": -85.48766327,
+    "code": "170"
+  },
+  {
+    "id": "183",
+    "name": "3-D Arts Center & Facilities Management",
+    "lat": 32.59994125,
+    "lon": -85.5034256,
+    "code": "183"
+  },
+  {
+    "id": "242",
+    "name": "3D Arts & Gameday Facilities",
+    "lat": 32.59930038,
+    "lon": -85.50347137,
+    "code": "1856J"
+  },
+  {
+    "id": "243",
+    "name": "ADA GPAC @ War Eagle Way",
+    "lat": 32.60473633,
+    "lon": -85.49082947,
+    "code": "1856I"
+  },
+  {
+    "id": "233",
+    "name": "ADA Lot @ VCOM",
+    "lat": 32.58918381,
+    "lon": -85.49391937,
+    "code": "1856A"
+  },
+  {
+    "id": "234",
+    "name": "ADA @ War Eagle Way",
+    "lat": 32.60477066,
+    "lon": -85.49085999,
+    "code": "1856B"
+  },
+  {
+    "id": "166",
+    "name": "Asian Supermarket",
+    "lat": 32.63280869,
+    "lon": -85.43327332,
+    "code": "166"
+  },
+  {
+    "id": "7",
+    "name": "Aspen Heights Ln",
+    "lat": 32.6187706,
+    "lon": -85.46521759,
+    "code": "7"
+  },
+  {
+    "id": "129",
+    "name": "AU Alumni Center",
+    "lat": 32.60138321,
+    "lon": -85.48001099,
+    "code": "129"
+  },
+  {
+    "id": "150",
+    "name": "Auburn City Hall",
+    "lat": 32.60798264,
+    "lon": -85.47980499,
+    "code": "150"
+  },
+  {
+    "id": "193",
+    "name": "Auburn Mall",
+    "lat": 32.62784958,
+    "lon": -85.44498444,
+    "code": "193"
+  },
+  {
+    "id": "236",
+    "name": "Auburn Mall @ War Eagle Way",
+    "lat": 32.60480499,
+    "lon": -85.49198914,
+    "code": "1856D"
+  },
+  {
+    "id": "32",
+    "name": "Auburn Medical Park",
+    "lat": 32.62809753,
+    "lon": -85.45615387,
+    "code": "32"
+  },
+  {
+    "id": "152",
+    "name": "Auburn Post Office",
+    "lat": 32.61233139,
+    "lon": -85.47561646,
+    "code": "152"
+  },
+  {
+    "id": "238",
+    "name": "Auburn Softball Complex",
+    "lat": 32.55353165,
+    "lon": -85.51000214,
+    "code": "1856F"
+  },
+  {
+    "id": "131",
+    "name": "AU Federal Credit Union",
+    "lat": 32.57991409,
+    "lon": -85.48937225,
+    "code": "131"
+  },
+  {
+    "id": "26",
+    "name": "AU Impound Lot",
+    "lat": 32.60381317,
+    "lon": -85.49980927,
+    "code": "26"
+  },
+  {
+    "id": "216",
+    "name": "AU Medical Center SQ",
+    "lat": 32.59267044,
+    "lon": -85.48773193,
+    "code": "216"
+  },
+  {
+    "id": "185",
+    "name": "AU Medical Clinic",
+    "lat": 32.59262085,
+    "lon": -85.48786163,
+    "code": "185"
+  },
+  {
+    "id": "76",
+    "name": "AU Research Park & The Edge Apartments",
+    "lat": 32.58441925,
+    "lon": -85.4940033,
+    "code": "76"
+  },
+  {
+    "id": "237",
+    "name": "AU Softball Complex @ War Eagle Way",
+    "lat": 32.60480881,
+    "lon": -85.49149323,
+    "code": "1856E"
+  },
+  {
+    "id": "154",
+    "name": "Barron's Trailer Park",
+    "lat": 32.57901764,
+    "lon": -85.52285004,
+    "code": "154"
+  },
+  {
+    "id": "157",
+    "name": "Beard Eaves Memorial Coliseum / South Donahue Residence Hall",
+    "lat": 32.59891891,
+    "lon": -85.4905014,
+    "code": "157"
+  },
+  {
+    "id": "158",
+    "name": "Beech St & Magnolia Ave",
+    "lat": 32.60602951,
+    "lon": -85.50088501,
+    "code": "158"
+  },
+  {
+    "id": "222",
+    "name": "Beech Street and Magnolia",
+    "lat": 32.60606003,
+    "lon": -85.5008316,
+    "code": "222"
+  },
+  {
+    "id": "17",
+    "name": "Beech St & West Thach Ave",
+    "lat": 32.60482788,
+    "lon": -85.50082397,
+    "code": "17"
+  },
+  {
+    "id": "132",
+    "name": "Bellwood",
+    "lat": 32.58963394,
+    "lon": -85.52215576,
+    "code": "132"
+  },
+  {
+    "id": "18",
+    "name": "Biggin Hall & Ramsay Hall (From Campus)",
+    "lat": 32.60648727,
+    "lon": -85.4827652,
+    "code": "18"
+  },
+  {
+    "id": "19",
+    "name": "Biggin Hall & Ramsay Hall (To Campus)",
+    "lat": 32.60662079,
+    "lon": -85.48327637,
+    "code": "19"
+  },
+  {
+    "id": "31",
+    "name": "Bowlero Auburn",
+    "lat": 32.61610031,
+    "lon": -85.46630096,
+    "code": "31"
+  },
+  {
+    "id": "125",
+    "name": "Burton House / Terra Nova Apts / Cavell Court",
+    "lat": 32.60662079,
+    "lon": -85.47750092,
+    "code": "125"
+  },
+  {
+    "id": "68",
+    "name": "Cambridge Residence Hall",
+    "lat": 32.60317612,
+    "lon": -85.47996521,
+    "code": "68"
+  },
+  {
+    "id": "163",
+    "name": "Cary Drive & North Donahue Dr",
+    "lat": 32.61778641,
+    "lon": -85.49040222,
+    "code": "163"
+  },
+  {
+    "id": "271",
+    "name": "Charter 2",
+    "lat": 32.6026001,
+    "lon": -85.48993683,
+    "code": "CH2"
+  },
+  {
+    "id": "270",
+    "name": "Charter Stop",
+    "lat": 32.60219574,
+    "lon": -85.48815918,
+    "code": "CH1"
+  },
+  {
+    "id": "15",
+    "name": "College Mobile Home Park",
+    "lat": 32.58084869,
+    "lon": -85.52098083,
+    "code": "15"
+  },
+  {
+    "id": "133",
+    "name": "College of Veterinary Medicine",
+    "lat": 32.58882523,
+    "lon": -85.51035309,
+    "code": "133"
+  },
+  {
+    "id": "16",
+    "name": "Conway Acres",
+    "lat": 32.5800705,
+    "lon": -85.52204895,
+    "code": "16"
+  },
+  {
+    "id": "98",
+    "name": "Creekside 1st Stop",
+    "lat": 32.62038803,
+    "lon": -85.46694183,
+    "code": "98"
+  },
+  {
+    "id": "99",
+    "name": "Creekside 2nd Stop",
+    "lat": 32.6199379,
+    "lon": -85.46949768,
+    "code": "99"
+  },
+  {
+    "id": "23",
+    "name": "Creekside 3rd Stop",
+    "lat": 32.61798096,
+    "lon": -85.46782684,
+    "code": "23"
+  },
+  {
+    "id": "96",
+    "name": "Crossland Downs & Large Animal Teaching Hospital",
+    "lat": 32.58694077,
+    "lon": -85.51358032,
+    "code": "96"
+  },
+  {
+    "id": "97",
+    "name": "Crossland Downs & Stone Gate Mobile Home Community",
+    "lat": 32.58670044,
+    "lon": -85.5134201,
+    "code": "97"
+  },
+  {
+    "id": "102",
+    "name": "Deerwood Apartments",
+    "lat": 32.6093483,
+    "lon": -85.47052002,
+    "code": "102"
+  },
+  {
+    "id": "126",
+    "name": "Delta Aviation School",
+    "lat": 32.61011505,
+    "lon": -85.44020081,
+    "code": "126"
+  },
+  {
+    "id": "101",
+    "name": "Donahue Crossing 1st Stop",
+    "lat": 32.63232803,
+    "lon": -85.49978638,
+    "code": "101"
+  },
+  {
+    "id": "100",
+    "name": "Donahue Crossing 2nd Stop",
+    "lat": 32.63162613,
+    "lon": -85.5012207,
+    "code": "100"
+  },
+  {
+    "id": "95",
+    "name": "Donahue Crossing 3rd Stop",
+    "lat": 32.63365173,
+    "lon": -85.5007782,
+    "code": "95"
+  },
+  {
+    "id": "21",
+    "name": "Downs Way & West Longleaf Dr",
+    "lat": 32.57255173,
+    "lon": -85.51277161,
+    "code": "21"
+  },
+  {
+    "id": "240",
+    "name": "Duck Samford Park",
+    "lat": 32.61310959,
+    "lon": -85.44384003,
+    "code": "1856H"
+  },
+  {
+    "id": "239",
+    "name": "Duck Samford @ War Eagle Way",
+    "lat": 32.60485077,
+    "lon": -85.49299622,
+    "code": "1856G"
+  },
+  {
+    "id": "232",
+    "name": "Duncan Dr & The College of Education",
+    "lat": 32.59675217,
+    "lon": -85.48748779,
+    "code": "232"
+  },
+  {
+    "id": "113",
+    "name": "Dwell Logan Square Apartments 2nd Stop",
+    "lat": 32.60911179,
+    "lon": -85.49588776,
+    "code": "113"
+  },
+  {
+    "id": "52",
+    "name": "Dwell Logan Square Apt 1st Stop",
+    "lat": 32.60805511,
+    "lon": -85.49891663,
+    "code": "52"
+  },
+  {
+    "id": "33",
+    "name": "Eagles Landing 1st Stop",
+    "lat": 32.57167816,
+    "lon": -85.51615143,
+    "code": "33"
+  },
+  {
+    "id": "104",
+    "name": "Eagle's Landing 2nd Stop",
+    "lat": 32.57165909,
+    "lon": -85.51596069,
+    "code": "104"
+  },
+  {
+    "id": "149",
+    "name": "Eagles West Apartments",
+    "lat": 32.60628891,
+    "lon": -85.49487305,
+    "code": "149"
+  },
+  {
+    "id": "224",
+    "name": "Eagles West Apartments",
+    "lat": 32.60645294,
+    "lon": -85.49529266,
+    "code": "224"
+  },
+  {
+    "id": "181",
+    "name": "East Drake Ave & North Ross St",
+    "lat": 32.61431885,
+    "lon": -85.47579193,
+    "code": "181"
+  },
+  {
+    "id": "167",
+    "name": "East Glenn Administrative Support Building / HR",
+    "lat": 32.60758209,
+    "lon": -85.44792175,
+    "code": "167"
+  },
+  {
+    "id": "134",
+    "name": "East Thach Ave & Cove Ct",
+    "lat": 32.60436249,
+    "lon": -85.46627045,
+    "code": "134"
+  },
+  {
+    "id": "86",
+    "name": "Edge West Apartments",
+    "lat": 32.60627365,
+    "lon": -85.4965744,
+    "code": "86"
+  },
+  {
+    "id": "208",
+    "name": "Edge West Apartments",
+    "lat": 32.60643005,
+    "lon": -85.49642181,
+    "code": "208"
+  },
+  {
+    "id": "190",
+    "name": "Evergreen Apartments",
+    "lat": 32.58271027,
+    "lon": -85.49124146,
+    "code": "190"
+  },
+  {
+    "id": "13",
+    "name": "Extension Loop",
+    "lat": 32.60298538,
+    "lon": -85.49668121,
+    "code": "13"
+  },
+  {
+    "id": "231",
+    "name": "FA 2",
+    "lat": 32.58930588,
+    "lon": -85.48619843,
+    "code": "231"
+  },
+  {
+    "id": "241",
+    "name": "Facilities @ War Eagle Way",
+    "lat": 32.60480881,
+    "lon": -85.49241638,
+    "code": "1856I"
+  },
+  {
+    "id": "179",
+    "name": "FarmHouse Fraternity",
+    "lat": 32.60406876,
+    "lon": -85.49725342,
+    "code": "179"
+  },
+  {
+    "id": "235",
+    "name": "Football Drop-Off/Pick-Up @ Auburn Mall",
+    "lat": 32.62844467,
+    "lon": -85.44937897,
+    "code": "1856C"
+  },
+  {
+    "id": "177",
+    "name": "French Quarter",
+    "lat": 32.57772064,
+    "lon": -85.48954773,
+    "code": "177"
+  },
+  {
+    "id": "276",
+    "name": "FSS Stop1",
+    "lat": 32.60245132,
+    "lon": -85.48805237,
+    "code": "FSS 1"
+  },
+  {
+    "id": "277",
+    "name": "FSS Stop 2",
+    "lat": 32.60230637,
+    "lon": -85.49004364,
+    "code": "FSS 2"
+  },
+  {
+    "id": "246",
+    "name": "Gameday  GPAC",
+    "lat": 32.58921432,
+    "lon": -85.48614502,
+    "code": "1856J"
+  },
+  {
+    "id": "118",
+    "name": "Gay St & E Drake Ave",
+    "lat": 32.61508179,
+    "lon": -85.47956848,
+    "code": "118"
+  },
+  {
+    "id": "130",
+    "name": "Gay St & Mitcham Ave (The Standard)",
+    "lat": 32.6096611,
+    "lon": -85.47984314,
+    "code": "130"
+  },
+  {
+    "id": "178",
+    "name": "Gazebo Apartments",
+    "lat": 32.61764908,
+    "lon": -85.47519684,
+    "code": "178"
+  },
+  {
+    "id": "175",
+    "name": "Gentilly Park",
+    "lat": 32.58179092,
+    "lon": -85.52009583,
+    "code": "175"
+  },
+  {
+    "id": "176",
+    "name": "Gentilly Park",
+    "lat": 32.58760071,
+    "lon": -85.52120209,
+    "code": "176"
+  },
+  {
+    "id": "29",
+    "name": "Gentry Dr & Drew Ln",
+    "lat": 32.62450027,
+    "lon": -85.45932007,
+    "code": "29"
+  },
+  {
+    "id": "79",
+    "name": "Gogue Performing Arts Center",
+    "lat": 32.58897018,
+    "lon": -85.4866333,
+    "code": "79"
+  },
+  {
+    "id": "174",
+    "name": "Goodwin Music Hall/Telfair B. Peet Theatre",
+    "lat": 32.59817123,
+    "lon": -85.4864502,
+    "code": "174"
+  },
+  {
+    "id": "48",
+    "name": "Greene Hall",
+    "lat": 32.58934021,
+    "lon": -85.51021576,
+    "code": "48"
+  },
+  {
+    "id": "171",
+    "name": "Harmon Duplexes 1st Stop",
+    "lat": 32.56602097,
+    "lon": -85.49603271,
+    "code": "171"
+  },
+  {
+    "id": "172",
+    "name": "Harmon Duplexes 2nd Stop",
+    "lat": 32.56805038,
+    "lon": -85.49607086,
+    "code": "172"
+  },
+  {
+    "id": "103",
+    "name": "Harper Ave & Cook St / Deerfield Condominiums",
+    "lat": 32.61053085,
+    "lon": -85.47409821,
+    "code": "103"
+  },
+  {
+    "id": "322",
+    "name": "Harper Flatts",
+    "lat": 32.59535217,
+    "lon": -85.50646973,
+    "code": "HF"
+  },
+  {
+    "id": "59",
+    "name": "Health Sciences Sector",
+    "lat": 32.59161758,
+    "lon": -85.49195099,
+    "code": "59"
+  },
+  {
+    "id": "209",
+    "name": "Hemlock at W. Magnolia",
+    "lat": 32.6063385,
+    "lon": -85.49876404,
+    "code": "209"
+  },
+  {
+    "id": "46",
+    "name": "Highland Condominiums",
+    "lat": 32.61048508,
+    "lon": -85.47039032,
+    "code": "46"
+  },
+  {
+    "id": "162",
+    "name": "Impound Lot",
+    "lat": 32.60303116,
+    "lon": -85.50079346,
+    "code": "162"
+  },
+  {
+    "id": "42",
+    "name": "Intramural Field (Biggio Drive)",
+    "lat": 32.59564972,
+    "lon": -85.49802399,
+    "code": "42"
+  },
+  {
+    "id": "274",
+    "name": "jAUnt Stop 1",
+    "lat": 32.60253525,
+    "lon": -85.48988342,
+    "code": "JT 1"
+  },
+  {
+    "id": "275",
+    "name": "jAUnt Stop 2",
+    "lat": 32.60213852,
+    "lon": -85.48815918,
+    "code": "JT 2"
+  },
+  {
+    "id": "284",
+    "name": "Jordan Hare Stadium",
+    "lat": 32.60050964,
+    "lon": -85.49131775,
+    "code": "PG 1"
+  },
+  {
+    "id": "105",
+    "name": "Jule Collins Smith Museum of Art",
+    "lat": 32.58793259,
+    "lon": -85.48312378,
+    "code": "105"
+  },
+  {
+    "id": "41",
+    "name": "KA Stop",
+    "lat": 32.5969162,
+    "lon": -85.49975586,
+    "code": "41"
+  },
+  {
+    "id": "107",
+    "name": "Lakewood Commons",
+    "lat": 32.5778389,
+    "lon": -85.49308777,
+    "code": "107"
+  },
+  {
+    "id": "53",
+    "name": "Lem Morrison Dr & Donahue Dr",
+    "lat": 32.5927124,
+    "lon": -85.48778534,
+    "code": "53"
+  },
+  {
+    "id": "110",
+    "name": "Lem Morrison Drive (New Frat Row)",
+    "lat": 32.59494781,
+    "lon": -85.49923706,
+    "code": "110"
+  },
+  {
+    "id": "92",
+    "name": "Longleaf Villas",
+    "lat": 32.57292938,
+    "lon": -85.50569916,
+    "code": "92"
+  },
+  {
+    "id": "115",
+    "name": "Lowder Hall",
+    "lat": 32.60509872,
+    "lon": -85.49057007,
+    "code": "115"
+  },
+  {
+    "id": "114",
+    "name": "Lowder Hall & Shelby Center (From Campus)",
+    "lat": 32.60643005,
+    "lon": -85.48603058,
+    "code": "114"
+  },
+  {
+    "id": "187",
+    "name": "Lowder Hall & Shelby Center (To Campus)",
+    "lat": 32.6065712,
+    "lon": -85.4861145,
+    "code": "187"
+  },
+  {
+    "id": "203",
+    "name": "Madison Park",
+    "lat": 32.58332825,
+    "lon": -85.51820374,
+    "code": "203"
+  },
+  {
+    "id": "137",
+    "name": "Magnolia Woods Apartments & Greystone Manor",
+    "lat": 32.60665131,
+    "lon": -85.47384644,
+    "code": "137"
+  },
+  {
+    "id": "200",
+    "name": "Martin Ave & North Gay St",
+    "lat": 32.61748123,
+    "lon": -85.47955322,
+    "code": "200"
+  },
+  {
+    "id": "199",
+    "name": "Mary Ln & Harris Ave",
+    "lat": 32.61885071,
+    "lon": -85.47367859,
+    "code": "199"
+  },
+  {
+    "id": "196",
+    "name": "Mell St Station",
+    "lat": 32.60116959,
+    "lon": -85.4832077,
+    "code": "196"
+  },
+  {
+    "id": "88",
+    "name": "Neville Arena",
+    "lat": 32.60245132,
+    "lon": -85.49192047,
+    "code": "88"
+  },
+  {
+    "id": "122",
+    "name": "North Dean & Drew Ln",
+    "lat": 32.62440872,
+    "lon": -85.46163177,
+    "code": "122"
+  },
+  {
+    "id": "73",
+    "name": "North Ross St & Martin Ave",
+    "lat": 32.6160202,
+    "lon": -85.47573853,
+    "code": "73"
+  },
+  {
+    "id": "74",
+    "name": "North Ross St & Mary Ln",
+    "lat": 32.61862183,
+    "lon": -85.47551727,
+    "code": "74"
+  },
+  {
+    "id": "58",
+    "name": "Opelika Wal-Mart",
+    "lat": 32.63735962,
+    "lon": -85.42124176,
+    "code": "58"
+  },
+  {
+    "id": "318",
+    "name": "Pan 1",
+    "lat": 32.60320282,
+    "lon": -85.49138641,
+    "code": "Pan 1"
+  },
+  {
+    "id": "319",
+    "name": "Pan 2",
+    "lat": 32.59250641,
+    "lon": -85.48828888,
+    "code": "Pan 2"
+  },
+  {
+    "id": "77",
+    "name": "Peachtree Apartments",
+    "lat": 32.60904312,
+    "lon": -85.49209595,
+    "code": "77"
+  },
+  {
+    "id": "285",
+    "name": "Pre Game 2",
+    "lat": 32.60007858,
+    "lon": -85.49154663,
+    "code": "PG 2"
+  },
+  {
+    "id": "279",
+    "name": "Recruitment 1",
+    "lat": 32.60112,
+    "lon": -85.49045563,
+    "code": "Rec 1"
+  },
+  {
+    "id": "280",
+    "name": "Recruitment 2",
+    "lat": 32.60106277,
+    "lon": -85.48867035,
+    "code": "Rec2"
+  },
+  {
+    "id": "315",
+    "name": "Research Park To Campus",
+    "lat": 32.58591461,
+    "lon": -85.49367523,
+    "code": "Res P"
+  },
+  {
+    "id": "65",
+    "name": "Ridgewood Village",
+    "lat": 32.58733368,
+    "lon": -85.52124023,
+    "code": "65"
+  },
+  {
+    "id": "186",
+    "name": "Riverwalk Apartments & The View (From Campus))",
+    "lat": 32.6119194,
+    "lon": -85.49025726,
+    "code": "186"
+  },
+  {
+    "id": "69",
+    "name": "Riverwalk Apartments & The View (To Campus)",
+    "lat": 32.61189651,
+    "lon": -85.49053192,
+    "code": "69"
+  },
+  {
+    "id": "94",
+    "name": "Ross St &  Harper Ave / Regency Square Apartments",
+    "lat": 32.61109924,
+    "lon": -85.47538757,
+    "code": "94"
+  },
+  {
+    "id": "191",
+    "name": "Samford Square",
+    "lat": 32.57448578,
+    "lon": -85.50308228,
+    "code": "191"
+  },
+  {
+    "id": "2",
+    "name": "Sanders St & Bragg Ave",
+    "lat": 32.61102676,
+    "lon": -85.48413849,
+    "code": "2"
+  },
+  {
+    "id": "9",
+    "name": "Sanders St & Drake Ave (OB)",
+    "lat": 32.61408234,
+    "lon": -85.48377228,
+    "code": "9"
+  },
+  {
+    "id": "50",
+    "name": "Sara St & Harmon Dr",
+    "lat": 32.56909943,
+    "lon": -85.4980011,
+    "code": "50"
+  },
+  {
+    "id": "169",
+    "name": "Sara St & Veterans Pkwy",
+    "lat": 32.56461334,
+    "lon": -85.49790955,
+    "code": "169"
+  },
+  {
+    "id": "148",
+    "name": "Savannah Sq & Williamsburg Pl",
+    "lat": 32.56541824,
+    "lon": -85.50000763,
+    "code": "148"
+  },
+  {
+    "id": "320",
+    "name": "Shuttle 1",
+    "lat": 32.6023407,
+    "lon": -85.48807526,
+    "code": "S 1"
+  },
+  {
+    "id": "321",
+    "name": "Shuttle 2",
+    "lat": 32.60264969,
+    "lon": -85.48988342,
+    "code": "S 2"
+  },
+  {
+    "id": "55",
+    "name": "South College St & East Longleaf Dr",
+    "lat": 32.57249832,
+    "lon": -85.49623108,
+    "code": "55"
+  },
+  {
+    "id": "66",
+    "name": "South College St & East University Dr",
+    "lat": 32.57686996,
+    "lon": -85.4961319,
+    "code": "66"
+  },
+  {
+    "id": "136",
+    "name": "South Donahue Dr & Woodfield Dr",
+    "lat": 32.58892441,
+    "lon": -85.48982239,
+    "code": "136"
+  },
+  {
+    "id": "143",
+    "name": "South Donahue Dr & Woodfield Dr",
+    "lat": 32.58887863,
+    "lon": -85.48983002,
+    "code": "143"
+  },
+  {
+    "id": "189",
+    "name": "South Donahue Residence Hall",
+    "lat": 32.59762573,
+    "lon": -85.48976898,
+    "code": "189"
+  },
+  {
+    "id": "147",
+    "name": "Southern Edge Apartments",
+    "lat": 32.57753372,
+    "lon": -85.48795319,
+    "code": "147"
+  },
+  {
+    "id": "30",
+    "name": "South Quad Parking Deck",
+    "lat": 32.59372711,
+    "lon": -85.48662567,
+    "code": "30"
+  },
+  {
+    "id": "215",
+    "name": "South Quad Parking Deck SQ",
+    "lat": 32.59375763,
+    "lon": -85.48670197,
+    "code": "215"
+  },
+  {
+    "id": "268",
+    "name": "Stop 1",
+    "lat": 32.58076096,
+    "lon": -85.51861572,
+    "code": "st1"
+  },
+  {
+    "id": "265",
+    "name": "Stop 2",
+    "lat": 32.58185959,
+    "lon": -85.51969147,
+    "code": "ST2"
+  },
+  {
+    "id": "266",
+    "name": "Stop 3",
+    "lat": 32.57948303,
+    "lon": -85.52285767,
+    "code": "ST2"
+  },
+  {
+    "id": "267",
+    "name": "Stop 4",
+    "lat": 32.5815773,
+    "lon": -85.51943207,
+    "code": "ST3"
+  },
+  {
+    "id": "47",
+    "name": "Student Center Greenspace Pavilion",
+    "lat": 32.60183716,
+    "lon": -85.4876709,
+    "code": "47"
+  },
+  {
+    "id": "56",
+    "name": "Student Center Haley Center Pavillion",
+    "lat": 32.60241699,
+    "lon": -85.48751831,
+    "code": "56"
+  },
+  {
+    "id": "57",
+    "name": "Student Center Stadium Parking Deck Pavilion",
+    "lat": 32.60108185,
+    "lon": -85.48836517,
+    "code": "57"
+  },
+  {
+    "id": "139",
+    "name": "Summer Wind Apartments & The Domain",
+    "lat": 32.62553024,
+    "lon": -85.49465179,
+    "code": "139"
+  },
+  {
+    "id": "138",
+    "name": "Terrell Dining Hall",
+    "lat": 32.59583282,
+    "lon": -85.48605347,
+    "code": "138"
+  },
+  {
+    "id": "165",
+    "name": "The Beacon",
+    "lat": 32.58178329,
+    "lon": -85.49327087,
+    "code": "165"
+  },
+  {
+    "id": "89",
+    "name": "The Brookes & Hearthstone",
+    "lat": 32.58533096,
+    "lon": -85.51534271,
+    "code": "89"
+  },
+  {
+    "id": "112",
+    "name": "The Grove",
+    "lat": 32.60906982,
+    "lon": -85.49925995,
+    "code": "112"
+  },
+  {
+    "id": "153",
+    "name": "The Hub Apartments",
+    "lat": 32.59539413,
+    "lon": -85.5063324,
+    "code": "153"
+  },
+  {
+    "id": "117",
+    "name": "The Magnolia 1st Stop",
+    "lat": 32.57307816,
+    "lon": -85.50286102,
+    "code": "117"
+  },
+  {
+    "id": "116",
+    "name": "The Magnolia 2nd Stop",
+    "lat": 32.57143021,
+    "lon": -85.50354767,
+    "code": "116"
+  },
+  {
+    "id": "198",
+    "name": "The McWhorter Center",
+    "lat": 32.59741592,
+    "lon": -85.49529266,
+    "code": "198"
+  },
+  {
+    "id": "188",
+    "name": "The Mill",
+    "lat": 32.57497025,
+    "lon": -85.49067688,
+    "code": "188"
+  },
+  {
+    "id": "87",
+    "name": "The Village",
+    "lat": 32.6047287,
+    "lon": -85.49375153,
+    "code": "87"
+  },
+  {
+    "id": "248",
+    "name": "Tiger Town Dick's Sporting Goods",
+    "lat": 32.61669922,
+    "lon": -85.40872955,
+    "code": "1856L"
+  },
+  {
+    "id": "4",
+    "name": "Tiger Town Kroger",
+    "lat": 32.62068176,
+    "lon": -85.4108963,
+    "code": "4"
+  },
+  {
+    "id": "247",
+    "name": "Tiger Town @ War Eagle Way",
+    "lat": 32.60481644,
+    "lon": -85.49353027,
+    "code": "1856K"
+  },
+  {
+    "id": "144",
+    "name": "Tullahoma Dr at Shelton Mill Rd",
+    "lat": 32.62438965,
+    "lon": -85.47486115,
+    "code": "144"
+  },
+  {
+    "id": "272",
+    "name": "Van Stop 1",
+    "lat": 32.60221481,
+    "lon": -85.48810577,
+    "code": "VS 1"
+  },
+  {
+    "id": "273",
+    "name": "Van Stop 2",
+    "lat": 32.60255432,
+    "lon": -85.48990631,
+    "code": "VS 2"
+  },
+  {
+    "id": "54",
+    "name": "VCOM",
+    "lat": 32.58822632,
+    "lon": -85.49024963,
+    "code": "54"
+  },
+  {
+    "id": "14",
+    "name": "Village North (From Campus)",
+    "lat": 32.61397171,
+    "lon": -85.49034882,
+    "code": "14"
+  },
+  {
+    "id": "64",
+    "name": "Village North (To Campus)",
+    "lat": 32.61407089,
+    "lon": -85.49054718,
+    "code": "64"
+  },
+  {
+    "id": "84",
+    "name": "Webster Crossing",
+    "lat": 32.59521484,
+    "lon": -85.52407837,
+    "code": "84"
+  },
+  {
+    "id": "91",
+    "name": "West Magnolia Ave & Hemlock Dr",
+    "lat": 32.60620117,
+    "lon": -85.49915314,
+    "code": "91"
+  },
+  {
+    "id": "250",
+    "name": "West Parking - Game Day",
+    "lat": 32.60412979,
+    "lon": -85.50192261,
+    "code": "1856N"
+  },
+  {
+    "id": "85",
+    "name": "West Parking Lot",
+    "lat": 32.60409546,
+    "lon": -85.50190735,
+    "code": "85"
+  },
+  {
+    "id": "207",
+    "name": "West Parking Lot #2",
+    "lat": 32.60379791,
+    "lon": -85.50190735,
+    "code": "207"
+  },
+  {
+    "id": "249",
+    "name": "West Parking @ War Eagle Way",
+    "lat": 32.60494232,
+    "lon": -85.49417114,
+    "code": "1856M"
+  },
+  {
+    "id": "244",
+    "name": "Woodfield - Game Day",
+    "lat": 32.58886719,
+    "lon": -85.48994446,
+    "code": "1856J"
+  },
+  {
+    "id": "251",
+    "name": "Woodfield @ War Eagle Way",
+    "lat": 32.6048584,
+    "lon": -85.49436188,
+    "code": "1856O"
+  },
+  {
+    "id": "67",
+    "name": "Woodland Hills Apartments",
+    "lat": 32.62223434,
+    "lon": -85.49311066,
+    "code": "67"
+  },
+  {
+    "id": "206",
+    "name": "Yugo Auburn North 1",
+    "lat": 32.62976074,
+    "lon": -85.47606659,
+    "code": "206"
+  },
+  {
+    "id": "1",
+    "name": "Yugo Auburn North 2nd Stop",
+    "lat": 32.62813187,
+    "lon": -85.47338867,
+    "code": "1"
+  }
+]

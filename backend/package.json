@@ -29,6 +29,7 @@
     "csv-parse": "^5.5.6",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "gtfs-realtime-bindings": "^1.1.1",
     "helmet": "^8.0.0",
     "ioredis": "^5.4.1",
     "polyline": "^0.2.0",

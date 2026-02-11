@@ -1,282 +1,135 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-02-03
+**Analysis Date:** 2026-02-11
 
 ## Naming Patterns
 
 **Files:**
-- Backend routes: `[resource].routes.ts` (e.g., `routes.routes.ts`, `stops.routes.ts`)
-- Backend services: `[service].service.ts` (e.g., `etaspot.service.ts`)
-- Backend middleware: `[feature]-handler.ts` (e.g., `error-handler.ts`)
-- Mobile screens: `[Screen]Screen.tsx` (e.g., `MapScreen.tsx`, `RoutesScreen.tsx`)
-- Mobile components: `[Component].tsx` (e.g., `Card.tsx`, `StopMarker.tsx`)
-- Mobile hooks: `use[Feature].ts` or `use[Feature].tsx` (e.g., `useVehicles.ts`, `useRoutePreferences.tsx`)
-- Mobile store slices: `[feature]Slice.ts` (e.g., `routesSlice.ts`)
-- Types: `[domain].types.ts` (e.g., `gtfs.types.ts`, `navigation.types.ts`)
+- Python: snake_case (e.g., `train_advanced.py`, `build_differentiator_features.py`)
+- TypeScript: kebab-case with suffix (e.g., `health.routes.ts`, `etaspot.service.ts`, `error-handler.ts`)
+- Route handlers: `{resource}.routes.ts`
+- Services: `{name}.service.ts`
+- Middleware: `{name}-{action}.ts`
 
 **Functions:**
-- camelCase for all functions and methods
-- Async functions that are route handlers: prefix with resource name (e.g., in `routes.routes.ts`: `router.get('/', async (req, res, next) => {}`)
-- Helper functions: descriptive names (e.g., `calculateDistance`, `decodePolyline`, `transformVehicle`)
-- React component functions: PascalCase (components are functions returning JSX)
-- Hook functions: camelCase, prefixed with `use` (e.g., `useVehicles`, `useStopArrivals`)
+- Python: snake_case (e.g., `compute_gps_speed()`, `load_featured_v2()`, `haversine_meters()`)
+- TypeScript: camelCase (e.g., `getVehicles()`, `fetchFeed()`, `processPositionUpdates()`)
 
 **Variables:**
-- camelCase for all variables and constants
-- Redux state variables: camelCase (e.g., `selectedRoute`, `visibleRoutes`)
-- Interface/type properties: camelCase (e.g., `vehicleId`, `routeId`, `wheelchairAccessible`)
-- Constants (exports): camelCase (e.g., `Colors`, `Typography`, `Spacing`, `AUBURN_COORDS`)
-- Private class properties: camelCase with underscore prefix (e.g., `_socket`, `_vehicles`)
+- Python: SCREAMING_SNAKE_CASE for constants (e.g., `GPS_SPEED_CAP_MPS`, `IDLE_SPEED_THRESHOLD`, `MIN_OBS`)
+- Python: snake_case for locals (e.g., `pings_featured`, `hist_segments`, `split_name`)
+- TypeScript: SCREAMING_SNAKE_CASE for constants (e.g., `POLL_INTERVAL_MS`, `POSITION_FEED_URL`)
+- TypeScript: camelCase for locals (e.g., `vehicleId`, `pollTimer`, `isConnected`)
 
 **Types:**
-- Interface names: PascalCase, prefixed with I for basic interfaces, omitted for domain types (e.g., `interface CardProps`, `interface VehiclePosition`, `interface ApiError`)
-- Type aliases: PascalCase (e.g., `type ApiResponse<T>`)
-- Enum names: PascalCase (none observed, but convention follows TypeScript style)
+- TypeScript: PascalCase for interfaces (e.g., `VehiclePosition`, `TripEta`)
+- Python: No explicit type classes, but uses type hints with standard types
 
 ## Code Style
 
 **Formatting:**
-- No enforced formatter (Prettier not configured)
-- Indent: 2 spaces (observed throughout)
-- Line length: No strict limit observed, but generally kept reasonable
-- Quotes: Single quotes for strings (observed in mobile and backend)
-- Semicolons: Required (TypeScript strict mode)
-- Trailing commas: Used in multi-line objects/arrays
+- Python: No formatter config detected; follows PEP 8 style manually
+- TypeScript: Prettier likely used (inferred from consistent 2-space indentation)
+- TypeScript indentation: 2 spaces
+- Python indentation: 4 spaces
+- String quotes: Python uses double quotes predominantly; TypeScript uses single quotes
 
 **Linting:**
-- ESLint configured in backend only
-- Config: `eslint` v9.17.0 with `@typescript-eslint` parser v8.18.0
-- Rules: No custom eslint config file found, using defaults
-- Mobile project: No ESLint configured
-- Backend: `npm run lint` lints `src/**/*.ts`
+- TypeScript: ESLint configured in `backend/package.json` with `@typescript-eslint/eslint-plugin` and `@typescript-eslint/parser`
+- TypeScript strict mode enabled in `tsconfig.json`: `"strict": true`, `noUnusedLocals`, `noUnusedParameters`, `noImplicitReturns`, `noFallthroughCasesInSwitch`
+- Python: No linting config detected (no `.pylintrc`, `.flake8`, or `pyproject.toml` with tool configs)
+- Run linting: `npm run lint` (TypeScript backend)
 
 ## Import Organization
 
 **Order:**
-1. External dependencies (node modules, installed packages)
-2. Relative imports from other parts of codebase
-3. Type imports (typically last in a group)
-
-**Examples:**
-
-Backend (from `stops.routes.ts`):
-```typescript
-import { Router, Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
-import { createError } from '../middleware/error-handler';
-```
-
-Mobile (from `MapView.tsx`):
-```typescript
-import React, { useRef, useState, useMemo, useEffect } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
-import MapView, { Region } from 'react-native-maps';
-import { AUBURN_COORDS } from '../../config/api.config';
-import { useGetStopsQuery, useGetRoutesQuery, useGetStopRouteMappingsQuery } from '../../store/api/transitApi';
-import { useVehicles } from '../../hooks/useVehicles';
-import { useRoutePreferences } from '../../hooks/useRoutePreferences';
-import StopMarker from './StopMarker';
-import RoutePolyline from './RoutePolyline';
-import VehicleMarker from './VehicleMarker';
-import { Colors, Typography, Radius, Shadows, Spacing } from '../../theme';
-```
+- Python standard library first, then third-party, then local imports
+- Example from `scripts/train_advanced.py`:
+  1. Standard library: `argparse`, `json`, `sys`, `time`, `warnings`, `pathlib`
+  2. Third-party: `numpy`, `optuna`, `sklearn`, `xgboost`
+  3. Local: `from build_differentiator_features import ...`
+- TypeScript: External packages first, then local imports
+- Example from `backend/src/index.ts`:
+  1. External: `express`, `http`, `socket.io`, `cors`, `helmet`, `compression`, `dotenv`
+  2. Local: `./middleware/error-handler`, `./routes/*`, `./services/etaspot.service`
 
 **Path Aliases:**
-- None observed. All imports use relative paths
+- Not detected in this codebase
 
 ## Error Handling
 
 **Patterns:**
-
-Backend uses custom error wrapper:
+- Python ML scripts: Minimal explicit error handling; rely on exceptions bubbling up
+- Python data processing: Assert statements for data integrity checks (e.g., `assert len(df) == n_before`)
+- TypeScript async functions: try/catch with `next(error)` pattern for Express routes
+- Example from `backend/src/routes/health.routes.ts`:
 ```typescript
-export interface ApiError extends Error {
-  statusCode?: number;
-  code?: string;
+try {
+  await prisma.$queryRaw`SELECT 1`;
+  await redis.ping();
+  res.json({ success: true, data: {...} });
+} catch (error) {
+  next(error);
 }
-
-export const createError = (message: string, statusCode: number, code: string): ApiError => {
-  const error = new Error(message) as ApiError;
-  error.statusCode = statusCode;
-  error.code = code;
-  return error;
-};
 ```
-
-Thrown errors include:
-- `statusCode`: HTTP status code (e.g., 404, 400)
-- `code`: Machine-readable error code (e.g., 'ROUTE_NOT_FOUND', 'MISSING_PARAMETERS')
-- `message`: Human-readable message
-
-Route handlers use try-catch with `next(error)` to pass to error handler middleware:
-```typescript
-router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    // logic
-  } catch (error) {
-    next(error);
-  }
-});
-```
-
-Mobile uses state for errors:
-```typescript
-const [error, setError] = useState<string | null>(null);
-// Set error on connection failure:
-socket.on('connect_error', (err) => {
-  setError(err.message);
-});
-```
+- TypeScript services: Emit 'error' events for async failures (e.g., `this.emit('error', err)` in `etaspot.service.ts`)
 
 ## Logging
 
-**Framework:** `console` (standard JavaScript console methods)
+**Framework:**
+- Python: `print()` statements for console output
+- TypeScript: `console.log()` / `console.error()`
 
 **Patterns:**
-- Development info: `console.log()` (connection status, socket events, initialization)
-- Warnings: `console.warn()` (missing environment variables)
-- Errors: `console.error()` (connection errors, exceptions)
-
-**Examples:**
-```typescript
-console.log('Connected to ETA SPOT WebSocket');
-console.error('ETA SPOT connection error:', error.message);
-console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
+- Python scripts use structured print sections with decorators:
+```python
+print(f"\n{'='*60}")
+print("SECTION TITLE")
+print(f"{'='*60}")
 ```
-
-Error handler includes stack traces in development:
-```typescript
-...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-```
+- Python uses f-strings for formatted output with alignment (e.g., `f"{value:>8.1f}"`)
+- TypeScript logs timestamps with ISO format: `console.log(\`${new Date().toISOString()} ${req.method} ${req.path}\`)`
+- TypeScript service logs events: "Client connected", "ETA SPOT service connected", etc.
 
 ## Comments
 
 **When to Comment:**
-- Complex algorithms (e.g., polyline decoding in `routes.routes.ts`, Haversine formula in `stops.routes.ts`)
-- Multi-step logic (e.g., "Extract unique stops from the first trip")
-- Non-obvious conditional logic (e.g., fallback patterns for finding trip shapes)
+- Python docstrings at top of every script file describing purpose, usage, inputs, outputs
+- Python docstrings for complex functions (e.g., `compute_gps_speed()`, `compute_historical_segments()`)
+- Inline comments for non-obvious logic (e.g., GPS jitter filtering, temporal gap handling)
+- Section dividers in Python scripts (e.g., `# ---------------------------------------------------------------------------`)
 
-**Code block comments:**
-```typescript
-// Decode Google encoded polyline to array of coordinates
-function decodePolyline(encoded: string): Array<{ lat: number; lon: number }> { }
-
-// Filter by bounding box
-stops = await prisma.stop.findMany({...})
-
-// Skip vehicles not on a route
-if (!msg.serviceState?.rID) {
-  return null;
-}
-```
-
-**Inline comments:** Rarely used; comments are typically block-level
-
-**JSDoc/TSDoc:** Not observed in codebase. Comments use single-line `//` format
+**JSDoc/TSDoc:**
+- Not consistently used in TypeScript code
+- Interfaces have inline comments for clarity (e.g., `VehiclePosition` fields)
 
 ## Function Design
 
-**Size:** Functions typically 20-50 lines; larger ones extract sub-logic
+**Size:**
+- Python: Functions range from 20-150 lines; complex pipelines broken into helper functions
+- TypeScript: Methods are concise (10-50 lines); event handlers are small
 
 **Parameters:**
-- Route handlers: standard Express signature `(req: Request, res: Response, next: NextFunction)`
-- Utilities: accept structured parameters when multiple options needed
-- Hooks: accept options object (e.g., `useVehicles(options: UseVehiclesOptions = {})`)
-- React components: destructure props interface (e.g., `const Card: React.FC<CardProps> = ({ children, variant = 'default', style })`)
+- Python: Explicit DataFrame parameters with type hints (e.g., `def compute_gps_speed(pings: pd.DataFrame) -> pd.DataFrame`)
+- Python config passed as module-level constants, not function parameters
+- TypeScript: Interface-typed parameters (e.g., `routeId: string`, `vehicle: VehiclePosition`)
 
 **Return Values:**
-- Routes: return JSON via `res.json()` with standard format:
-  ```typescript
-  {
-    success: true|false,
-    data: T,
-    meta: { timestamp, count?, cached? }
-  }
-  ```
-- Hooks: return object with state and handlers (e.g., `{ vehicles, connected, error, refresh }`)
-- Utilities: return typed values (e.g., `VehiclePosition | null`)
+- Python: DataFrames for transformations, dict for aggregates, explicit return types in signatures
+- TypeScript: Typed returns (e.g., `Promise<void>`, `VehiclePosition[]`, `boolean`)
+- TypeScript services: Void for side-effect methods (e.g., `start(): void`, `stop(): void`)
 
 ## Module Design
 
 **Exports:**
+- Python: Functions and constants exported via `__all__` or defined at module level (e.g., `FEATURE_COLS_V2`, `load_featured_v2()`)
+- Python scripts check `if __name__ == "__main__":` for entry point
+- TypeScript: Named exports for routers (e.g., `export { router as healthRouter }`)
+- TypeScript services: Singleton pattern with exported instance (e.g., `export const etaSpotService = new ETASpotService()`)
 
-Backend routes export named export at end of file:
-```typescript
-export { router as routesRouter };
-```
-
-Services export singleton instances:
-```typescript
-export const etaSpotService = new ETASpotService();
-```
-
-Mobile hooks export named functions:
-```typescript
-export const useVehicles = (options: UseVehiclesOptions = {}) => { }
-export const useStopArrivals = (stopId: string, enabled = true) => { }
-```
-
-Redux slices export actions and reducer:
-```typescript
-export const { setSelectedRoute, setVisibleRoutes } = routesSlice.actions;
-export default routesSlice.reducer;
-```
-
-Theme exports as const object:
-```typescript
-export const Colors = { /* ... */ } as const;
-export const Typography = { /* ... */ } as const;
-export const Spacing = { /* ... */ } as const;
-```
-
-**Barrel Files:** Not observed; components are imported directly
-
-**Re-exports:** API hooks barrel export from `transitApi.ts`:
-```typescript
-export const {
-  useGetRoutesQuery,
-  useGetRouteDetailQuery,
-  // ...
-} = transitApi;
-```
-
-## TypeScript Patterns
-
-**Strict Mode:** Enabled in both `backend/tsconfig.json` and `mobile/tsconfig.json`
-
-**Key compiler options:**
-- `noUnusedLocals: true`
-- `noUnusedParameters: true`
-- `noImplicitReturns: true`
-- `noFallthroughCasesInSwitch: true`
-
-**Type usage:**
-- Interfaces for component props and service interfaces
-- Type aliases for domain types and union types
-- Generic types for API responses: `ApiResponse<T>`
-- Proper typing of event handlers and callbacks
-
-**React.FC vs function components:**
-- Observed pattern: `const ComponentName: React.FC = () => {}` or `const ComponentName: React.FC<Props> = (props) => {}`
-- Destructuring props inline is preferred
-
-## Response Format
-
-All API responses follow consistent format:
-```typescript
-{
-  success: boolean,
-  data: T,
-  meta: {
-    timestamp: ISO8601 string,
-    count?: number,
-    cached?: boolean,
-    pointCount?: number,
-    radius?: number
-  }
-}
-```
+**Barrel Files:**
+- Not used in this codebase
 
 ---
 
-*Convention analysis: 2026-02-03*
+*Convention analysis: 2026-02-11*

@@ -1,267 +1,239 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-02-03
+**Analysis Date:** 2026-02-11
 
 ## Directory Layout
 
 ```
 Tiger Transit/
-├── backend/                    # Express.js REST API + WebSocket server
-│   ├── src/
-│   │   ├── index.ts           # Server entry point, Express app, Socket.IO setup
-│   │   ├── middleware/        # Cross-cutting concerns
-│   │   │   └── error-handler.ts
-│   │   ├── routes/            # Express route handlers
-│   │   │   ├── health.routes.ts
-│   │   │   ├── routes.routes.ts
-│   │   │   ├── stops.routes.ts
-│   │   │   └── vehicles.routes.ts
-│   │   ├── services/          # Business logic & external integrations
-│   │   │   └── etaspot.service.ts
-│   │   ├── types/             # TypeScript type definitions
-│   │   ├── utils/             # Shared utilities
-│   │   └── (dist/built files)
-│   ├── prisma/
-│   │   ├── schema.prisma      # Database schema & ORM models
-│   │   └── migrations/        # Database migration history
-│   ├── scripts/               # Utility scripts
-│   │   └── import-gtfs.ts
-│   ├── package.json
-│   └── tsconfig.json
-│
-├── mobile/                     # React Native Expo app
-│   ├── src/
-│   │   ├── components/        # Reusable UI components
-│   │   │   ├── Common/        # Generic UI (Badge, Card, LoadBar, etc.)
-│   │   │   ├── Map/           # Map-specific components
-│   │   │   │   ├── MapView.tsx
-│   │   │   │   ├── RoutePolyline.tsx
-│   │   │   │   ├── StopMarker.tsx
-│   │   │   │   └── VehicleMarker.tsx
-│   │   │   └── RouteList/     # Route list components
-│   │   ├── screens/           # Top-level screen components
-│   │   │   ├── MapScreen.tsx
-│   │   │   ├── RoutesScreen.tsx
-│   │   │   ├── RouteDetailScreen.tsx
-│   │   │   ├── StopDetailScreen.tsx
-│   │   │   └── SettingsScreen.tsx
-│   │   ├── navigation/        # React Navigation setup
-│   │   │   ├── RootNavigator.tsx
-│   │   │   └── TabNavigator.tsx
-│   │   ├── store/             # Redux state management
-│   │   │   ├── index.ts       # Store configuration
-│   │   │   ├── api/           # RTK Query API definitions
-│   │   │   │   └── transitApi.ts
-│   │   │   └── slices/        # Redux slices
-│   │   │       └── routesSlice.ts
-│   │   ├── hooks/             # Custom React hooks
-│   │   │   ├── useVehicles.ts
-│   │   │   └── useRoutePreferences.tsx
-│   │   ├── config/            # Configuration files
-│   │   │   └── api.config.ts
-│   │   ├── types/             # TypeScript interfaces
-│   │   │   ├── gtfs.types.ts
-│   │   │   └── navigation.types.ts
-│   │   ├── theme/             # Design tokens
-│   │   │   └── index.ts
-│   │   ├── utils/             # Utility functions
-│   │   ├── ETA-Model/         # Machine learning model (Python)
-│   │   └── assets/            # App icons and images
-│   ├── App.tsx                # App root component
-│   ├── package.json
-│   ├── tsconfig.json
-│   └── .expo/
-│
-├── gtfs_data/                 # GTFS feed data
-├── .planning/                 # GSD planning documents
-│   └── codebase/
-├── docker-compose.yml         # Local development database setup
-├── README.md
-└── QUICKSTART.md
+├── .planning/              # GSD planning artifacts
+│   ├── codebase/           # Codebase analysis documents (ARCHITECTURE.md, STRUCTURE.md, etc.)
+│   ├── phases/             # Phase-by-phase implementation plans and summaries
+│   └── research/           # Research documents for technologies and patterns
+├── backend/                # Node.js + Express API server
+│   ├── prisma/             # Database schema and migrations
+│   ├── scripts/            # Backend utility scripts (GTFS import)
+│   └── src/                # TypeScript application code
+│       ├── middleware/     # Express middleware (error-handler)
+│       ├── routes/         # API route handlers
+│       ├── services/       # Business logic (GTFS-RT polling)
+│       ├── types/          # TypeScript type definitions
+│       └── utils/          # Shared utilities
+├── data/                   # ML pipeline data storage
+│   └── processed/          # Parquet files for ML training
+├── gtfs_data/              # GTFS static feed CSV files
+├── mobile/                 # React Native mobile app
+│   ├── assets/             # Images, fonts, icons
+│   └── src/                # TypeScript/React code
+│       ├── components/     # Reusable UI components
+│       ├── config/         # App configuration (API URLs)
+│       ├── ETA-Model/      # Legacy ETA model code and raw data
+│       ├── hooks/          # Custom React hooks
+│       ├── navigation/     # React Navigation setup
+│       ├── screens/        # Screen components (Map, Routes, Stops, Settings)
+│       ├── store/          # Redux store and RTK Query API
+│       ├── theme/          # Color palette and styling
+│       ├── types/          # TypeScript type definitions
+│       └── utils/          # Shared utilities
+├── models/                 # Trained XGBoost models and evaluation outputs
+│   ├── diagnostics/        # Feature diagnostics and data quality reports
+│   └── evaluation/         # Phase 6 evaluation outputs (SHAP, metrics, comparisons)
+├── scripts/                # Python ML pipeline scripts
+├── docker-compose.yml      # Development environment (PostgreSQL, Redis)
+└── package.json            # Root package.json (workspace marker)
 ```
 
 ## Directory Purposes
 
-**backend/src:**
-- Purpose: TypeScript source code for REST API and WebSocket server
-- Contains: Route handlers, middleware, services, data models
-- Key files: `index.ts` (entry point), route handlers, ETASpotService
+**`.planning/`:**
+- Purpose: GSD workflow artifacts - plans, research, summaries, codebase analysis
+- Contains: codebase/ (ARCHITECTURE.md, STRUCTURE.md, STACK.md, etc.), phases/ (01-06 subdirs with PLAN.md, SUMMARY.md), research/ (technology domain research)
+- Key files: `.planning/phases/*/PLAN.md` - phase implementation plans, `.planning/codebase/*.md` - codebase reference docs
 
-**backend/prisma:**
-- Purpose: Database schema and migrations
-- Contains: schema.prisma (ORM model definitions), migration files
-- Key files: `schema.prisma` (defines all database tables and relationships)
+**`backend/`:**
+- Purpose: RESTful API server for GTFS data and real-time vehicle tracking
+- Contains: Express application, Prisma ORM, Socket.IO WebSocket server, GTFS-Realtime feed consumer
+- Key files: `src/index.ts` - main entry point, `prisma/schema.prisma` - database schema, `src/services/etaspot.service.ts` - GTFS-RT polling service
 
-**mobile/src/components:**
-- Purpose: Reusable React Native UI building blocks
-- Contains: Presentational components that render UI
-- Subdirectories: `Common/` (generic components), `Map/` (map-specific), `RouteList/` (list components)
+**`backend/prisma/`:**
+- Purpose: Database schema definition and migration history
+- Contains: schema.prisma with GTFS models (Route, Stop, Trip, StopTime, Shape, Calendar, VehiclePosition, ServiceAlert)
+- Key files: `schema.prisma` - Prisma schema with PostGIS extension
 
-**mobile/src/screens:**
-- Purpose: Full-screen components representing navigation destinations
-- Contains: MapScreen (main map), RoutesScreen (route list), DetailScreens
-- Maps to: Tab navigator and stack navigator routes
+**`backend/src/routes/`:**
+- Purpose: Express route handlers for REST API endpoints
+- Contains: routes.routes.ts (GET /routes, GET /routes/:id, GET /routes/:id/shape), stops.routes.ts (GET /stops, GET /stops/nearby, GET /stops/:id), vehicles.routes.ts, health.routes.ts
+- Key files: All *`.routes.ts` files export Express Router instances
 
-**mobile/src/store:**
-- Purpose: Redux state management
-- Contains: RTK Query API client, Redux slices, store configuration
-- Key files: `transitApi.ts` (API query definitions), `routesSlice.ts` (route preferences)
+**`backend/src/services/`:**
+- Purpose: Business logic layer separated from HTTP handlers
+- Contains: etaspot.service.ts - EventEmitter-based GTFS-Realtime feed poller with vehicle position tracking
+- Key files: `etaspot.service.ts` - singleton service instance exported
 
-**mobile/src/hooks:**
-- Purpose: Custom React hooks for shared logic
-- Contains: useVehicles (WebSocket connection), useRoutePreferences (AsyncStorage persistence)
-- Pattern: Encapsulate complex state/side-effect logic
+**`data/processed/`:**
+- Purpose: Intermediate and final Parquet datasets for ML training
+- Contains: telemetry.parquet (filtered vehicle GPS), arrivals.parquet (ground truth stop arrivals), exploded.parquet (per-stop prediction rows), labeled.parquet (rows with time_to_arrival labels), train/val/test splits, featured datasets with 15-27 engineered features
+- Key files: `train_featured_v2.parquet`, `val_featured_v2.parquet`, `test_featured_v2.parquet` - final feature sets for Phase 4+ models
 
-**mobile/src/navigation:**
-- Purpose: React Navigation setup and configuration
-- Contains: RootNavigator (main stack), TabNavigator (bottom tabs)
-- Pattern: Centralized navigation structure
+**`gtfs_data/`:**
+- Purpose: Static GTFS feed CSV files (routes.txt, stops.txt, trips.txt, stop_times.txt, shapes.txt, calendar.txt)
+- Contains: Auburn University transit GTFS feed (40+ routes, 178 stops, 1041+ trips)
+- Key files: All `.txt` files follow GTFS specification
 
-**mobile/src/types:**
-- Purpose: TypeScript interfaces shared across mobile app
-- Contains: GTFS types (Route, Stop, Trip), API response types
-- Key files: `gtfs.types.ts`, `navigation.types.ts`
+**`mobile/src/components/`:**
+- Purpose: Reusable React components organized by feature area
+- Contains: Common/ (Badge, Card, LoadBar, ScreenContainer, SectionHeader), Map/ (MapView, RoutePolyline, StopMarker, VehicleMarker)
+- Key files: `Map/MapView.tsx` - main transit map component, `Map/VehicleMarker.tsx` - real-time vehicle position marker
 
-**mobile/src/config:**
-- Purpose: Application configuration (API endpoints, constants)
-- Contains: API endpoint URLs, Auburn coordinates, timeout settings
-- Key files: `api.config.ts`
+**`mobile/src/screens/`:**
+- Purpose: Top-level screen components rendered by React Navigation
+- Contains: MapScreen.tsx, RoutesScreen.tsx, RouteDetailScreen.tsx, StopDetailScreen.tsx, SettingsScreen.tsx
+- Key files: `MapScreen.tsx` - renders TransitMapView, entry point for map tab
 
-**mobile/src/theme:**
-- Purpose: Design tokens (colors, typography, spacing)
-- Contains: Centralized style constants
-- Key files: `index.ts`
+**`mobile/src/store/api/`:**
+- Purpose: RTK Query API slice for backend data fetching
+- Contains: transitApi.ts with endpoints for routes, stops, shapes, nearby stops
+- Key files: `transitApi.ts` - exports API slice and React hooks (useGetRoutesQuery, useGetStopsQuery, etc.)
 
-**mobile/src/ETA-Model:**
-- Purpose: Machine learning model for ETA prediction (Python)
-- Contains: PyTorch models, training data, data preparation scripts
-- Note: Separate ML stack from main app; includes versioned model files
+**`mobile/src/ETA-Model/`:**
+- Purpose: Legacy data collection code and raw historical data
+- Contains: batchCollector.js, getWeatherData.ts, processTrainingData.js, raw_data/ subdirectory with arrivals CSVs and telemetry JSONL
+- Key files: Historical reference only - not used in current ML pipeline
+
+**`models/`:**
+- Purpose: Trained XGBoost model artifacts and evaluation outputs
+- Contains: baseline_v1.ubj, differentiator_v1.ubj, tuned_v1.ubj, asymmetric_v1.ubj, quantile_p{20,50,75}_v1.ubj, *_metrics.json, evaluation/ subdirectory
+- Key files: `tuned_v1.ubj` - Phase 5 Optuna-tuned model, `evaluation/eval_report.md` - Phase 6 comprehensive evaluation
+
+**`models/evaluation/`:**
+- Purpose: Phase 6 evaluation outputs (EVAL-01 through EVAL-04)
+- Contains: eval_metrics_sliced.json, eval_shap_global.png, eval_shap_waterfall_*.png, eval_comparison.json, eval_residuals*.png, eval_report.md
+- Key files: `eval_report.md` - master evaluation report
+
+**`scripts/`:**
+- Purpose: Python ML pipeline for ETA model training
+- Contains: Data parsers (parse_gtfs.py, parse_arrivals.py, parse_telemetry.py, parse_weather.py), row processing (explode_rows.py, label_join.py, temporal_split.py), feature engineering (build_features.py, build_differentiator_features.py), training (train_baseline.py, train_differentiator.py, train_advanced.py, train_asymmetric_quantile.py), evaluation (evaluate.py)
+- Key files: Pipeline executed sequentially: parse_* → explode_rows → label_join → temporal_split → build_features → train_* → evaluate
 
 ## Key File Locations
 
 **Entry Points:**
-
-| File | Purpose |
-|------|---------|
-| `backend/src/index.ts` | Backend server startup, Express app, Socket.IO setup |
-| `mobile/App.tsx` | Mobile app root, Redux provider, navigation root |
-| `mobile/src/screens/MapScreen.tsx` | Primary user-facing screen |
+- `backend/src/index.ts`: Express server entry point, Socket.IO initialization, ETASpotService startup
+- `mobile/App.tsx`: React Native root component with Redux Provider
+- `mobile/index.ts`: Expo entry point, imports App.tsx
+- `scripts/train_baseline.py`: Phase 3 baseline XGBoost training
+- `scripts/train_advanced.py`: Phase 5 Optuna hyperparameter tuning
+- `scripts/evaluate.py`: Phase 6 comprehensive model evaluation
 
 **Configuration:**
-
-| File | Purpose |
-|------|---------|
-| `backend/package.json` | Backend dependencies and scripts |
-| `mobile/package.json` | Mobile dependencies and scripts |
-| `backend/prisma/schema.prisma` | Database models and migrations |
-| `mobile/src/config/api.config.ts` | API endpoints, base URL, coordinates |
+- `backend/prisma/schema.prisma`: Database schema for GTFS and real-time data
+- `backend/package.json`: Backend dependencies (express, prisma, socket.io, gtfs-realtime-bindings, ioredis)
+- `mobile/package.json`: Mobile dependencies (expo, react-native, redux, react-navigation, react-native-maps)
+- `docker-compose.yml`: PostgreSQL (PostGIS), Redis, and backend service definitions
+- `mobile/src/config/api.config.ts`: API base URL and endpoint definitions
+- `.gitignore`: Excludes node_modules, data/processed (large parquet files), models/*.ubj (binary models)
 
 **Core Logic:**
-
-| File | Purpose |
-|------|---------|
-| `backend/src/services/etaspot.service.ts` | Vehicle tracking WebSocket client |
-| `backend/src/routes/*.routes.ts` | REST endpoints for routes/stops/vehicles |
-| `mobile/src/store/api/transitApi.ts` | RTK Query API client definition |
-| `mobile/src/hooks/useVehicles.ts` | Real-time vehicle WebSocket hook |
-| `mobile/src/components/Map/MapView.tsx` | Main map display and interaction |
+- `backend/src/services/etaspot.service.ts`: GTFS-Realtime feed polling, vehicle position tracking, ETA computation
+- `backend/src/routes/routes.routes.ts`: Route queries, stop sequences, polyline shape decoding
+- `backend/src/routes/stops.routes.ts`: Stop queries, nearby search with Haversine distance, route-stop mappings
+- `mobile/src/store/api/transitApi.ts`: RTK Query API slice with typed endpoints
+- `scripts/build_features.py`: Feature engineering (distance, scheduled time, lateness, temporal, weather)
+- `scripts/build_differentiator_features.py`: Phase 4 differentiator features (historical dwell/segment times)
+- `scripts/label_join.py`: merge_asof join to create ground truth labels
 
 **Testing:**
-
-| File | Purpose |
-|------|---------|
-| (Not yet implemented) | Jest/Vitest tests for backend |
-| (Not yet implemented) | Jest/Expo tests for mobile |
+- Not present - no test files or test framework configuration detected
 
 ## Naming Conventions
 
 **Files:**
-
-- `*.routes.ts`: Express route handler files (e.g., `routes.routes.ts`, `stops.routes.ts`)
-- `*.service.ts`: Service classes with business logic (e.g., `etaspot.service.ts`)
-- `*.slice.ts`: Redux slices (e.g., `routesSlice.ts`)
-- `*.types.ts`: TypeScript interface/type definitions (e.g., `gtfs.types.ts`, `navigation.types.ts`)
-- `*.config.ts`: Configuration constants (e.g., `api.config.ts`)
-- Hooks: `use*.ts` or `use*.tsx` (e.g., `useVehicles.ts`, `useRoutePreferences.tsx`)
-- Screens: `*Screen.tsx` (e.g., `MapScreen.tsx`, `RoutesScreen.tsx`)
-- Components: PascalCase (e.g., `MapView.tsx`, `VehicleMarker.tsx`)
+- Backend routes: `<entity>.routes.ts` (routes.routes.ts, stops.routes.ts)
+- Backend services: `<service>.service.ts` (etaspot.service.ts)
+- Python scripts: `<verb>_<noun>.py` (parse_gtfs.py, build_features.py, train_baseline.py)
+- React components: PascalCase.tsx (MapScreen.tsx, VehicleMarker.tsx)
+- Parquet datasets: `<stage>.parquet` or `<split>_featured.parquet` (telemetry.parquet, train_featured_v2.parquet)
+- Model artifacts: `<variant>_v<version>.ubj` (baseline_v1.ubj, tuned_v1.ubj, quantile_p20_v1.ubj)
 
 **Directories:**
-
-- Feature-based: `screens/`, `components/`, `hooks/` group by functionality
-- Layer-based: `middleware/`, `routes/`, `services/` group by architectural layer
-- Data/config: `config/`, `types/`, `store/`, `theme/` group by purpose
+- Backend: lowercase (routes, services, middleware, types, utils)
+- Mobile: lowercase (components, screens, hooks, store, navigation)
+- React component subdirs: PascalCase (Map/, Common/)
+- Data processing: lowercase (data/processed/, gtfs_data/, models/)
 
 ## Where to Add New Code
 
-**New Feature - Complete Path (e.g., new "Favorites" screen):**
+**New Backend API Endpoint:**
+- Primary code: `backend/src/routes/<entity>.routes.ts` - create new Router, define GET/POST handlers
+- Mount route: `backend/src/index.ts` - add `app.use('/<path>', <entity>Router)`
+- Business logic: `backend/src/services/<entity>.service.ts` if logic is complex
+- Types: `backend/src/types/<entity>.types.ts` for request/response interfaces
 
-1. **Screen component**: `mobile/src/screens/FavoritesScreen.tsx`
-2. **Navigation**: Add to `mobile/src/navigation/TabNavigator.tsx`
-3. **Redux slice** (if needed): `mobile/src/store/slices/favoritesSlice.ts`
-4. **Types**: Add to `mobile/src/types/gtfs.types.ts` or new `mobile/src/types/favorites.types.ts`
-5. **Components**: `mobile/src/components/Favorites/*.tsx` if building reusable parts
+**New Mobile Screen:**
+- Implementation: `mobile/src/screens/<ScreenName>Screen.tsx` - create React.FC component
+- Navigation: `mobile/src/navigation/TabNavigator.tsx` or `RootNavigator.tsx` - add Screen to navigator
+- API data: `mobile/src/store/api/transitApi.ts` - add RTK Query endpoint if needed
+- Components: `mobile/src/components/<Feature>/` - extract reusable components
 
-**New Backend Endpoint (e.g., `/alerts`):**
+**New ML Training Variant:**
+- Implementation: `scripts/train_<variant>.py` - follow pattern from train_baseline.py or train_advanced.py
+- Feature engineering: `scripts/build_<variant>_features.py` if new features needed
+- Input: Load from `data/processed/train_featured*.parquet`, `val_featured*.parquet`, `test_featured*.parquet`
+- Output: Save model to `models/<variant>_v1.ubj`, metrics to `models/<variant>_metrics.json`
 
-1. **Route handler**: `backend/src/routes/alerts.routes.ts`
-2. **Service** (if business logic): `backend/src/services/alerts.service.ts`
-3. **Database model**: Add to `backend/prisma/schema.prisma`
-4. **Types**: `backend/src/types/alerts.types.ts` (if complex)
-5. **Mount route**: Add to `backend/src/index.ts`: `app.use('/alerts', alertsRouter);`
-
-**New Reusable Component (e.g., RouteColorBadge):**
-
-- **If generic**: `mobile/src/components/Common/RouteColorBadge.tsx`
-- **If map-specific**: `mobile/src/components/Map/RouteColorBadge.tsx`
-- **If feature-specific**: `mobile/src/components/FeatureName/ComponentName.tsx`
-
-**New Custom Hook (e.g., useRouteTracking):**
-
-- Location: `mobile/src/hooks/useRouteTracking.ts`
-- Export from: `mobile/src/hooks/index.ts` (barrel export if created)
+**New Data Processing Step:**
+- Implementation: `scripts/<verb>_<noun>.py` - add to pipeline between existing steps
+- Input: Read from `data/processed/<previous_step>.parquet`
+- Output: Write to `data/processed/<new_step>.parquet`
+- Update README: Document new step in pipeline execution order
 
 **Utilities:**
-
-- **Backend shared**: `backend/src/utils/`
-- **Mobile shared**: `mobile/src/utils/`
+- Backend shared helpers: `backend/src/utils/` - create new .ts files, export functions
+- Mobile shared helpers: `mobile/src/utils/` - create new .ts files
+- Python ML helpers: Define in existing scripts or create `scripts/<helper>.py` and import in other scripts
 
 ## Special Directories
 
-**backend/prisma/migrations:**
-- Purpose: Stores database migration history
-- Generated: Yes (auto-generated by `prisma migrate dev`)
-- Committed: Yes (version control for schema evolution)
+**`.planning/`:**
+- Purpose: GSD workflow artifacts for project planning and codebase documentation
+- Generated: No - manually created via GSD commands
+- Committed: Yes
 
-**mobile/.expo:**
-- Purpose: Expo CLI configuration and cache
-- Generated: Yes (auto-generated by Expo)
-- Committed: No (in .gitignore)
+**`data/processed/`:**
+- Purpose: Intermediate ML pipeline datasets (parquet files)
+- Generated: Yes - by Python scripts in scripts/
+- Committed: No - .gitignore excludes data/processed/ (files are large, 100MB+)
 
-**mobile/src/ETA-Model:**
-- Purpose: Machine learning model for ETA prediction
-- Generated: Partially (output directories for processed data/models)
-- Committed: Selectively (model .pt files may be excluded from git)
-- Note: Python-based, separate from main React Native app
+**`models/`:**
+- Purpose: Trained XGBoost model binaries and evaluation outputs
+- Generated: Yes - by training and evaluation scripts
+- Committed: Partial - .ubj model files excluded (large binaries), JSON metrics and PNG plots committed
 
-**backend/node_modules, mobile/node_modules:**
-- Purpose: Installed dependencies
-- Generated: Yes (from package-lock.json)
-- Committed: No (in .gitignore)
+**`mobile/src/ETA-Model/raw_data/`:**
+- Purpose: Historical raw telemetry JSONL and arrivals CSV files
+- Generated: No - collected from live ETA SPOT system
+- Committed: No - .gitignore excludes raw_data/ (large files)
 
-## Import Path Aliases
+**`backend/node_modules/`, `mobile/node_modules/`:**
+- Purpose: Installed npm dependencies
+- Generated: Yes - by npm install
+- Committed: No - .gitignore excludes node_modules/
 
-**Backend:**
-- No aliases configured (uses relative paths)
+**`mobile/.expo/`:**
+- Purpose: Expo build cache and metadata
+- Generated: Yes - by Expo CLI during development
+- Committed: No - .gitignore excludes .expo/
 
-**Mobile:**
-- Check `tsconfig.json` for baseUrl/paths configuration
-- Likely uses `@/` or `~` for absolute paths to `src/`
+**`models/diagnostics/`:**
+- Purpose: Feature diagnostics and data quality analysis from Phase 4
+- Generated: Yes - by scripts/diagnose_features.py
+- Committed: Yes - diagnostic outputs are analysis artifacts
 
-## Project Structure Rationale
+**`models/evaluation/`:**
+- Purpose: Phase 6 comprehensive evaluation outputs (EVAL-01 through EVAL-04)
+- Generated: Yes - by scripts/evaluate.py
+- Committed: Yes - evaluation reports and visualizations are deliverables
 
-- **Monorepo**: Single repo for frontend and backend allows easy synchronization of data models
-- **Layered Backend**: Routes → Services → Prisma ORM follows clean architecture
-- **Redux + Hooks**: Combination handles both complex async queries (RTK Query) and local preferences (custom hooks)
-- **Feature-Based Frontend**: Screens and components organized by user-facing feature, not technical layer
-- **Centralized Config**: api.config.ts and theme/index.ts prevent scattered magic strings
+---
+
+*Structure analysis: 2026-02-11*

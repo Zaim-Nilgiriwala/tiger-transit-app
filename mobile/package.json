@@ -2,6 +2,7 @@
   "name": "mobile",
   "version": "1.0.0",
   "main": "index.ts",
+  "type": "module",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -19,6 +20,7 @@
     "expo": "~54.0.31",
     "expo-location": "^19.0.8",
     "expo-status-bar": "~3.0.9",
+    "openmeteo": "^1.2.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.5",

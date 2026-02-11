@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A new XGBoost-based ETA prediction model for Auburn University's Tiger Transit bus system, replacing the existing PyTorch neural network. The model predicts time-to-arrival (in seconds) from a vehicle's current position to every remaining stop on its route. Built on existing telemetry data (Nov 6 - Dec 12), GTFS schedule data, weather data, and timepoint schedules.
+An XGBoost-based ETA prediction model for Auburn University's Tiger Transit bus system. The model predicts time-to-arrival (in seconds) from a vehicle's current position to every remaining stop on its route, achieving 123.1s MAE across all 23 routes (82.6% improvement over naive schedule). Built on 5 weeks of telemetry data with 43 engineered features including timepoint holds, rolling speed windows, and historical segment statistics.
 
 ## Core Value
 
@@ -12,61 +12,50 @@ Accurate arrival time predictions for all remaining stops on a bus route, accoun
 
 ### Validated
 
-- ✓ Raw telemetry data collection from ETA Spot IRM API — existing (batchCollector.js)
-- ✓ Arrivals ground truth data — existing (CSV from ETA Spot)
-- ✓ GTFS route/stop/shape data — existing (gtfs_data/)
-- ✓ Weather data — existing (weather_data.csv)
-- ✓ Timepoint schedule data — existing (Spring 2026 Timepoint Update.xlsx)
-- ✓ Data filtering (exclude jAUnt, Shuttle, inactive vehicles) — existing pipeline
+- ✓ Raw telemetry data collection from ETA Spot IRM API -- existing (batchCollector.js)
+- ✓ Arrivals ground truth data -- existing (CSV from ETA Spot)
+- ✓ GTFS route/stop/shape data -- existing (gtfs_data/)
+- ✓ Weather data -- existing (weather_data.csv)
+- ✓ Timepoint schedule data -- existing (Spring 2026 Timepoint Update.xlsx)
+- ✓ Data filtering (exclude jAUnt, Shuttle, inactive vehicles) -- existing pipeline
+- ✓ Parse and map timepoint spreadsheet to stop IDs and route IDs -- v1.0
+- ✓ Data pipeline producing per-stop rows (one row per observation x target_stop pair) -- v1.0
+- ✓ 43-feature engineering (vehicle state, route context, temporal, weather, schedule, rolling speed, timepoints, historical stats) -- v1.0
+- ✓ Single XGBoost model predicting time-to-target-stop (123.1s MAE) -- v1.0
+- ✓ Asymmetric loss with 3:1 overestimation penalty -- v1.0
+- ✓ Quantile confidence intervals (P20/P50/P75) -- v1.0
+- ✓ Optuna hyperparameter tuning (50 trials, temporal CV) -- v1.0
+- ✓ Comprehensive evaluation with sliced metrics, SHAP, residual bias detection -- v1.0
 
 ### Active
 
-- [ ] Parse and map timepoint spreadsheet to stop IDs and route IDs
-- [ ] Build new data preparation pipeline producing per-stop rows (one row per vehicle_observation x target_stop pair)
-- [ ] Engineer all specified features: vehicle state, route context, temporal, weather, schedule, rolling speed windows, lateness, historic averages
-- [ ] Engineer timepoint-aware features: is_timepoint, scheduled_departure_at_timepoint, forced_dwell_time
-- [ ] Engineer additional features beyond the specified list where they improve accuracy
-- [ ] Train single XGBoost model that predicts time-to-target-stop
-- [ ] Proper train/val/test evaluation with relevant metrics (MAE, RMSE, percentile errors)
-- [ ] Feature importance analysis to understand what drives predictions
+(None -- planning next milestone)
 
 ### Out of Scope
 
-- Deployment/integration into the backend or mobile app — focus on model quality first
-- Real-time prediction API — deferred until model is validated
-- Per-route models — single model approach first (route encoded as feature)
-- Replacing the existing PyTorch model in production — this is a parallel effort
-- Collecting new raw data — using existing Nov 6 - Dec 12 dataset
+- Deployment/integration into the backend or mobile app -- deferred to v2
+- Real-time prediction API -- deferred until model is validated
+- Per-route models -- single model approach sufficient (route encoded as feature)
+- Replacing the existing PyTorch model in production -- parallel effort
+- Collecting new raw data -- using existing Nov 6 - Dec 12 dataset
+- Neural network approaches -- XGBoost only per project decision
+- Feature normalization/z-scoring -- unnecessary for tree-based models
 
 ## Context
+
+### Current State (v1.0 shipped)
+- XGBoost model: 123.1s MAE, 82.6% improvement over naive schedule
+- 43 features across 6 categories, trained on 2.08M labeled rows
+- Progressive improvement: Naive (708.9s) -> Baseline (394.7s) -> Differentiator (175.7s) -> Tuned (123.1s)
+- 23/23 route wins vs naive; 6 routes show overprediction bias, 2 underprediction
+- Top SHAP features: time_until_next_timepoint_departure, stop_index, pattern_id
+- ~22,550 lines of Python across 13 scripts
 
 ### Existing System
 - PyTorch neural network with 44 features, predicting next 3 stops
 - Per-route models with vehicle embeddings and asymmetric loss (5x penalty for overestimation)
-- Data pipeline: JSONL telemetry → data_prep scripts → .npy arrays → PyTorch training
+- Data pipeline: JSONL telemetry -> data_prep scripts -> .npy arrays -> PyTorch training
 - FastAPI prediction endpoint (api/server.py)
-
-### New Model Design
-- **Architecture:** Single XGBoost regressor, one model for all routes
-- **Row structure:** Each training example = (vehicle_observation, target_stop) pair. A single vehicle observation at position P on a route with N remaining stops produces N rows.
-- **Target variable:** time_to_arrival_seconds (actual arrival time at target stop minus observation timestamp)
-- **Labels source:** Arrivals CSV data joined with telemetry on vehicle ID and timestamp proximity
-
-### Timepoint System
-- 23 routes with 1-4 buses each have mandatory hold points
-- Buses cannot depart timepoint stops before scheduled time
-- Timepoint data in "Spring 2026 Timepoint Update.xlsx" — needs mapping from human-readable stop names to numeric stop IDs
-- Timepoints create a "floor" on ETAs for downstream stops when bus is ahead of schedule
-
-### Feature List (specified + to be expanded)
-**Vehicle state:** speed, heading, load, lat, lon, progress, isIdle, offroute, idle time
-**Rolling averages:** average speed over 30s, 60s, 120s, 180s windows
-**Route context:** patternID, tripID, trainID, dir, totalDistance, segment_id, stop_index, nextStopPercentProgress, lastStopStopID, lastStop.time, lastStop.sdTime, distance_to_target
-**Schedule context:** eta.stopID, schedule.stops, scheduled_time_to_target, lateness_now, timepoint features
-**Temporal:** time of day, day of week (is_monday...is_sunday), is_rush_hour, class_let_out_recently (approximate: classes end at :50/:00)
-**Weather:** from weather_data.csv
-**Historical averages:** segment travel times (mean/std by hour), boarding rates, dwell times, vehicle speed averages, and any other discoverable patterns
-**Target stop context:** stops remaining, distance to target stop, number of timepoints between current position and target
 
 ### Data Sources
 | Source | Location | Format |
@@ -77,24 +66,34 @@ Accurate arrival time predictions for all remaining stops on a bus route, accoun
 | GTFS | gtfs_data/ | Standard GTFS CSVs |
 | Timepoints | raw_data/Spring 2026 Timepoint Update.xlsx | Excel, 23 sheets |
 
+### Known Issues
+- Quantile monotonicity violations (32.3%) -- trained on 25% subsample
+- Route 27: only 96 test samples, 336.9s MAE (insufficient data)
+- lateness_now has zero variance (EtaSpot scheduled_eta == eta)
+- Midday overprediction bias (+24.93s mean residual)
+- 6 routes overpredicting (5, 7, 24, 31, 33, 96), 2 underpredicting (1, 99)
+
 ## Constraints
 
 - **Data:** Use existing raw data only (Nov 6 - Dec 12, ~5 weeks)
 - **Tech stack:** Python, XGBoost, pandas/numpy for data prep, scikit-learn for evaluation
 - **Model type:** XGBoost (gradient boosted trees), not neural network
 - **Single model:** One model for all routes (route as a feature), not per-route models
-- **Timepoint mapping:** Must resolve human-readable stop names from spreadsheet to numeric stop IDs in GTFS/ETA Spot system
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| XGBoost over PyTorch | Gradient boosted trees handle tabular data well, easier to interpret, faster training iteration | -- Pending |
-| Single model, per-stop rows | Variable number of remaining stops per observation; one model learns time-to-any-stop | -- Pending |
-| All remaining stops (not just next 3) | More useful predictions for riders planning ahead | -- Pending |
-| Approximate class schedule | Classes assumed to end at :50/:00 during typical hours; no actual Auburn schedule data needed | -- Pending |
-| Use existing data only | 5 weeks sufficient to build and validate; pipeline can ingest more later | -- Pending |
-| Deployment deferred | Focus on model accuracy first, integration second | -- Pending |
+| XGBoost over PyTorch | Gradient boosted trees handle tabular data well, easier to interpret, faster training iteration | ✓ Good -- 123.1s MAE, trains in seconds |
+| Single model, per-stop rows | Variable number of remaining stops per observation; one model learns time-to-any-stop | ✓ Good -- 23/23 routes beat naive |
+| All remaining stops (not just next 3) | More useful predictions for riders planning ahead | ✓ Good -- works across all stop distances |
+| Approximate class schedule | Classes assumed to end at :50/:00 during typical hours | ✓ Good -- class_let_out_recently contributes to predictions |
+| Use existing data only | 5 weeks sufficient to build and validate; pipeline can ingest more later | ✓ Good -- sufficient for model development |
+| Deployment deferred | Focus on model accuracy first, integration second | ✓ Good -- model quality validated before deployment work |
+| pred_contribs over TreeExplainer | 2158-iteration model too slow for TreeExplainer | ✓ Good -- equivalent exact SHAP values, 5 min vs hours |
+| 3:1 asymmetric loss (not 5:1) | 5:1 too aggressive; 3:1 with proximity scaling protects riders near buses | ✓ Good -- median residual -16.5s (conservative) |
+| Optuna 50 trials on 10% subsample | Fast search with full-data verification | ✓ Good -- found optimal params efficiently |
+| Quantile-based distance bucketing | All distances < 7 km; meter thresholds put 100% in one bucket | ✓ Good -- meaningful 4-bucket analysis |
 
 ---
-*Last updated: 2026-02-03 after initialization*
+*Last updated: 2026-02-11 after v1.0 milestone*

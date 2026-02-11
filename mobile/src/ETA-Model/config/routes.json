@@ -1,0 +1,6 @@
+{
+  "routes": [],
+  "defaultModel": "fallback.pt",
+  "modelVersion": "1.0.0",
+  "description": "ETA prediction model registry. Routes are automatically added when trained."
+}

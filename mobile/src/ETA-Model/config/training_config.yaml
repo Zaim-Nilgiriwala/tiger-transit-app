@@ -1,0 +1,148 @@
+# ETA Prediction Model Training Configuration
+# Tiger Transit - Auburn University
+
+# =============================================================================
+# Model Architecture
+# =============================================================================
+model:
+  type: standard  # Options: standard, uncertainty, lightweight
+  hidden_dims: [256, 128, 64]
+  dropout: 0.2
+  vehicle_embed_dim: 8
+  num_stops: 1  # Number of future stops to predict (v2 data prep uses 1)
+
+# =============================================================================
+# Loss Function
+# =============================================================================
+loss:
+  type: asymmetric  # Options: asymmetric, weighted, quantile, mse
+  # Overestimate penalty: How much worse is predicting the bus arrives earlier
+  # than it actually does (causing riders to potentially miss the bus)
+  # 5.0 = 5x penalty for overestimation vs underestimation
+  overestimate_penalty: 5.0
+  # Ordering constraint weight: Ensures ETA_1 < ETA_2 < ETA_3
+  # Set to 0 for single-stop prediction
+  ordering_weight: 0.0
+  # Use Huber loss for robustness to outliers
+  use_huber: false
+  huber_delta: 60.0  # seconds
+
+# =============================================================================
+# Training Parameters
+# =============================================================================
+training:
+  batch_size: 256
+  learning_rate: 0.001
+  epochs: 100
+  early_stopping_patience: 15
+  gradient_clip: 1.0
+
+  # Learning rate scheduler
+  scheduler:
+    type: reduce_on_plateau
+    factor: 0.5
+    patience: 5
+
+  # Data splits
+  train_split: 0.8
+  val_split: 0.1
+  test_split: 0.1
+
+# =============================================================================
+# Feature Configuration
+# =============================================================================
+features:
+  # Number of stops to predict ETAs for
+  num_stops: 1
+
+  # V2 data prep generates 27 features:
+  # Core: speed, heading, load, progress, lastStopOnTime, system_eta, scheduled_eta (7)
+  # Temporal: time_sin, time_cos, day_normalized, rush_hour flags, class_change (6)
+  # Day of week: one-hot encoding (7)
+  # Weather: precipitation, is_raining, probability, temperature (4)
+  # Historical: dwell_sec, boardings, alightings (3)
+
+  # Feature tiers to include
+  include_core: true       # Tier 1: distance, speed, heading, load, etc.
+  include_temporal: true   # Tier 2: time of day, day of week, rush hour
+  include_historical: true # Tier 3: segment times, boarding rates
+  include_weather: true    # Tier 4: precipitation, temperature (from historical data)
+  include_context: true    # Tier 5: game day, vehicle embedding
+
+  # Historical feature windows
+  vehicle_speed_window: 300  # seconds (5 minutes)
+
+  # Class change times (minutes after hour)
+  class_change_times: [0, 50]  # Top of hour and :50
+  class_change_window: 10     # +/- 10 minutes
+
+# =============================================================================
+# Data Paths (relative to ETA-Model directory)
+# =============================================================================
+data:
+  gtfs_dir: ../gtfs_data
+  raw_telemetry_dir: ./raw_data
+  live_telemetry_dir: ./live_data
+  processed_data_dir: ./processed_data
+  models_dir: ./models
+
+# =============================================================================
+# Route-Specific Configuration
+# =============================================================================
+routes:
+  # Regular routes (non-game day)
+  regular:
+    - route_id: "24"
+      name: "Shelby Center"
+    - route_id: "31"
+      name: "Campus Loop"
+    - route_id: "35"
+      name: "Tiger Transit Express"
+    # Add more routes as needed
+
+  # Game Day Services routes
+  game_day:
+    - route_id: "gds_1"
+      name: "Game Day Route 1"
+    # Add GDS routes as needed
+
+# =============================================================================
+# Evaluation Thresholds
+# =============================================================================
+evaluation:
+  # Target metrics (single-stop prediction)
+  target_mae: 45          # seconds - target for next stop prediction
+  target_overestimate_rate: 0.20  # 20% max overestimate rate
+
+  # Accuracy thresholds to report
+  accuracy_thresholds: [30, 60, 90, 120, 180, 300]  # seconds
+
+  # Baseline comparison: current system has ~173s MAE (2.9 min)
+
+# =============================================================================
+# Game Day Configuration
+# =============================================================================
+game_day:
+  # Game phases relative to kickoff
+  pre_game_hours: 4      # Hours before kickoff to consider pre-game
+  game_duration_hours: 4  # Estimated game duration
+  post_game_hours: 3     # Hours after game end to consider post-game
+
+  # Different training for different phases
+  train_separate_phases: true
+
+# =============================================================================
+# Hardware/Performance
+# =============================================================================
+hardware:
+  device: auto  # Options: auto, cpu, cuda
+  num_workers: 0  # DataLoader workers (0 for Windows)
+  pin_memory: false
+
+# =============================================================================
+# Logging
+# =============================================================================
+logging:
+  level: INFO
+  save_training_curves: true
+  checkpoint_every_n_epochs: 10

@@ -1,0 +1,60 @@
+{
+  "config": {
+    "startDate": "2026-01-29",
+    "endDate": "2026-02-06",
+    "serviceStartHour": 6,
+    "serviceEndHour": 22,
+    "speedIndex": 3,
+    "maxTimeout": 4200000,
+    "outputDir": "./raw_data"
+  },
+  "results": [
+    {
+      "dateStr": "2026-01-29",
+      "packets": 327258,
+      "frames": 65
+    },
+    {
+      "dateStr": "2026-01-30",
+      "packets": 324158,
+      "frames": 65
+    },
+    {
+      "dateStr": "2026-01-31",
+      "packets": 17276,
+      "frames": 65
+    },
+    {
+      "dateStr": "2026-02-01",
+      "packets": 30733,
+      "frames": 65
+    },
+    {
+      "dateStr": "2026-02-02",
+      "packets": 318413,
+      "frames": 65
+    },
+    {
+      "dateStr": "2026-02-03",
+      "packets": 323624,
+      "frames": 65
+    },
+    {
+      "dateStr": "2026-02-04",
+      "packets": 324107,
+      "frames": 65
+    },
+    {
+      "dateStr": "2026-02-05",
+      "packets": 317512,
+      "frames": 65
+    },
+    {
+      "dateStr": "2026-02-06",
+      "packets": 319639,
+      "frames": 65
+    }
+  ],
+  "totalPackets": 2302720,
+  "collectedAt": "2026-02-10T21:52:27.468Z"
+}

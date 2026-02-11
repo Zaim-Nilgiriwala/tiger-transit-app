@@ -1,9 +1,11 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import MapScreen from '../screens/MapScreen';
 import RoutesScreen from '../screens/RoutesScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import { Colors, Shadows } from '../theme';
 
 const Tab = createBottomTabNavigator();
 
@@ -24,12 +26,17 @@ const TabNavigator: React.FC = () => {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#E87722', // Auburn orange
-        tabBarInactiveTintColor: 'gray',
-        headerStyle: {
-          backgroundColor: '#0C2340', // Auburn navy
+        tabBarActiveTintColor: Colors.orange,
+        tabBarInactiveTintColor: Colors.gray400,
+        tabBarStyle: {
+          height: Platform.OS === 'ios' ? 88 : 64,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+          paddingTop: 8,
+          borderTopWidth: 0,
+          backgroundColor: Colors.surface,
+          ...Shadows.md,
         },
-        headerTintColor: '#fff',
+        headerShown: false,
       })}
     >
       <Tab.Screen name="Map" component={MapScreen} />

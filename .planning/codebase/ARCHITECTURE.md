@@ -1,216 +1,166 @@
 # Architecture
 
-**Analysis Date:** 2026-02-03
+**Analysis Date:** 2026-02-11
 
 ## Pattern Overview
 
-**Overall:** Client-Server with Real-time WebSocket Communication
+**Overall:** Three-tier hybrid architecture with ML pipeline
 
 **Key Characteristics:**
-- **Backend:** Express.js REST API with PostgreSQL database and real-time WebSocket server
-- **Frontend:** React Native mobile app with Redux state management
-- **Communication:** RESTful HTTP for data queries, WebSocket for real-time vehicle tracking
-- **Database:** PostgreSQL with PostGIS extension for geospatial queries
-- **Real-time Integration:** Custom ETA Spot vehicle tracking service via WebSocket
+- Backend API layer (Node.js/TypeScript + Express) serving GTFS transit data and real-time vehicle positions
+- Mobile frontend (React Native + Redux) consuming REST APIs and WebSocket feeds
+- Offline ML training pipeline (Python/XGBoost) for ETA prediction model development
+- Data flows from external GTFS-RT feeds → backend cache → WebSocket broadcast → mobile client
+- ML model trained offline from historical telemetry/arrivals data, deployed separately from API
 
 ## Layers
 
-**Presentation Layer (Mobile):**
-- Purpose: User interface for viewing routes, stops, and real-time vehicle locations
+**Data Layer (PostgreSQL + Redis):**
+- Purpose: Persistent storage of GTFS static data and caching of real-time vehicle positions
+- Location: `backend/prisma/schema.prisma`
+- Contains: GTFS entities (routes, stops, trips, stop_times, shapes), vehicle positions, service alerts
+- Depends on: PostGIS extension for geospatial queries
+- Used by: Backend services layer via Prisma ORM
+
+**Backend Service Layer (Node.js):**
+- Purpose: Business logic for GTFS data access, real-time feed polling, and WebSocket broadcasting
+- Location: `backend/src/services/`
+- Contains: `etaspot.service.ts` - GTFS-Realtime feed consumer, vehicle position tracking
+- Depends on: Prisma client, gtfs-realtime-bindings, Redis client
+- Used by: Express route handlers, Socket.IO event emitters
+
+**Backend API Layer (Express):**
+- Purpose: REST endpoints for transit data queries (routes, stops, shapes) and WebSocket connections
+- Location: `backend/src/routes/`, `backend/src/index.ts`
+- Contains: Route handlers (routes.routes.ts, stops.routes.ts, vehicles.routes.ts, health.routes.ts), middleware (error-handler), main application bootstrap
+- Depends on: Service layer, Prisma client
+- Used by: Mobile app via HTTP/WebSocket
+
+**Mobile Presentation Layer (React Native):**
+- Purpose: User interface for viewing transit maps, routes, stops, and real-time vehicle positions
 - Location: `mobile/src/screens/`, `mobile/src/components/`
-- Contains: Screen components (MapScreen, RoutesScreen, StopDetailScreen), reusable UI components (Badge, Card, LoadBar)
-- Depends on: Redux store, custom hooks (useVehicles, useRoutePreferences), API client
-- Used by: Navigation system (RootNavigator, TabNavigator)
+- Contains: Screen components (MapScreen, RouteDetailScreen, StopDetailScreen), UI components (MapView, VehicleMarker, RoutePolyline)
+- Depends on: Redux store, React Navigation, react-native-maps
+- Used by: End users on iOS/Android/Web
 
-**State Management Layer (Mobile):**
-- Purpose: Centralized Redux store for transit data and user preferences
-- Location: `mobile/src/store/`
-- Contains: Redux slices (routesSlice), RTK Query API client (transitApi)
-- Depends on: @reduxjs/toolkit, redux-persist (via AsyncStorage)
-- Used by: All screen components via React-Redux hooks
+**Mobile State Management (Redux Toolkit):**
+- Purpose: Client-side state management and API data caching
+- Location: `mobile/src/store/api/transitApi.ts`
+- Contains: RTK Query API slice with endpoints for routes, stops, shapes
+- Depends on: Backend API endpoints
+- Used by: React components via hooks (useGetRoutesQuery, useGetStopsQuery)
 
-**API Data Layer (Mobile):**
-- Purpose: RTK Query generated API hooks and real-time WebSocket connections
-- Location: `mobile/src/store/api/transitApi.ts`, `mobile/src/hooks/useVehicles.ts`
-- Contains: Query definitions (getRoutes, getRouteDetail, getStops), vehicle subscription hooks
-- Depends on: `mobile/src/config/api.config.ts`, Socket.IO client
-- Used by: Map components and detail screens
-
-**Route/API Layer (Backend):**
-- Purpose: Express route handlers that serve transit data
-- Location: `backend/src/routes/`
-- Contains: Routes for /routes, /stops, /vehicles, /health endpoints
-- Depends on: Prisma ORM, error-handler middleware
-- Used by: Express app in index.ts
-
-**Service Layer (Backend):**
-- Purpose: Business logic and external integrations
-- Location: `backend/src/services/etaspot.service.ts`
-- Contains: ETASpotService class for WebSocket connection to vehicle tracking provider
-- Depends on: Socket.IO client, EventEmitter
-- Used by: Server index.ts for vehicle position broadcasts
-
-**Middleware Layer (Backend):**
-- Purpose: Cross-cutting concerns and error handling
-- Location: `backend/src/middleware/error-handler.ts`
-- Contains: Global error handler, API error factory
-- Depends on: Express
-- Used by: Express app in index.ts
-
-**Data Access Layer (Backend):**
-- Purpose: Database interactions via Prisma ORM
-- Location: Prisma models in `backend/prisma/schema.prisma`
-- Contains: Models for Route, Stop, Trip, StopTime, Shape, VehiclePosition, ServiceAlert
-- Depends on: PostgreSQL, PostGIS extension
-- Used by: Route handlers and services
+**ML Training Pipeline (Python/Pandas/XGBoost):**
+- Purpose: Offline training of ETA prediction models from historical telemetry and arrival data
+- Location: `scripts/`
+- Contains: Data parsers (parse_gtfs.py, parse_arrivals.py, parse_telemetry.py), feature engineering (build_features.py, build_differentiator_features.py), training scripts (train_baseline.py, train_advanced.py, train_asymmetric_quantile.py), evaluation (evaluate.py)
+- Depends on: Parquet files in `data/processed/`, GTFS static files in `gtfs_data/`
+- Used by: Offline model development process, outputs to `models/` directory
 
 ## Data Flow
 
-**Query Flow (Static Data):**
+**Real-Time Vehicle Position Flow:**
 
-1. Mobile app calls Redux query hook (e.g., `useGetRoutesQuery()`)
-2. RTK Query fetches from backend API endpoint (`/routes`, `/stops`, etc.)
-3. Backend route handler queries Prisma ORM
-4. Prisma executes SQL against PostgreSQL
-5. Results returned through route handler response middleware
-6. RTK Query caches result in Redux store
-7. Component renders from cached Redux state
+1. ETASpotService polls GTFS-RT feeds (position_updates.pb, trip_updates.pb) every 5 seconds
+2. Service decodes Protocol Buffer feeds using gtfs-realtime-bindings
+3. Trip updates are processed to extract next stop ETAs and delay information
+4. Position updates are merged with trip ETA data to create VehiclePosition objects
+5. Positions are stored in in-memory Map and emitted as 'vehicle' events
+6. Socket.IO server broadcasts vehicle updates to subscribed clients (by route or stop)
+7. Mobile app receives vehicle positions via WebSocket and updates map markers in real-time
 
-**Real-time Vehicle Updates Flow:**
+**GTFS Static Data Flow:**
 
-1. Backend ETASpotService connects to Auburn ETA Spot WebSocket
-2. Receives vehicle position updates (sysRpt messages) with coordinates, route ID, ETA
-3. Emits 'vehicle' event with transformed VehiclePosition
-4. Express server broadcasts to subscribed WebSocket clients via Socket.IO
-5. Mobile app `useVehicles` hook receives 'vehicle' or 'vehicles' events
-6. Updates React state with new vehicle positions
-7. Map components re-render with updated vehicle markers
+1. GTFS CSV files imported via `backend/scripts/import-gtfs.ts`
+2. Data loaded into PostgreSQL via Prisma ORM
+3. REST API endpoints query Prisma for routes, stops, trips, shapes
+4. Mobile app requests data via RTK Query API layer
+5. Results cached in Redux store for offline access
 
-**Stop Subscription Flow:**
+**ML Model Training Flow (Offline):**
 
-1. Mobile app subscribes to stop via Socket.IO: `socket.emit('subscribe:stop', stopId)`
-2. Backend creates Socket.IO room `stop:{stopId}`
-3. Backend checks which vehicles are heading to that stop (nextStopId match)
-4. Broadcasts 'arrival' events only for relevant vehicles
-5. Mobile receives updates for ETAs at specific stop
+1. Raw telemetry JSONL files parsed into `data/processed/telemetry.parquet` (parse_telemetry.py)
+2. Arrival CSVs parsed into `data/processed/arrivals.parquet` (parse_arrivals.py)
+3. GTFS static files parsed into route/stop/shape parquets (parse_gtfs.py)
+4. Telemetry downsampled to 60s intervals and exploded into per-stop prediction rows (explode_rows.py)
+5. Exploded rows joined with actual arrivals via merge_asof to create ground truth labels (label_join.py)
+6. Labeled data split temporally into train/val/test (temporal_split.py)
+7. Features engineered from GTFS schedules, weather, and telemetry (build_features.py, build_differentiator_features.py)
+8. XGBoost models trained with hyperparameter tuning (train_baseline.py → train_advanced.py)
+9. Final model evaluated on test set with sliced metrics and SHAP explanations (evaluate.py)
+10. Trained model artifacts saved to `models/*.ubj` for potential deployment
 
-**Route Subscription Flow:**
-
-1. Mobile app subscribes to route via Socket.IO: `socket.emit('subscribe:route', routeId)`
-2. Backend creates Socket.IO room `route:{routeId}`
-3. Backend broadcasts vehicle updates only for vehicles on that route
-4. Mobile filters vehicles in local state
-
-## State Management
-
-**Redux Store Structure:**
-- `transitApi`: RTK Query cache and middleware for API queries
-- `routes`: Manual slice for route preferences (which routes to display)
-
-**Mobile Local State:**
-- `useVehicles`: Maintains vehicle array and connection status
-- `useRoutePreferences`: AsyncStorage-backed preferences for route visibility
-- `MapView`: Region state for map viewport
-
-**Backend State:**
-- `ETASpotService`: In-memory Map of vehicle positions
-- Socket.IO rooms: Dynamic subscription management
+**State Management:**
+- Backend: In-memory Map for vehicle positions (2-minute staleness window), Redis for future caching
+- Mobile: Redux Toolkit for API data cache, AsyncStorage for user preferences
+- ML Pipeline: Parquet files for intermediate data, no state persistence between scripts
 
 ## Key Abstractions
 
-**VehiclePosition Interface:**
-- Purpose: Standardized vehicle data across backend and mobile
-- Examples: `backend/src/services/etaspot.service.ts`, `mobile/src/hooks/useVehicles.ts`
-- Pattern: Shared interface definition for type safety
+**VehiclePosition (Backend):**
+- Purpose: Real-time transit vehicle state with ETA prediction
+- Examples: `backend/src/services/etaspot.service.ts`, `backend/prisma/schema.prisma`
+- Pattern: Interface defining vehicleId, routeId, lat/lon, heading, speed, load, nextStopId, etaSeconds, delay, timestamp
 
-**ApiResponse Wrapper:**
-- Purpose: Consistent API response format with metadata
-- Examples: `mobile/src/types/gtfs.types.ts` (ApiResponse generic)
-- Pattern: All backend routes return `{ success, data, meta }`
+**GTFS Entity Models (Backend):**
+- Purpose: Static transit network structure (routes, stops, trips, schedules)
+- Examples: `backend/prisma/schema.prisma` - Route, Stop, Trip, StopTime, Shape, Calendar models
+- Pattern: Prisma schema matching GTFS specification with PostGIS extensions for geospatial columns
 
-**Route Preferences Context:**
-- Purpose: Track which routes user has toggled on/off
-- Examples: `mobile/src/hooks/useRoutePreferences.tsx`
-- Pattern: Context provider with AsyncStorage persistence
+**Feature Vector (ML Pipeline):**
+- Purpose: 15-27 engineered features representing a vehicle's state for ETA prediction
+- Examples: `scripts/build_features.py` (FEATURE_COLS), `scripts/build_differentiator_features.py` (FEATURE_COLS_V2)
+- Pattern: Pandas DataFrame columns combining distance_to_target, scheduled_time, speed, lateness, temporal, weather, and differentiator features (dwell times, segment times)
 
-**ETASpotService:**
-- Purpose: Encapsulate external ETA Spot WebSocket protocol
-- Examples: `backend/src/services/etaspot.service.ts`
-- Pattern: EventEmitter class that transforms external messages to internal events
+**XGBoost DMatrix (ML Pipeline):**
+- Purpose: Optimized data structure for gradient boosted tree training with categorical features
+- Examples: `scripts/train_baseline.py`, `scripts/train_advanced.py` - xgb.DMatrix creation with enable_categorical=True
+- Pattern: Conversion from Pandas DataFrame with explicit categorical column types, used for all train/val/test splits
+
+**RTK Query Endpoint (Mobile):**
+- Purpose: Type-safe API data fetching with automatic caching and invalidation
+- Examples: `mobile/src/store/api/transitApi.ts` - getRoutes, getStops, getRouteShape endpoints
+- Pattern: RTK Query builder pattern with typed request/response, transformResponse for unwrapping ApiResponse wrapper
 
 ## Entry Points
 
-**Backend Server:**
+**Backend API Server:**
 - Location: `backend/src/index.ts`
-- Triggers: `npm run dev` (development) or `npm start` (production)
-- Responsibilities: Express app setup, middleware config, Socket.IO setup, route mounting, ETA Spot connection
+- Triggers: `npm run dev` or `npm start` from backend directory
+- Responsibilities: Initialize Express app with middleware (helmet, cors, compression), mount route handlers, start Socket.IO server, initialize ETASpotService polling, listen on port 3000
 
-**Mobile App:**
-- Location: `mobile/App.tsx`
-- Triggers: Expo start
-- Responsibilities: Redux Provider setup, Route Preferences Provider, Navigation initialization
+**Mobile Application:**
+- Location: `mobile/App.tsx`, `mobile/index.ts`
+- Triggers: `expo start` from mobile directory
+- Responsibilities: Initialize Redux store, wrap app in Provider and RoutePreferencesProvider, render RootNavigator with tab navigation
 
-**Map View (Primary Mobile Screen):**
-- Location: `mobile/src/screens/MapScreen.tsx` → `mobile/src/components/Map/MapView.tsx`
-- Triggers: User opens "Map" tab in tab navigator
-- Responsibilities: Coordinate map display, fetch routes/stops/vehicles, manage visibility preferences
+**ML Training Scripts:**
+- Location: `scripts/train_baseline.py`, `scripts/train_advanced.py`, `scripts/evaluate.py`
+- Triggers: Manual execution via `python scripts/<script>.py` after data preparation
+- Responsibilities: Load featured parquet splits, train XGBoost models with early stopping, compute metrics, generate SHAP visualizations, save model artifacts to models/ directory
+
+**Data Processing Pipeline:**
+- Location: `scripts/parse_*.py`, `scripts/build_*.py`, `scripts/explode_rows.py`, `scripts/label_join.py`, `scripts/temporal_split.py`
+- Triggers: Manual sequential execution in dependency order (parse → explode → label → split → build_features → train)
+- Responsibilities: Transform raw telemetry/arrivals/GTFS data through staged processing to create train/val/test feature sets
 
 ## Error Handling
 
-**Strategy:** Centralized error middleware with structured error responses
+**Strategy:** Centralized middleware for backend, try-catch with error events for services, manual error handling in ML scripts
 
-**Backend Patterns:**
-- Route handlers wrap database calls in try-catch
-- Errors passed to `next(error)` → caught by global errorHandler
-- errorHandler returns consistent JSON: `{ success: false, error: { code, message }, meta }`
-- ApiError interface allows statusCode and code properties for HTTP semantics
+**Patterns:**
+- Backend API: Express error-handler middleware (`backend/src/middleware/error-handler.ts`) catches thrown errors, returns standardized JSON with success: false, error code, message
+- GTFS-RT Service: Try-catch in poll() method emits 'error' and 'disconnected' events, logs to console, continues polling on next interval
+- ML Scripts: Assertions for data quality checks (type mismatches, missing columns), sys.exit(1) on critical failures, print() logging for progress/diagnostics
 
-**Mobile Patterns:**
-- RTK Query transformResponse handles API error payloads
-- useVehicles hook catches Socket.IO connection errors in state
-- Screens display connection status banners when error state is set
+## Cross-Cutting Concerns
 
-**Cross-Cutting Concerns**
+**Logging:** Console logging with timestamps for backend requests (middleware), service events (ETASpotService), and ML script progress (print statements)
 
-**Logging:**
-- Backend: console.log at key points (startup, connections, requests)
-- Mobile: console.log in useVehicles and Socket.IO event handlers
+**Validation:** Zod schemas for API request validation (not yet implemented), Pandas dtype checks and assertions in ML pipeline (e.g., label_join.py type validation), query parameter parsing in route handlers
 
-**Validation:**
-- Backend: Query parameter parsing in route handlers (e.g., bbox bounds)
-- Mobile: RTK Query transforms response to typed models
+**Authentication:** None implemented - open API endpoints and WebSocket connections (future: JWT tokens, API keys)
 
-**Authentication:**
-- Backend: ETA Spot cookie-based auth (passed in Socket.IO extraHeaders)
-- Mobile: No API authentication (public transit data, but hardcoded server IP)
+---
 
-**CORS:**
-- Backend: express-cors middleware with configurable origin (env var)
-- Mobile: Direct Socket.IO connection to backend server
-
-## Architecture Decisions
-
-**Why Express + Socket.IO:**
-- Express handles REST queries for static GTFS data
-- Socket.IO adds real-time push for vehicle positions without polling
-- Clean separation: query-based REST for data, event-based WebSocket for streaming
-
-**Why Redux + RTK Query:**
-- RTK Query provides automatic caching for routes/stops queries
-- Redux persists route preferences to AsyncStorage
-- Scales better than prop drilling for deeply nested map components
-
-**Why PostgreSQL + PostGIS:**
-- GTFS data is already normalized relational schema
-- PostGIS enables spatial queries (nearby stops by distance)
-- Proven for transit applications
-
-**Why Prisma ORM:**
-- Type-safe SQL generation from schema
-- Automatic migrations
-- Works well with TypeScript
-
-**Why Custom ETA Spot Service:**
-- Auburn's vehicle data comes from proprietary ETA Spot system
-- Service wraps WebSocket protocol, transforms external format to internal VehiclePosition
-- EventEmitter pattern allows flexible subscription handling
+*Architecture analysis: 2026-02-11*

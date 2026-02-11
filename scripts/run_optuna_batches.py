@@ -15,8 +15,8 @@ import time
 from pathlib import Path
 
 
-TARGET_TRIALS = 50
-BATCH_SIZE = 10  # trials per invocation
+TARGET_TRIALS = 150
+BATCH_SIZE = 25  # trials per invocation
 
 
 def count_trials():
