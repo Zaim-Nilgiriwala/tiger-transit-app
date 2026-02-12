@@ -5,34 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Accurate arrival time predictions for all remaining stops on a bus route, accounting for timepoint holds, schedule adherence, and real-world conditions.
-**Current focus:** v1.0 milestone complete. Planning next milestone.
+**Current focus:** v1.1 Model Reapproach -- predict residuals instead of raw seconds
 
 ## Current Position
 
-Phase: 6 of 6 (Evaluation and Analysis) -- COMPLETE
-Plan: All plans complete (06-02 skipped at milestone completion)
-Status: v1.0 Milestone complete
-Last activity: 2026-02-11 -- v1.0 milestone archived
+Phase: Not started (defining requirements)
+Plan: --
+Status: Defining requirements
+Last activity: 2026-02-11 -- Milestone v1.1 started
 
-Progress: [##########] 100%
-
-## Performance Metrics
-
-**Velocity:**
-- Total plans completed: 13
-- Average duration: ~9m
-- Total execution time: ~1.8 hours
-
-**By Phase:**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 01-data-foundation | 3/3 | 26m | ~9m |
-| 02-row-explosion-labels | 2/2 | ~6m | ~3m |
-| 03-baseline-model | 2/2 | ~23m | ~12m |
-| 04-differentiator-features | 3/3 | ~23m | ~8m |
-| 05-advanced-training | 2/2 | ~20m | ~10m |
-| 06-evaluation-and-analysis | 1/1 | ~15m | ~15m |
+Progress: [          ] 0%
 
 ## Model Performance Tracker
 
@@ -43,9 +25,25 @@ Progress: [##########] 100%
 | Differentiator (P4) | 175.7s | 279.7s | 75.2% | 43 | 3000 |
 | Tuned (P5) | 123.1s | 202.8s | 82.6% | 43 | 1239 |
 | Asymmetric (P5) | 126.5s | 210.8s | 82.2% | 43 | 2174 |
+| **v1.1 target** | **< 123.1s** | -- | -- | 43 | TBD |
+
+## Accumulated Context
+
+### Decisions
+
+Carried from v1.0:
+- lateness_now has zero variance (scheduled_eta == eta in EtaSpot data)
+- Quantile monotonicity violations (32.3%) with independent quantile training on subsampled data
+- pred_contribs preferred over TreeExplainer for large models
+- 6 routes show overprediction bias, 2 underprediction -- consider route-specific calibration
+
+### Blockers/Concerns
+
+- Route 27 has only 96 test samples -- insufficient for reliable evaluation
+- Midday overprediction bias (+24.93s) from v1.0 -- may or may not persist with residual target
 
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: v1.0 milestone completed and archived
-Resume: `/gsd:new-milestone` for next milestone
+Stopped at: Defining v1.1 requirements
+Resume: Continue with requirements definition and roadmap creation
