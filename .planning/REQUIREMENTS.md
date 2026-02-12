@@ -7,11 +7,11 @@
 
 ### Baseline Computation
 
-- [ ] **BASE-01**: Compute stop-to-stop historical average travel times from training data, aggregated by (route_id, from_stop_id, target_stop_id, hour, day_type)
-- [ ] **BASE-02**: Compute segment-median-sum baseline by summing historical segment median travel times along the route path from current position to target stop
-- [ ] **BASE-03**: Blend both baselines into a single baseline_eta column (average of segment-sum and stop-to-stop)
-- [ ] **BASE-04**: Generate residual labels (time_to_arrival_seconds - baseline_eta) for all rows in train/val/test splits
-- [ ] **BASE-05**: Measure and report baseline-only MAE on test set as fail-fast checkpoint (expected 200-400s)
+- [x] **BASE-01**: Compute stop-to-stop historical average travel times from training data, aggregated by (route_id, from_stop_id, target_stop_id, hour, day_type)
+- [x] **BASE-02**: Compute segment-median-sum baseline by summing historical segment median travel times along the route path from current position to target stop
+- [x] **BASE-03**: Blend both baselines into a single baseline_eta column (average of segment-sum and stop-to-stop)
+- [x] **BASE-04**: Generate residual labels (time_to_arrival_seconds - baseline_eta) for all rows in train/val/test splits
+- [x] **BASE-05**: Measure and report baseline-only MAE on test set as fail-fast checkpoint (expected 200-400s)
 
 ### Training Pipeline
 
@@ -54,11 +54,11 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BASE-01 | Phase 7 | Pending |
-| BASE-02 | Phase 7 | Pending |
-| BASE-03 | Phase 7 | Pending |
-| BASE-04 | Phase 7 | Pending |
-| BASE-05 | Phase 7 | Pending |
+| BASE-01 | Phase 7 | Complete |
+| BASE-02 | Phase 7 | Complete |
+| BASE-03 | Phase 7 | Complete |
+| BASE-04 | Phase 7 | Complete |
+| BASE-05 | Phase 7 | Complete |
 | TRAIN-01 | Phase 8 | Pending |
 | TRAIN-02 | Phase 8 | Pending |
 | TRAIN-03 | Phase 8 | Pending |
@@ -77,4 +77,4 @@
 
 ---
 *Requirements defined: 2026-02-11*
-*Last updated: 2026-02-11 after roadmap creation*
+*Last updated: 2026-02-12 after Phase 7 completion*
