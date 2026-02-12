@@ -33,10 +33,10 @@ Phases 1-6 delivered the initial XGBoost ETA model: 123.1s MAE across 23 routes,
   2. Every row in train/val/test parquets has a non-NaN baseline_eta value (after fallback hierarchy), with fewer than 5% of rows requiring tier-3+ fallback
   3. Residual column (time_to_arrival_seconds - baseline_eta) exists in all splits, with training-set mean within +/-30s of zero
   4. Baseline-only MAE on test set is reported and falls between 150s and 500s (sanity check -- better than naive 708.9s, worse than v1.0 123.1s)
-**Plans**: TBD (1-2 plans)
+**Plans**: 1 plan
 
 Plans:
-- [ ] 07-01: Build baseline computation pipeline (historical lookups, blended baseline, residual labels, fail-fast MAE report)
+- [ ] 07-01-PLAN.md -- Build baseline computation pipeline (s2s lookups, segment-median-sum, 50/50 blend, residual labels, diagnostic report)
 
 ### Phase 8: Training Adaptation
 **Goal**: A trained v1.1 XGBoost model that predicts residuals, with optimized hyperparameters for the zero-centered residual target distribution
@@ -75,7 +75,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 7. Baseline Infrastructure | v1.1 | 0/1 | Not started | - |
+| 7. Baseline Infrastructure | v1.1 | 0/1 | Planned | - |
 | 8. Training Adaptation | v1.1 | 0/2 | Not started | - |
 | 9. Evaluation and Comparison | v1.1 | 0/1 | Not started | - |
 
