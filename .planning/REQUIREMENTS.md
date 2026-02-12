@@ -54,27 +54,27 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BASE-01 | TBD | Pending |
-| BASE-02 | TBD | Pending |
-| BASE-03 | TBD | Pending |
-| BASE-04 | TBD | Pending |
-| BASE-05 | TBD | Pending |
-| TRAIN-01 | TBD | Pending |
-| TRAIN-02 | TBD | Pending |
-| TRAIN-03 | TBD | Pending |
-| TRAIN-04 | TBD | Pending |
-| TRAIN-05 | TBD | Pending |
-| EVAL-01 | TBD | Pending |
-| EVAL-02 | TBD | Pending |
-| EVAL-03 | TBD | Pending |
-| EVAL-04 | TBD | Pending |
-| EVAL-05 | TBD | Pending |
+| BASE-01 | Phase 7 | Pending |
+| BASE-02 | Phase 7 | Pending |
+| BASE-03 | Phase 7 | Pending |
+| BASE-04 | Phase 7 | Pending |
+| BASE-05 | Phase 7 | Pending |
+| TRAIN-01 | Phase 8 | Pending |
+| TRAIN-02 | Phase 8 | Pending |
+| TRAIN-03 | Phase 8 | Pending |
+| TRAIN-04 | Phase 8 | Pending |
+| TRAIN-05 | Phase 8 | Pending |
+| EVAL-01 | Phase 9 | Pending |
+| EVAL-02 | Phase 9 | Pending |
+| EVAL-03 | Phase 9 | Pending |
+| EVAL-04 | Phase 9 | Pending |
+| EVAL-05 | Phase 9 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 15 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 15
+- Mapped to phases: 15
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-11*
-*Last updated: 2026-02-11 after initial definition*
+*Last updated: 2026-02-11 after roadmap creation*
