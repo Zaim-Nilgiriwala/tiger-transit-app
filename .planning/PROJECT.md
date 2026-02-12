@@ -29,7 +29,12 @@ Accurate arrival time predictions for all remaining stops on a bus route, accoun
 
 ### Active
 
-(None -- planning next milestone)
+- [ ] Build blended baseline ETA calculator (average of segment-median sum and stop-to-stop historical average)
+- [ ] Compute residual labels (actual_arrival - baseline_ETA) for training data
+- [ ] Modify v1.0 training pipeline to predict residual instead of raw seconds
+- [ ] Fresh Optuna hyperparameter tuning for residual target distribution
+- [ ] Symmetric squared error loss (no asymmetric initially)
+- [ ] Evaluation comparing v1.1 residual model vs v1.0 raw model (must beat 123.1s MAE)
 
 ### Out of Scope
 
@@ -40,6 +45,20 @@ Accurate arrival time predictions for all remaining stops on a bus route, accoun
 - Collecting new raw data -- using existing Nov 6 - Dec 12 dataset
 - Neural network approaches -- XGBoost only per project decision
 - Feature normalization/z-scoring -- unnecessary for tree-based models
+
+## Current Milestone: v1.1 Model Reapproach
+
+**Goal:** Rearchitect the XGBoost model to predict residuals (actual - baseline_ETA) instead of raw seconds, where the baseline is a blended average of segment-median sums and stop-to-stop historical averages.
+
+**Key changes from v1.0:**
+- Target variable: residual (centered ~0) instead of raw time_to_arrival_seconds (0-2000+s)
+- Baseline ETA: average of (sum of segment medians) and (direct stop-to-stop historical average)
+- Same 43 features retained
+- Modify v1.0 scripts in place (no forking)
+- Symmetric loss first, fresh Optuna tuning
+- Success: beat v1.0's 123.1s MAE
+
+**At inference:** `predicted_arrival = baseline_ETA + predicted_residual`
 
 ## Context
 
@@ -94,6 +113,9 @@ Accurate arrival time predictions for all remaining stops on a bus route, accoun
 | 3:1 asymmetric loss (not 5:1) | 5:1 too aggressive; 3:1 with proximity scaling protects riders near buses | ✓ Good -- median residual -16.5s (conservative) |
 | Optuna 50 trials on 10% subsample | Fast search with full-data verification | ✓ Good -- found optimal params efficiently |
 | Quantile-based distance bucketing | All distances < 7 km; meter thresholds put 100% in one bucket | ✓ Good -- meaningful 4-bucket analysis |
+| Residual target over raw seconds (v1.1) | Model learns deviation from historical baseline, tighter target distribution, focuses on explaining anomalies | -- Pending |
+| Modify in place over forking (v1.1) | Simpler codebase, v1.0 preserved in git history | -- Pending |
+| Symmetric loss first (v1.1) | Residual targets centered around 0; asymmetric penalty semantics change with residuals | -- Pending |
 
 ---
-*Last updated: 2026-02-11 after v1.0 milestone*
+*Last updated: 2026-02-11 after v1.1 milestone start*
