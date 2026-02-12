@@ -1,314 +1,274 @@
-# Feature Research: XGBoost ETA Model Input Features
+# Feature Research: Residual-Based ETA Prediction (v1.1)
 
-**Domain:** Transit bus arrival time prediction (ML model input features)
-**Researched:** 2026-02-03
-**Confidence:** MEDIUM-HIGH (well-studied domain; specific Auburn/timepoint aspects are domain-specific inference)
+**Domain:** Transit bus arrival time prediction -- residual target (actual - baseline_ETA)
+**Researched:** 2026-02-11
+**Confidence:** MEDIUM-HIGH
+**Supersedes:** v1.0 FEATURES.md (2026-02-03, raw-seconds target)
 
 ---
 
-## Feature Landscape
+## Context: Why Feature Behavior Changes with Residual Target
 
-This document covers ML model input features (not product features) for the Tiger Transit XGBoost ETA model. Features are categorized by their impact on model accuracy: table stakes features that any competent model must include, differentiator features that separate a good model from a great one, and anti-features that seem useful but hurt performance.
+The v1.0 model predicts raw `time_to_arrival_seconds` (range 0-2000+s, mean ~300s). The v1.1 model predicts `residual = actual_arrival - baseline_ETA` (range centered around 0, much tighter distribution).
 
-### Table Stakes Features (Must Have or Model Is Weak)
+The baseline is the average of:
+1. **Segment-median sum:** Sum of historical median travel times for each segment between current position and target stop
+2. **Stop-to-stop historical average:** Direct historical average travel time from current stop to target stop
 
-These are the baseline features that every transit ETA model in the literature uses. Omitting any of these will produce a noticeably worse model than a simple schedule-based baseline.
+This baseline already encodes distance, route structure, stop count, and typical travel time patterns. Features that primarily encode the same information become **redundant** -- the model no longer needs to "learn" that 5 stops away takes longer than 2 stops. Instead, the model needs features that explain **why this trip deviates from the historical norm**.
 
-| Feature | Why Essential | Complexity | Encoding Notes | Confidence |
-|---------|--------------|------------|----------------|------------|
-| **distance_to_target** (route distance along shape from current position to target stop, in meters) | Single most predictive feature in virtually every transit ETA paper. Without it the model has no spatial anchor. | MEDIUM -- requires snapping GPS to GTFS shape and computing cumulative `shape_dist_traveled` | Continuous, no encoding needed. Use route distance, NOT haversine. | HIGH |
-| **scheduled_time_to_target** (seconds from now until scheduled arrival at target stop) | The schedule is the strongest available prior. XGBoost learns residuals around schedule. Zhu et al. (2022) and multiple studies confirm schedule deviation as top feature. | LOW -- join GTFS stop_times to current trip, subtract current time | Continuous (seconds). Can be negative if bus is late. | HIGH |
-| **current_speed** (v, instantaneous GPS speed) | Direct measure of current travel conditions. In Zhu et al., speed variation was a top-3 influencing factor. | LOW -- available directly from telemetry | Continuous. Clip outliers (e.g., > 80 mph = GPS error). | HIGH |
-| **stops_remaining** (integer count of stops between current position and target stop) | Captures dwell time accumulation. More stops = more variability. Core in every multi-stop model. | LOW -- count from stop sequence | Integer, treat as continuous. | HIGH |
-| **lateness_now** (current schedule deviation in seconds: actual_time - scheduled_time at last stop) | Strongest real-time signal of whether bus is running fast or slow. Captures current trip's deviation pattern. | LOW -- `lastStop.time - lastStop.sdTime` | Continuous (positive = late, negative = early). | HIGH |
-| **time_of_day** (minutes since midnight or fractional hours) | Travel times vary dramatically by time of day (rush hour, midday, evening). Universal in all studies. | LOW | **For XGBoost: use raw minutes_since_midnight as continuous.** Trees can split on arbitrary thresholds, so cyclical sin/cos encoding is unnecessary and can actually hurt tree models (see Anti-Features). | HIGH |
-| **day_of_week** (0-6) | Weekend vs. weekday patterns are fundamentally different. Saturday service differs from Tuesday. | LOW | **Use XGBoost native categorical** (`enable_categorical=True`, dtype `category`). Do NOT one-hot encode -- native partition splits are optimal. | HIGH |
-| **stop_index** (ordinal position of target stop in the route's stop sequence) | Captures systematic patterns: early stops on a route behave differently than late stops (cumulative delay, passenger accumulation). | LOW | Continuous integer. | HIGH |
-| **route_progress** (nextStopPercentProgress -- fraction of current segment completed) | Interpolates position between last stop and next stop. Critical for accuracy within a segment. | LOW -- available from telemetry | Continuous [0, 1]. | HIGH |
-| **precipitation** (mm/hr from weather data) | Rain demonstrably slows buses. Zhu et al. found weather in the top influencing factors. Even small precipitation increases travel time 5-15%. | LOW -- join weather_data.csv by hour | Continuous. The `is_raining` binary is redundant if you include precipitation_mm -- XGBoost can learn the threshold itself. | MEDIUM |
-| **temperature** (Celsius) | Extreme temperatures affect boarding times (passengers slower, doors open longer) and road conditions. | LOW -- from weather CSV | Continuous. | MEDIUM |
+### The Fundamental Shift
 
-### Differentiator Features (Give Competitive Advantage Over Baselines)
+| Aspect | v1.0 (Raw Target) | v1.1 (Residual Target) |
+|--------|-------------------|------------------------|
+| What model learns | "How long will this trip take?" | "How much faster/slower than usual?" |
+| Target range | 0 - 2000+ seconds | Centered ~0, tighter spread |
+| Dominant signal | Distance, route structure | Real-time conditions, anomalies |
+| Feature role | Spatial features dominate | Condition features dominate |
+| Baseline absorbed | Nothing -- model learns everything | Distance, segment times, stop count |
 
-These features separate a well-engineered model from one that just uses the basics. Each has evidence of improving accuracy in the literature or strong domain-specific reasoning for the Auburn context.
+**Confidence:** HIGH -- this follows directly from the mathematical definition of the residual target. When `baseline = f(distance, stops, historical_times)`, the residual `y - baseline` is orthogonal to those components. Uber's DeepETA system uses the identical pattern: a routing engine provides the baseline, and the ML model predicts the residual, focusing on dynamic factors the routing engine cannot capture ([Uber DeepETA blog](https://www.uber.com/blog/deepeta-how-uber-predicts-arrival-times/)).
 
-| Feature | Value Proposition | Complexity | Encoding Notes | Confidence |
-|---------|-------------------|------------|----------------|------------|
-| **rolling_avg_speed_30s / 60s / 120s / 180s** (exponential or simple moving average of GPS speed) | Smooths GPS noise and captures traffic trend. A bus decelerating over 2 minutes is more informative than instantaneous speed. The Lag Model approach in the autonomous shuttle study (arXiv 2401.05322) found recent lag features highly predictive. 30s captures stop-and-go; 180s captures corridor-level congestion. | MEDIUM -- requires windowed aggregation over recent telemetry | Four continuous features. Consider also **speed_trend** (180s - 30s) as a derivative feature capturing acceleration/deceleration pattern. | HIGH |
-| **historical_segment_time_mean** (average travel time for this segment at this hour-of-day, from training data) | Encodes "how long does this segment usually take at 8am on a Tuesday?" Acts as a learned prior. Multiple papers use segment-level historical averages as a strong baseline feature. | HIGH -- requires pre-computing from training data, keyed by (segment_id, hour, day_type) | Continuous (seconds). Also compute **historical_segment_time_std** to capture variability. | HIGH |
-| **historical_dwell_time_mean** (average dwell time at each stop between current position and target) | Dwell time is "among the most important factors" per the autonomous shuttle study. Cumulative dwell across multiple stops can dominate travel time on short routes. | HIGH -- requires computing from arrivals data, keyed by (stop_id, hour, day_type) | Continuous (seconds). Sum of expected dwell times between current position and target. | MEDIUM |
-| **is_timepoint** (boolean: is the target stop a timepoint?) | Tiger Transit-specific. Timepoint stops have mandatory holds -- the bus CANNOT depart before scheduled time. This creates a hard floor on ETA when bus is early. Without this feature, model will systematically underpredict for timepoint stops when bus is running ahead of schedule. | MEDIUM -- requires timepoint mapping from Excel spreadsheet | Binary (0/1). | HIGH |
-| **timepoints_remaining** (count of timepoint stops between current position and target) | Each intervening timepoint adds potential forced dwell time. A target that is 3 timepoints away has more schedule-recovery opportunities (and delays) than one with 0 timepoints. | MEDIUM -- requires timepoint list per route | Integer, treat as continuous. | HIGH |
-| **time_until_next_timepoint_departure** (seconds until scheduled departure at next timepoint, if bus is ahead of schedule) | Directly encodes the forced wait. If bus is 3 minutes early and next timepoint departure is in 5 minutes, the bus will wait 3 minutes there. This is the single most important Auburn-specific feature. | HIGH -- requires real-time schedule calculation | Continuous (seconds). Zero if bus is behind schedule or no upcoming timepoint. | HIGH |
-| **is_rush_hour** (boolean: is current time in a defined rush window?) | Captures bimodal traffic pattern. Auburn campus has distinct rush patterns around class changes. | LOW | Binary (0/1). Define windows: 7:30-9:00 AM, 11:30-1:00 PM, 3:30-5:30 PM for Auburn. | MEDIUM |
-| **class_let_out_recently** (boolean: did a class period end within last 15 minutes?) | Auburn-specific. Class dismissal at :50 and :00 creates surge boarding demand and pedestrian/traffic congestion. This is a differentiator that generic transit models lack. | LOW -- approximate from clock time | Binary (0/1). Classes end at :50 of each hour (50-min classes) and :00 (for some). Window: 5 min before to 15 min after. | MEDIUM |
-| **passenger_load** (current occupancy from telemetry) | Higher load = longer dwell times at remaining stops (more alighting). Also correlates with route demand patterns. | LOW -- from telemetry `load` field | Continuous integer. | MEDIUM |
-| **heading_alignment** (cosine similarity between bus heading and bearing to target stop) | Captures whether bus is moving toward or away from target. A bus heading away from its next stop (loop routes, turning) will take longer. Already used in existing PyTorch model. | MEDIUM -- requires bearing calculation | Continuous [-1, 1]. Better than raw heading for XGBoost. | MEDIUM |
-| **is_idle / idle_duration** (bus stationary for > threshold seconds) | A currently-idling bus adds direct delay. Idle duration captures severity (traffic light vs. breakdown vs. driver break). | LOW -- from telemetry `isIdle` and `idle` fields | Binary + continuous pair. | MEDIUM |
-| **segment_id** (identifier for the route segment between consecutive stops) | Allows model to learn per-segment patterns (a segment with traffic lights vs. highway). | LOW -- derived from route stop sequence | **Use XGBoost native categorical** with partition splits. Do NOT one-hot encode (too many segments). | MEDIUM |
-| **patternID** (route pattern / direction variant) | Different patterns of the same route may have different stop sequences and travel characteristics. Subsumes route + direction information. | LOW -- from telemetry | **Use XGBoost native categorical.** | MEDIUM |
-| **offroute** (boolean: is bus flagged as off-route?) | Off-route buses have unpredictable travel times. Model should learn higher uncertainty. | LOW -- from telemetry | Binary (0/1). | LOW-MEDIUM |
+---
 
-### Anti-Features (Seem Useful but Hurt Performance)
+## Feature Importance Reclassification for v1.1
 
-These are features that appear reasonable but introduce problems including data leakage, encoding issues, or noise that degrades XGBoost performance.
+### Features That Become MORE Important (Explain Deviations)
+
+These features capture **why this trip differs from the historical average**. They become the primary signal when the baseline absorbs route structure and distance.
+
+| Feature | v1.0 SHAP Rank | v1.1 Expected Role | Why More Important | Confidence |
+|---------|----------------|--------------------|--------------------|------------|
+| **speed_mean_30s** | Mid-range | HIGH -- primary real-time signal | Current traffic/speed directly determines whether bus is running faster or slower than the historical median used in the baseline. If baseline assumes 25 mph for a segment but bus is doing 15 mph, the residual is positive (late). | HIGH |
+| **speed_mean_60s / 120s / 180s** | Mid-range | HIGH -- traffic corridor state | Longer rolling windows capture sustained congestion vs. momentary slowdowns. 180s window captures corridor-level traffic state that drives systematic deviations from historical medians. | HIGH |
+| **acceleration** | Low | MEDIUM -- trend indicator | Decelerating bus signals upcoming delay (approaching congestion, red light queue). Accelerating bus signals clearing conditions. Neither is captured by the static baseline. | MEDIUM |
+| **speed_ratio** | Low | HIGH -- direct anomaly detector | `current_speed / historical_median_speed` is literally the ratio that generates residuals. If speed_ratio < 1.0, the bus is slower than the historical median that informs the baseline. This feature should jump to top-5 importance. | HIGH |
+| **precipitation_mm** | Low | MEDIUM-HIGH -- explains systematic slowdowns | Rain slows all buses on all segments. The historical median baseline reflects average-weather conditions. Rain creates a systematic positive residual (bus takes longer than usual). | MEDIUM |
+| **temperature_c** | Very low | LOW-MEDIUM -- extreme weather effects | Extreme cold/heat affects boarding times and road conditions. Only matters at temperature extremes. | LOW |
+| **is_rush_hour** | Low | MEDIUM -- temporal deviation pattern | Rush hour creates congestion-driven delays that exceed historical segment medians (which blend rush and non-rush data). If the baseline already conditions on hour_ct and day_type, this is partially captured. **Depends on baseline granularity.** | MEDIUM |
+| **class_let_out_recently** | Low | MEDIUM -- Auburn-specific anomaly | Class dismissal creates surge demand and pedestrian congestion not captured in segment-level historical medians. Affects boarding dwell time and intersection delays. | MEDIUM |
+| **is_idle / seconds_idle** | Very low | MEDIUM -- active delay signal | An idling bus right now is accumulating delay that the baseline does not know about. The seconds_idle feature directly measures accumulated real-time delay beyond what historical medians predict. | MEDIUM |
+| **gps_speed_mps** | Low | MEDIUM -- instantaneous condition | Raw GPS speed captures the immediate condition. Less informative than rolling averages (noisy) but still signals current-moment anomalies. | MEDIUM |
+| **passenger_load** | Very low | LOW-MEDIUM -- dwell time predictor | Higher load = longer dwell at remaining stops. The baseline uses historical dwell medians. A bus with unusually high load will have above-average dwell times, creating positive residuals. | LOW |
+| **timepoint_adherence** | Mid-range | MEDIUM-HIGH -- schedule deviation context | How far ahead/behind the bus is relative to the timepoint schedule. A bus running 3 minutes late at the last timepoint will likely continue running late -- the baseline does not have this real-time information. | MEDIUM |
+| **speed_std_30s / 60s / 120s / 180s** | Low | LOW-MEDIUM -- variability signal | High speed variance indicates stop-and-go conditions (traffic lights, congestion). Consistently low variance indicates free-flow or consistently stopped. Helps explain residual variability. | LOW |
+
+### Features That Become LESS Important (Already Captured by Baseline)
+
+These features primarily encode **route structure, distance, and stop count** -- exactly what the baseline already computes. The model no longer needs these to predict the gross time magnitude; it only needs them if they interact with deviation patterns.
+
+| Feature | v1.0 SHAP Rank | v1.1 Expected Role | Why Less Important | Keep/Drop? | Confidence |
+|---------|----------------|--------------------|--------------------|------------|------------|
+| **stop_index** | #2 (120.2) | LOW -- positional context only | v1.0: stop_index encoded cumulative distance and typical delay patterns. v1.1: the baseline already sums segment medians up to this stop_index. The model no longer needs stop_index to estimate "how far away." It may still help as a context feature (early-route vs. late-route deviation patterns differ). | KEEP but expect massive SHAP drop | HIGH |
+| **distance_to_target** | High | LOW -- route geometry redundant with baseline | The baseline's segment-median-sum IS a function of distance. When baseline = sum(segment_medians), distance_to_target provides negligible additional information for predicting the residual. May help marginally for within-segment interpolation. | KEEP but expect SHAP drop to near-zero | HIGH |
+| **stops_remaining** | High | LOW -- absorbed by baseline | Same logic as distance_to_target. More stops = larger baseline ETA. The residual should not scale with stops_remaining because the baseline already accounts for it. Exception: if more stops = more variance = more room for deviation, it adds a weak heteroscedasticity signal. | KEEP but expect minimal contribution | HIGH |
+| **pattern_id** | #3 (119.0) | MEDIUM-LOW -- route-level bias only | v1.0: pattern_id was a dominant feature because different routes have fundamentally different travel times. With residual prediction, pattern_id only matters if certain routes systematically deviate from their historical medians more than others. Some routes may be more variable (campus-adjacent vs. highway). | KEEP -- still useful for route-specific deviation patterns | MEDIUM |
+| **route_id** | Moderate | LOW -- similar to pattern_id | Largely redundant with pattern_id. Route-specific bias in residuals is the only remaining signal. | KEEP for consistency | MEDIUM |
+| **scheduled_time_to_target** | High | LOW-MEDIUM -- schedule is a weaker baseline | The baseline uses historical actuals, not schedule. scheduled_time_to_target provides schedule-based context. Since baseline already uses historical medians (more accurate than schedule), this feature's role diminishes. However, the difference (scheduled - baseline) could indicate schedule tension. | KEEP -- provides complementary schedule perspective | MEDIUM |
+| **segment_travel_median / p25 / p75** | High | LOW -- directly feeds baseline | These features ARE the baseline (or very close to it). The segment_travel_median summed across remaining segments IS component 1 of the blended baseline. Including them as features while predicting residuals from a baseline that uses them creates near-perfect collinearity. | **KEEP but expect near-zero importance** -- see Anti-Features discussion | HIGH |
+| **dwell_median / p25 / p75** | Moderate | LOW -- partially feeds baseline | Historical dwell medians at current and remaining stops inform the baseline's estimated travel time. Similar collinearity concern. | KEEP but expect reduced importance | MEDIUM |
+| **target_dwell_median / p25 / p75** | Low-Moderate | LOW -- dwell at destination | Target stop dwell time is less relevant for arrival time (it is the stop we are predicting arrival AT, not departure FROM). May have been marginal in v1.0 already. | KEEP -- low cost, might capture destination-specific patterns | LOW |
+| **minutes_since_midnight** | Moderate | LOW-MEDIUM -- time already in baseline via hour_ct conditioning | If the baseline's historical segment medians are conditioned on (hour_ct, day_type), then time-of-day is already partially captured. Residual patterns by time exist (e.g., midday overprediction from v1.0) but the primary temporal signal is absorbed. | KEEP -- captures fine-grained temporal patterns not in hourly baseline | MEDIUM |
+| **day_of_week** | Low | LOW -- mostly absorbed if baseline conditions on day_type | If historical medians use weekday/weekend conditioning, day_of_week adds little. May help for Friday vs. Monday differences within weekdays. | KEEP -- low cost categorical | LOW |
+
+### Features with UNCHANGED Importance
+
+| Feature | v1.0 Role | v1.1 Expected Role | Rationale | Confidence |
+|---------|-----------|--------------------|--------------------|------------|
+| **time_until_next_timepoint_departure** | #1 (155.6) | HIGH -- remains top feature | Timepoint holds are NOT captured by segment-median baselines. A bus that arrives 4 minutes early at a timepoint will wait 4 minutes -- this delay is not in historical medians (medians include the hold but the baseline does not know current adherence). This feature provides real-time information about forced waits that remain invisible to the baseline. | HIGH |
+| **is_timepoint** | Moderate | MODERATE -- context for timepoint logic | Whether the target stop is a timepoint affects whether a hold applies. Same role in residual prediction. | HIGH |
+| **timepoints_remaining** | Moderate | MODERATE -- cumulative hold potential | More timepoints = more potential for schedule-recovery holds. The baseline does not account for current schedule adherence, so this remains relevant. | MEDIUM |
+| **scheduled_departure_seconds** | Low-Moderate | LOW-MODERATE -- timepoint schedule reference | When the next timepoint departure is scheduled. Relevant for computing expected hold duration. | MEDIUM |
+| **route_progress** | Low | LOW -- within-segment interpolation | Captures position within current segment. Marginal in both v1.0 and v1.1 since it is a fine-grained spatial feature. | LOW |
+| **current_speed** | Mid | MEDIUM -- instantaneous snapshot | Captured more cleanly by rolling averages, but provides raw signal. Similar role in both models. | MEDIUM |
+| **lateness_now** | High (but zero variance in v1.0!) | ZERO VARIANCE -- remains broken | `scheduled_eta_seconds - eta_seconds` is always 0 because EtaSpot's scheduled_eta == eta. This feature has zero variance in v1.0 and will have zero variance in v1.1. It contributes nothing. | HIGH |
+
+---
+
+## New Features Worth Adding for Residual Prediction
+
+These features are specifically valuable when the target is a residual (deviation from baseline), because they directly encode information about HOW and WHY the current trip deviates.
+
+### Table Stakes for Residual Prediction
+
+| Feature | Description | Why Essential for Residuals | Complexity | Priority |
+|---------|-------------|----------------------------|------------|----------|
+| **baseline_eta** | The blended baseline ETA value itself (seconds) | The model needs to know the baseline magnitude to contextualize the residual. A 10-second residual on a 30-second baseline is very different from a 10-second residual on a 600-second baseline. Without this, the model cannot learn that residuals scale with trip length (longer trips have larger absolute residuals). Uber's DeepETA includes the routing engine ETA as a feature. | LOW -- already computed for labels | **P1** |
+| **baseline_confidence** | Measure of baseline reliability -- e.g., (p75 - p25) / median from historical segment data, or count of observations | When the baseline is built from sparse data (few historical observations), it is less reliable and residuals will be larger/noisier. The model should know when to trust the baseline vs. when to rely more on real-time features. | MEDIUM -- derive from historical aggregates | **P2** |
+
+### Differentiator Features for Residual Prediction
+
+| Feature | Description | Value for Residuals | Complexity | Priority |
+|---------|-------------|---------------------|------------|----------|
+| **baseline_component_diff** | `abs(segment_median_sum - stop_to_stop_average)` | When the two baseline components disagree, the blended average may be poor. Large disagreement = unreliable baseline = larger expected residual. Gives model a signal about baseline quality. | LOW -- computed during baseline calc | **P2** |
+| **lateness_at_last_timepoint** | Actual seconds ahead/behind schedule at the most recent passed timepoint | More informative than `timepoint_adherence` (which uses clock time). Directly encodes whether the bus is running ahead or behind, which predicts whether upcoming timepoint holds will add delay. | MEDIUM -- requires timepoint schedule lookup | **P2** |
+| **residual_momentum** | Change in residual over last N observations for same vehicle-route | If a bus has been running increasingly late over the last 5 pings (residual increasing), it signals worsening conditions. If residual is decreasing, conditions are improving. This is a temporal derivative of the thing we are predicting. | MEDIUM -- requires per-vehicle tracking | **P3** |
+| **segment_speed_vs_historical** | `speed_mean_60s / segment_historical_speed_at_this_hour` for current segment | Direct measure of how much faster/slower the bus is traveling ON THIS SEGMENT compared to the historical norm for this segment. More specific than global speed_ratio. | MEDIUM -- requires segment-specific historical lookup | **P2** |
+
+### Confidence Assessment for New Features
+
+| Feature | Confidence | Reasoning |
+|---------|-----------|-----------|
+| baseline_eta | HIGH | Uber's DeepETA includes routing engine ETA as a feature. Mathematically necessary for residual scaling. |
+| baseline_confidence | MEDIUM | Theoretically sound but no transit-specific literature confirming impact. Need to validate empirically. |
+| baseline_component_diff | MEDIUM | Novel feature -- logical but unvalidated. Low implementation cost makes it worth trying. |
+| lateness_at_last_timepoint | MEDIUM | Auburn-specific. Theoretically valuable but depends on timepoint schedule accuracy. |
+| residual_momentum | LOW | Requires temporal tracking infrastructure. May not add much over speed_mean features which already capture trajectory. Defer to v1.2. |
+| segment_speed_vs_historical | MEDIUM | Essentially a more specific version of speed_ratio. May not add enough over speed_ratio to justify complexity. |
+
+---
+
+## Anti-Features for Residual Prediction
+
+Features that seem useful but create problems when the target is a residual.
 
 | Anti-Feature | Why Tempting | Why Problematic | What to Do Instead |
 |--------------|-------------|-----------------|-------------------|
-| **Raw lat/lon as features** | GPS position contains spatial info | For tree-based models, raw lat/lon creates axis-aligned splits that poorly capture route geometry. A bus at (32.605, -85.485) and one at (32.606, -85.485) may be on completely different routes or opposite sides of campus. Lat/lon are only meaningful relative to the route shape. | Use **route_progress**, **distance_to_target**, and **segment_id** instead. These encode position relative to the route, which is what matters. |
-| **Cyclical sin/cos encoding for time_of_day** | Standard for neural networks to handle midnight wraparound | XGBoost splits on `feature < threshold`. Sin/cos creates a non-monotonic mapping where 11:55 PM and 12:05 AM have similar sin values but ALSO 11:55 AM has a similar sin value. Trees cannot efficiently learn from this. One split cannot isolate "8-9 AM rush hour" from sin/cos. | Use **raw minutes_since_midnight** (0-1439). XGBoost naturally handles the fact that minute 1435 is "close to" minute 5 through learning patterns, and the midnight boundary is irrelevant for daytime-only transit. |
-| **One-hot encoded day_of_week (7 binary columns)** | Common approach in older tutorials | Wastes 6 degrees of freedom. XGBoost with native categorical support using partition-based splits can optimally group days (e.g., {Mon,Tue,Wed,Thu} vs {Fri} vs {Sat,Sun}) in a single split, which is more powerful and efficient than binary columns. | Use **native categorical** with `enable_categorical=True` and `dtype="category"`. |
-| **One-hot encoded patternID or stop IDs** | Seems like proper categorical encoding | High cardinality (23+ routes with patterns, 100+ stops). One-hot creates sparse features that XGBoost struggles with. Also massively increases feature dimensionality. | Use **native categorical** for patternID and segment_id. For target stop, use stop_index (ordinal position) plus distance_to_target. |
-| **tripID as a feature** | Unique identifier per trip, might capture trip-specific patterns | Near-unique per observation. Extremely high cardinality with almost no reuse across training examples. Model memorizes specific trips rather than learning patterns. This is a form of target leakage -- the tripID effectively encodes the time-of-day and route. | **Drop tripID entirely.** Its information is captured by patternID + time_of_day + day_of_week. If vehicle-specific patterns matter, use a vehicle_id categorical (low cardinality, ~40 buses). |
-| **trainID (vehicle ID) as high-cardinality feature** | Different buses might have different speeds | With only ~5 weeks of data and ~40 vehicles, per-vehicle patterns are sparse. Risk of overfitting to specific vehicle assignments that change semester to semester. | Either **drop** or include as **native categorical** with low importance weight. Vehicle-specific speed patterns are better captured by rolling_avg_speed features. |
-| **schedule.stops (raw array of upcoming stop schedule data)** | Contains rich schedule information | Raw nested/array data cannot be directly fed to XGBoost. Must be decomposed into scalar features. Feeding a serialized array is meaningless. | Decompose into: **scheduled_time_to_target**, **timepoints_remaining**, **next_stop_scheduled_arrival**. |
-| **eta.stopID (the stop for which ETA Spot provides an ETA)** | System already predicts ETA, use it as a feature | Using the existing system's ETA prediction as a feature creates a dependency on the old system and is a form of soft leakage -- if the old system's prediction correlates with actual arrival time, the new model may just learn to copy it rather than learning from raw signals. Also limits the new model to only being as good as the old one. | **Drop.** Build predictions from raw signals only. If you want to use the old model as a benchmark, compare against it, do not feed it as input. |
-| **Normalization / z-score scaling** | Standard ML preprocessing | XGBoost is scale-invariant. Tree splits compare `feature < threshold` -- scaling does not change split points or tree structure at all. Normalization adds unnecessary preprocessing complexity with zero benefit for tree models. | **Do not normalize any features for XGBoost.** This is a key difference from the existing PyTorch pipeline. |
-| **lastStop.time as raw timestamp** | Records when bus left last stop | Raw Unix timestamps are meaningless to the model (monotonically increasing, never repeats). The useful information is the DIFFERENCE: `current_time - lastStop.time` = time since last stop, and `lastStop.time - lastStop.sdTime` = lateness_now. | Derive **time_since_last_stop** (seconds) and **lateness_now** (seconds). Drop raw timestamps. |
+| **Using segment_travel_median as both a feature AND a baseline component** | It was important in v1.0 and is already computed | If segment_travel_median feeds into the baseline_ETA, and the target is `actual - baseline_ETA`, then the model is given an input that is a direct component of the subtracted term. This creates a mathematical dependency: the feature can almost perfectly predict one component of the target with a coefficient of -1. In XGBoost this manifests as a split that subtracts the baseline component, effectively "undoing" the baseline. The model wastes capacity reconstructing raw_seconds from residual + segment_median. | KEEP the features (XGBoost is robust enough to handle this -- it will simply assign them low importance) but **do not expect them to contribute meaningfully**. More importantly, do not be alarmed when their SHAP values drop to near-zero. If feature count is a concern, they are safe to drop. |
+| **Normalizing residuals by baseline_eta** (predicting relative error instead) | Relative error seems more "fair" across short and long trips | Creates heteroscedastic target where short-trip residuals are amplified. A 5-second error on a 30-second trip becomes 16.7% but only 0.5% on a 1000-second trip. XGBoost with squared error loss will over-weight short trips. Also makes the target distribution asymmetric and harder to learn. | Keep absolute residuals as target. Include baseline_eta as a FEATURE so the model can learn the scaling relationship itself. |
+| **Removing "absorbed" features entirely** | Distance, stops_remaining, stop_index are theoretically redundant with baseline | The baseline is a BLENDED AVERAGE of two components, not a perfect predictor. The segment-median-sum may disagree with the stop-to-stop average. Residuals may still correlate with spatial features due to baseline imperfections. Removing them risks losing signal from baseline errors. Also, these features may interact with real-time features (e.g., "3 stops away AND raining" = different residual pattern than "1 stop away AND raining"). | KEEP all 43 features. Let XGBoost determine importance via SHAP. Only drop features after v1.1 evaluation confirms they contribute nothing. |
+| **Asymmetric loss for residual prediction** | v1.0 used 3:1 overestimation penalty | With residual target, the semantics of asymmetric loss change. Over-predicting the residual means predicting the bus will be LATER than it actually is (overpredicting arrival time), which is actually the SAFER direction for riders. The penalty direction may need to flip. More importantly, residuals centered at 0 benefit from symmetric loss first to establish a clean baseline before adding asymmetric complexity. | Start with symmetric squared error loss (reg:squarederror). Add asymmetric loss only after v1.1 baseline is established and evaluated. Carefully verify penalty direction: positive residual = bus late, negative = bus early. |
+| **Predicting log(residual) or abs(residual)** | Residuals may have heavy tails | Residuals can be negative (bus faster than baseline). Log transform is undefined for negative values. Abs loses sign information. Both destroy the semantic meaning of the residual. | Predict raw residual (can be positive or negative). Handle outliers with robust loss (Huber) if needed, or clip extreme residuals during preprocessing. |
 
 ---
 
-## Feature Encoding Recommendations for XGBoost
-
-### XGBoost Native Categorical (Preferred for All Categoricals)
-
-Since XGBoost 1.5, native categorical support with optimal partition-based splits outperforms both label encoding and one-hot encoding. Use this for all categorical features.
-
-**Setup:**
-```python
-import pandas as pd
-
-# Mark categoricals with pandas dtype
-df['patternID'] = df['patternID'].astype('category')
-df['segment_id'] = df['segment_id'].astype('category')
-df['day_of_week'] = df['day_of_week'].astype('category')
-
-# Enable in XGBoost
-model = xgb.XGBRegressor(
-    enable_categorical=True,
-    max_cat_to_onehot=4,  # auto one-hot if <= 4 categories, partition otherwise
-    tree_method='hist',    # required for categorical support
-)
-```
-
-**Key parameter:** `max_cat_to_onehot` controls the threshold. Features with fewer categories than this value get one-hot treatment (fast); features with more get partition-based splits (powerful for high cardinality). Default of 4 is reasonable.
-
-Source: [XGBoost Categorical Data Documentation](https://xgboost.readthedocs.io/en/stable/tutorials/categorical.html)
-
-### Continuous Features (No Encoding Needed)
-
-XGBoost handles continuous features natively. Do NOT:
-- Normalize or standardize (scale-invariant)
-- Bin/bucket continuous values (loses granularity; XGBoost finds optimal splits itself)
-- Apply log transforms unless distribution is extremely skewed AND you want to compress the scale
-
-The only preprocessing needed for continuous features is:
-- **Clip outliers** (GPS speed > 80 mph, negative distances, etc.)
-- **Fill missing values** with a sentinel (XGBoost handles NaN natively with `missing` parameter, which is often the best approach -- let XGBoost learn the optimal direction for missing values)
-
-### Binary Features
-
-Binary features (0/1) work fine as-is. No special encoding needed.
-
-### Time Features
-
-| Feature | Encoding | Rationale |
-|---------|----------|-----------|
-| time_of_day | `minutes_since_midnight` (0-1439) | Trees split on thresholds; raw minutes lets XGBoost isolate any time window |
-| day_of_week | Native categorical (0-6 as `category` dtype) | Partition splits can group days optimally (e.g., weekday vs weekend) |
-| is_rush_hour | Binary (0/1) | Pre-computed convenience feature; trees could learn this from time_of_day alone but explicit is faster |
-| class_let_out_recently | Binary (0/1) | Domain-specific temporal signal that trees would struggle to derive from time_of_day |
-
----
-
-## Feature Interaction Recommendations for XGBoost
-
-XGBoost supports explicit [feature interaction constraints](https://xgboost.readthedocs.io/en/stable/tutorials/feature_interaction_constraint.html) that control which features can appear together in a tree path. This prevents spurious interactions while allowing known-useful ones.
-
-### Recommended Interaction Groups
-
-For this model, consider these interaction constraint groups if overfitting is observed:
-
-1. **Spatial group:** `[distance_to_target, stops_remaining, stop_index, route_progress, segment_id, patternID, timepoints_remaining]` -- These features describe WHERE the bus is relative to the target. They should interact freely.
-
-2. **Temporal group:** `[minutes_since_midnight, day_of_week, is_rush_hour, class_let_out_recently]` -- Time context features should interact (rush hour on Monday differs from rush hour on Saturday).
-
-3. **Real-time vehicle state group:** `[current_speed, rolling_avg_speed_30s, rolling_avg_speed_60s, rolling_avg_speed_120s, rolling_avg_speed_180s, is_idle, idle_duration, passenger_load, offroute]` -- Current conditions should interact (idle + high load = long boarding dwell).
-
-4. **Schedule adherence group:** `[lateness_now, scheduled_time_to_target, is_timepoint, time_until_next_timepoint_departure]` -- Schedule features should interact (early bus + upcoming timepoint = forced wait).
-
-5. **Environmental group:** `[precipitation, temperature]` -- Weather features.
-
-6. **Historical group:** `[historical_segment_time_mean, historical_segment_time_std, historical_dwell_time_mean]` -- Historical averages.
-
-**Recommendation:** Start WITHOUT interaction constraints (let XGBoost find all interactions). Only add constraints if feature importance analysis reveals suspicious interactions or if cross-validation shows overfitting. With ~5 weeks of data, overfitting is a real risk, and constraints may help.
-
----
-
-## Feature Dependencies
+## Feature Dependencies for v1.1
 
 ```
-[GPS Telemetry]
-    |-- current_speed, heading, lat, lon, load, isIdle, idle, offroute
-    |-- rolling_avg_speed_* (requires buffering recent telemetry)
-    |-- route_progress (from nextStopPercentProgress)
-    |-- lateness_now (requires lastStop.time and lastStop.sdTime)
-    |-- time_since_last_stop (requires lastStop.time)
+[Baseline Computation] (NEW for v1.1)
+    |-- baseline_eta = avg(segment_median_sum, stop_to_stop_historical_avg)
+    |   |-- segment_median_sum: sum of segment_travel_median for remaining segments
+    |   |-- stop_to_stop_avg: direct historical average from current stop to target
+    |-- residual_label = actual_arrival - baseline_eta
+    |-- baseline_eta as feature (RECOMMENDED)
+    |-- baseline_confidence (OPTIONAL)
+    |-- baseline_component_diff (OPTIONAL)
 
-[GTFS Static Data]
-    |-- distance_to_target (requires shapes.txt + stop_times.txt + shape_dist_traveled)
-    |-- stop_index (requires stop_times.txt ordered by stop_sequence)
-    |-- scheduled_time_to_target (requires stop_times.txt)
-    |-- segment_id (derived from consecutive stop pairs)
+[Real-Time Features] (gain importance in v1.1)
+    |-- speed_mean_{30,60,120,180}s --> PRIMARY residual explainers
+    |-- speed_ratio --> direct anomaly signal
+    |-- acceleration --> trend signal
+    |-- is_idle / seconds_idle --> active delay
 
-[Timepoint Spreadsheet]
-    |-- is_timepoint (requires parsed timepoint mapping to stop IDs)
-    |-- timepoints_remaining (requires timepoint list per route)
-    |-- time_until_next_timepoint_departure (requires timepoint schedule + current lateness)
+[Timepoint Features] (retain importance in v1.1)
+    |-- time_until_next_timepoint_departure --> forced hold prediction
+    |-- timepoint_adherence --> schedule deviation context
+    |-- is_timepoint, timepoints_remaining --> hold structure
 
-[Historical Pre-computation] (requires training data)
-    |-- historical_segment_time_mean/std (aggregate from training data)
-    |-- historical_dwell_time_mean (aggregate from arrivals data)
+[Weather/Temporal] (gain importance in v1.1)
+    |-- precipitation_mm --> systematic weather delay
+    |-- is_rush_hour, class_let_out_recently --> demand/congestion anomalies
 
-[Weather CSV]
-    |-- precipitation, temperature (join by hour)
-
-[Clock Time]
-    |-- minutes_since_midnight, day_of_week, is_rush_hour, class_let_out_recently
+[Route/Distance Features] (lose importance in v1.1)
+    |-- distance_to_target, stops_remaining, stop_index --> absorbed by baseline
+    |-- pattern_id, route_id --> route-specific deviation patterns only
+    |-- segment_travel_median/p25/p75 --> directly feeds baseline
 ```
 
 ### Dependency Notes
 
-- **distance_to_target requires GTFS shape processing:** This is the highest-complexity table stakes feature. The existing `distance.py` module already computes route distance using `shape_dist_traveled`, so the infrastructure exists.
-- **Timepoint features require spreadsheet parsing:** The Excel spreadsheet with 23 sheets must be parsed and human-readable stop names mapped to numeric stop IDs before timepoint features can be computed. This is a prerequisite for all timepoint features.
-- **Historical features require a completed training data pipeline:** You must build the dataset once to compute historical averages, then add them as features. This creates a circular dependency -- use leave-one-out or time-windowed approach to avoid leakage.
-- **Rolling speed features require temporal buffering:** During both training (from JSONL sequences) and inference (from real-time stream), you need to maintain a sliding window of recent telemetry per vehicle.
+- **baseline_eta MUST be computed before labels:** The residual label requires the baseline. The baseline requires historical_segments and historical_dwells from training data. This creates the same circular dependency as v1.0's historical features -- use temporal holdout (train on earlier data, compute baseline from earlier data).
+- **baseline_eta as feature requires the same value used for labeling:** If different baseline values are used for training labels vs. inference features, the model learns a corrupted relationship.
+- **Segment/dwell historical features feed BOTH the baseline AND the feature matrix:** This is acceptable. The model may learn to correct for baseline errors by comparing the individual segment medians (features) against the blended baseline (also a feature).
 
 ---
 
-## MVP Feature Set (v1 Model)
+## MVP Recommendation for v1.1
 
-### Launch With (v1 -- first trainable model)
+### Phase 1: Baseline + Residual Labels (Must Have)
 
-Build the model with these features first. They cover the table stakes and are achievable with existing data:
+- [ ] Compute blended baseline_ETA from historical_segments + stop-to-stop averages
+- [ ] Generate residual labels: `residual = actual_arrival - baseline_ETA`
+- [ ] Add `baseline_eta` as feature #44
+- [ ] Keep all 43 existing features (do NOT drop any yet)
+- [ ] Train with symmetric loss (reg:squarederror)
+- [ ] Fresh Optuna hyperparameter tuning
 
-- [x] distance_to_target (route distance)
-- [x] scheduled_time_to_target
-- [x] current_speed
-- [x] stops_remaining
-- [x] stop_index
-- [x] lateness_now
-- [x] route_progress
-- [x] minutes_since_midnight
-- [x] day_of_week (native categorical)
-- [x] patternID (native categorical)
-- [x] precipitation
-- [x] temperature
-- [x] passenger_load
-- [x] is_idle
+### Phase 2: Feature Analysis (Validate Importance Shifts)
 
-**Expected baseline:** MAE of 60-120 seconds for next-stop prediction, degrading for farther stops. This should already beat a pure schedule-based model.
+- [ ] Run SHAP on v1.1 model -- compare against v1.0 SHAP rankings
+- [ ] Verify expected importance shifts (speed features up, distance features down)
+- [ ] Identify any surprises (features that behave unexpectedly)
+- [ ] Evaluate: does v1.1 beat 123.1s MAE?
 
-### Add After Baseline Validated (v1.1)
+### Phase 3: Residual-Specific Features (If Needed)
 
-- [ ] rolling_avg_speed_30s / 60s / 120s / 180s -- requires telemetry windowing
-- [ ] is_rush_hour, class_let_out_recently -- easy temporal features
-- [ ] heading_alignment to target stop
-- [ ] time_since_last_stop
-- [ ] offroute flag
-- [ ] is_timepoint, timepoints_remaining -- requires timepoint parsing
+Only if v1.1 Phase 2 does not beat 123.1s MAE:
 
-### Add After Timepoint Mapping Complete (v1.2)
+- [ ] Add baseline_confidence feature
+- [ ] Add baseline_component_diff feature
+- [ ] Add segment_speed_vs_historical feature
+- [ ] Consider dropping zero-importance features to reduce noise
 
-- [ ] time_until_next_timepoint_departure -- the high-value Auburn-specific feature
-- [ ] historical_segment_time_mean / std -- requires pre-computation pass
-- [ ] historical_dwell_time_mean -- requires arrivals data analysis
-- [ ] segment_id as native categorical
+### Defer to v1.2+
 
-### Future Consideration (v2+)
-
-- [ ] Interaction constraints tuning based on feature importance analysis
-- [ ] Speed trend (derivative of rolling averages)
-- [ ] Fleet-level lag features (how are OTHER buses on this route performing right now?)
-- [ ] Event features (game days, special events) -- insufficient data in current 5-week window
+- [ ] residual_momentum (temporal derivative tracking)
+- [ ] Per-route residual bias correction
+- [ ] Asymmetric loss tuned for residual target semantics
+- [ ] Feature interaction constraints tuned for residual patterns
 
 ---
 
-## Feature Prioritization Matrix
+## Feature Prioritization Matrix (v1.1)
 
-| Feature | Model Value | Implementation Cost | Priority |
-|---------|------------|---------------------|----------|
-| distance_to_target | HIGH | MEDIUM | P1 |
-| scheduled_time_to_target | HIGH | LOW | P1 |
-| lateness_now | HIGH | LOW | P1 |
-| current_speed | HIGH | LOW | P1 |
-| stops_remaining | HIGH | LOW | P1 |
-| stop_index | HIGH | LOW | P1 |
-| minutes_since_midnight | HIGH | LOW | P1 |
-| day_of_week | MEDIUM | LOW | P1 |
-| patternID | MEDIUM | LOW | P1 |
-| route_progress | MEDIUM | LOW | P1 |
-| precipitation + temperature | MEDIUM | LOW | P1 |
-| rolling_avg_speed (4 windows) | HIGH | MEDIUM | P2 |
-| is_timepoint | HIGH | MEDIUM | P2 |
-| timepoints_remaining | HIGH | MEDIUM | P2 |
-| time_until_next_timepoint_departure | HIGH | HIGH | P2 |
-| historical_segment_time_mean/std | MEDIUM | HIGH | P2 |
-| historical_dwell_time_mean | MEDIUM | HIGH | P2 |
-| is_rush_hour | LOW | LOW | P2 |
-| class_let_out_recently | MEDIUM | LOW | P2 |
-| passenger_load | LOW | LOW | P1 |
-| heading_alignment | LOW | MEDIUM | P3 |
-| segment_id (categorical) | MEDIUM | LOW | P2 |
-| is_idle / idle_duration | LOW | LOW | P2 |
-| offroute | LOW | LOW | P3 |
+| Feature | Residual Value | Implementation Cost | Priority |
+|---------|---------------|---------------------|----------|
+| **baseline_eta** (NEW) | HIGH | LOW | P1 |
+| speed_mean_{30,60,120,180}s (existing) | HIGH | NONE (already built) | P1 |
+| speed_ratio (existing) | HIGH | NONE | P1 |
+| time_until_next_timepoint_departure (existing) | HIGH | NONE | P1 |
+| timepoint_adherence (existing) | MEDIUM-HIGH | NONE | P1 |
+| precipitation_mm (existing) | MEDIUM | NONE | P1 |
+| acceleration (existing) | MEDIUM | NONE | P1 |
+| is_rush_hour (existing) | MEDIUM | NONE | P1 |
+| class_let_out_recently (NOT in v2 features!) | MEDIUM | LOW | P1 |
+| All 43 existing features | VARIES | NONE | P1 (keep all) |
+| baseline_confidence (NEW) | MEDIUM | MEDIUM | P2 |
+| baseline_component_diff (NEW) | MEDIUM | LOW | P2 |
+| segment_speed_vs_historical (NEW) | MEDIUM | MEDIUM | P2 |
+| lateness_at_last_timepoint (NEW) | MEDIUM | MEDIUM | P2 |
+| residual_momentum (NEW) | LOW | MEDIUM | P3 |
 
 **Priority key:**
-- P1: Must have for first model training
-- P2: Add after baseline is working; significant accuracy improvement expected
-- P3: Nice to have; marginal improvement expected
+- P1: Include in v1.1 initial training (keep all existing + add baseline_eta)
+- P2: Add if v1.1 does not beat 123.1s MAE
+- P3: Defer to v1.2+
 
 ---
 
-## Comparison with Existing PyTorch Model Features
+## Expected SHAP Ranking Shift: v1.0 vs v1.1
 
-| Existing PyTorch Feature | New XGBoost Feature | Change | Rationale |
-|--------------------------|---------------------|--------|-----------|
-| heading_sin, heading_cos | heading_alignment OR drop | Simplified | Sin/cos needed for NN continuity; XGBoost doesn't need it |
-| time_of_day_sin, time_of_day_cos | minutes_since_midnight | Changed encoding | Trees split on thresholds; cyclical encoding hurts trees |
-| day_of_week one-hot (7 cols) | day_of_week native categorical (1 col) | Changed encoding | Native partition splits are optimal for XGBoost |
-| vehicle embedding | Drop (or vehicle_id as categorical) | Removed | Embeddings are NN-specific; insufficient data for per-vehicle patterns |
-| route_distance_stop{1,2,3} | distance_to_target (single) | Restructured | Per-stop row structure means one target per row |
-| stops_remaining_{1,2,3} | stops_remaining (single) | Restructured | Per-stop row structure |
-| is_game_day, hours_to_kickoff | Drop for v1 | Deferred | Only ~5 weeks of data with maybe 1-2 game days; insufficient signal |
-| 3-stop output | 1-stop output (per-stop rows) | Architecture change | Single target variable; each row predicts one stop |
-| Asymmetric loss (5x overestimate) | XGBoost quantile regression or custom objective | Needs design | Discussed below |
+| Rank | v1.0 (Raw Target) | v1.1 (Residual Target, Predicted) |
+|------|-------------------|-----------------------------------|
+| #1 | time_until_next_timepoint_departure (155.6) | time_until_next_timepoint_departure (stays #1 -- timepoint holds not in baseline) |
+| #2 | stop_index (120.2) | speed_ratio or speed_mean_60s (real-time speed vs. historical norm) |
+| #3 | pattern_id (119.0) | baseline_eta (trip length context for residual scaling) |
+| #4 | segment_travel_p25 (high) | precipitation_mm or is_rush_hour (systematic deviation drivers) |
+| #5 | segment_travel_median (high) | timepoint_adherence (schedule deviation propagation) |
+| ... | distance, stops_remaining (high) | distance, stops_remaining (drop to bottom 10) |
 
-### Loss Function Note
+**Confidence:** MEDIUM -- this ranking is predicted from first principles (what the baseline absorbs vs. what it does not). Actual SHAP analysis on the trained v1.1 model will confirm or contradict these predictions. The #1 position of `time_until_next_timepoint_departure` is HIGH confidence because timepoint hold durations are genuinely orthogonal to segment-median-based baselines.
 
-The existing model uses 5x penalty for overestimation (bus arrives earlier than predicted = rider misses bus). For XGBoost, implement this as either:
-1. **Custom objective function** with asymmetric gradient (preferred -- direct control)
-2. **Quantile regression** predicting a conservative quantile (e.g., 60th-70th percentile)
-3. **Sample weighting** (weight overestimation errors higher in the loss)
+---
 
-This is an architecture decision, not a feature decision, but noted here because it affects how features interact with the loss.
+## Note on class_let_out_recently
+
+The v1.0 FEATURES.md recommended `class_let_out_recently` as a differentiator feature, but reviewing the actual v2 feature set in `build_differentiator_features.py`, this feature is NOT included in `PHASE4_FEATURE_COLS`. It was listed in the v1.0 research but never implemented. For v1.1, it should be added -- Auburn class dismissal creates localized congestion that historical segment medians (which average across all times) do not fully capture.
+
+Implementation: `class_let_out_recently = 1 if (minutes_since_midnight % 60) in range(45, 60+15)` (classes end at :50/:00, window from :45 to :15 of next hour).
 
 ---
 
 ## Sources
 
-- [XGBoost-Based Travel Time Prediction (Zhu et al., 2022)](https://onlinelibrary.wiley.com/doi/10.1155/2022/3504704) -- Feature importance analysis, MEDIUM confidence
-- [Arrival Time Prediction for Autonomous Shuttles (2024)](https://arxiv.org/html/2401.05322) -- Dwell time modeling, lag features, MEDIUM confidence
-- [Bus Arrival Time Prediction Using ML (2025)](https://www.researchgate.net/publication/397281321_Bus_Arrival_Time_Prediction_Using_Machine_Learning_Approaches) -- XGBoost outperforming baselines, MEDIUM confidence
-- [Scalable Transit Delay Prediction (2025)](https://arxiv.org/html/2601.18521) -- Multi-resolution feature engineering, temporal leakage prevention, MEDIUM confidence
-- [XGBoost Categorical Data Documentation](https://xgboost.readthedocs.io/en/stable/tutorials/categorical.html) -- Native categorical support, HIGH confidence
-- [XGBoost Feature Interaction Constraints](https://xgboost.readthedocs.io/en/stable/tutorials/feature_interaction_constraint.html) -- Interaction constraint syntax, HIGH confidence
-- [NVIDIA: Categorical Features in XGBoost](https://developer.nvidia.com/blog/categorical-features-in-xgboost-without-manual-encoding/) -- Partition-based splits, HIGH confidence
-- [DeepETA: Uber's ETA Prediction](https://www.uber.com/blog/deepeta-how-uber-predicts-arrival-times/) -- Feature quantile bucketization, MEDIUM confidence
-- [DoorDash ETA Predictions](https://careersatdoordash.com/blog/deep-learning-for-smarter-eta-predictions/) -- Limitations of tree models, MEDIUM confidence
-- [Transit App: Better Predictions](https://blog.transitapp.com/better-predictions/) -- Real-world ETA challenges, LOW confidence
-- Existing codebase: `mobile/src/ETA-Model/src/features.py`, `mobile/src/ETA-Model/src/preprocess.py` -- HIGH confidence (direct code review)
+- [Uber DeepETA Blog](https://www.uber.com/blog/deepeta-how-uber-predicts-arrival-times/) -- Residual prediction architecture where ML corrects routing engine baseline, MEDIUM confidence
+- [DeeprETA Paper (arXiv 2206.02127)](https://arxiv.org/abs/2206.02127) -- Post-processing residual ETA system at scale, MEDIUM confidence
+- [XGBoost Documentation: Intercept / Base Score](https://xgboost.readthedocs.io/en/stable/tutorials/intercept.html) -- How XGBoost handles initial predictions and residuals, HIGH confidence
+- [Mathematical Theory of Collinearity Effects on ML Variable Importance](https://arxiv.org/html/2510.00557v1) -- How correlated features affect importance in tree models, MEDIUM confidence
+- v1.0 Evaluation: `models/evaluation/eval_shap_meta.json`, `models/evaluation/eval_report.md` -- SHAP rankings for raw-target model, HIGH confidence (direct codebase)
+- v1.0 Feature Engineering: `scripts/build_features.py`, `scripts/build_differentiator_features.py` -- 43-feature implementation, HIGH confidence (direct codebase)
+- v1.0 FEATURES.md research (2026-02-03) -- Original feature landscape analysis, HIGH confidence (direct prior research)
 
 ---
-*Feature research for: Tiger Transit XGBoost ETA Model*
-*Researched: 2026-02-03*
+*Feature research for: Tiger Transit XGBoost ETA Model v1.1 (residual target)*
+*Researched: 2026-02-11*

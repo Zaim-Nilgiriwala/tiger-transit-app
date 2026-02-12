@@ -1,477 +1,471 @@
-# Architecture Research: XGBoost Transit ETA Prediction Pipeline
+# Architecture Research: Residual-Based ETA Prediction Pipeline
 
-**Domain:** ML training pipeline for transit bus ETA prediction
-**Researched:** 2026-02-03
-**Confidence:** HIGH
+**Domain:** Modifying existing XGBoost ETA pipeline from raw-second prediction to residual prediction
+**Researched:** 2026-02-11
+**Confidence:** HIGH (based on direct codebase inspection + validated industry pattern)
 
-## System Overview
+## Executive Summary
 
-```
-RAW DATA SOURCES                      DATA PREPARATION                         TRAINING & EVALUATION
-=====================                 ======================                   =====================
+The residual-based approach replaces the XGBoost target variable from raw `time_to_arrival_seconds` (range 10-7200s) with `residual = actual_arrival - baseline_ETA` (centered ~0). This is the same pattern Uber uses in DeepETA: a routing engine produces a baseline ETA, and the ML model predicts the residual (correction). The tighter target distribution should help XGBoost focus on explaining deviations from historical norms rather than learning the overall time-distance relationship from scratch.
 
-live_data/*.jsonl (telemetry)  --->  [1. Loader]                              [7. Trainer]
-raw_data/Arrivals*.csv         --->  [2. Filter]                                  |
-raw_data/weather_data.csv      --->  [3. Feature Engineering]                 [8. Evaluator]
-gtfs_data/ (shapes/stops/trips)--->      |                                        |
-timepoints.xlsx                --->  [4. Row Exploder]                        [9. Artifact Exporter]
-                                         |                                        |
-                                     [5. Label Creator]                       Output:
-                                         |                                      - model.json
-                                     [6. Splitter]                              - metrics.json
-                                         |                                      - feature_importance.json
-                                     Output:                                    - evaluation_report.md
-                                       - train.parquet
-                                       - val.parquet
-                                       - test.parquet
-                                       - metadata.json
-```
+The key architectural question is: **where does the baseline computation fit in the existing 9-script pipeline?** The answer is: between `temporal_split.py` (Step 6) and `build_features.py` / `build_differentiator_features.py` (Step 7), implemented as a new `compute_baseline.py` script that computes baseline ETA for every row in each split, using lookup tables built exclusively from training data.
 
-### Component Responsibilities
+## System Overview: Current vs Proposed
 
-| Component | Responsibility | Typical Implementation |
-|-----------|----------------|------------------------|
-| Loader | Parse JSONL telemetry, CSV arrivals, GTFS files, weather CSV, timepoints Excel into DataFrames | `loaders.py` -- one function per source format |
-| Filter | Exclude jAUnt/Shuttle vehicles, inactive trips, invalid GPS, depot patterns | `filters.py` -- pure predicate functions |
-| Feature Engineering | Compute rolling windows, distance features, temporal features, weather join, historical stats | `features/` subpackage with one module per feature group |
-| Row Exploder | Expand each telemetry observation into N rows (one per remaining target stop on the trip) | `row_exploder.py` -- the critical memory-intensive step |
-| Label Creator | Join exploded rows with arrivals CSV to get ground-truth `time_to_arrival_sec` | `labels.py` -- vectorized merge, not row-by-row iteration |
-| Splitter | Temporal train/val/test split respecting time ordering | `split.py` -- date-based cutoffs |
-| Trainer | XGBoost DMatrix creation, hyperparameter config, training with early stopping | `train.py` -- thin wrapper around xgb.train() |
-| Evaluator | MAE/RMSE/MAPE by route, by stop count bucket, by time-of-day, residual analysis | `evaluate.py` -- metrics + visualization |
-| Artifact Exporter | Save model JSON, normalization stats, feature lists, metadata for serving | `artifacts.py` -- everything needed to reproduce or serve |
-
-## Recommended Project Structure
+### Current Pipeline (v1.0)
 
 ```
-eta_pipeline/
-|-- __init__.py
-|-- config.py                    # All constants, paths, feature lists, thresholds
-|-- cli.py                       # CLI entry point (argparse or click)
-|
-|-- data/
-|   |-- __init__.py
-|   |-- loaders.py               # Load JSONL, CSV arrivals, GTFS, weather, timepoints
-|   |-- filters.py               # Vehicle/trip filtering predicates
-|   |-- row_exploder.py          # Per-stop row expansion (the critical component)
-|   |-- labels.py                # Join telemetry with arrivals for ground truth
-|   |-- split.py                 # Temporal train/val/test splitting
-|
-|-- features/
-|   |-- __init__.py
-|   |-- core.py                  # Speed, heading sin/cos, passenger count, delay
-|   |-- distance.py              # GTFS route distance, haversine, stops remaining
-|   |-- temporal.py              # Hour, day, cyclical encoding, rush hour, class change
-|   |-- rolling.py               # Rolling window speed/distance/heading stats
-|   |-- weather.py               # Temperature, precipitation, is_raining
-|   |-- historical.py            # Segment avg times, dwell times, vehicle speed factor
-|   |-- schedule.py              # Scheduled baseline, timepoint hold times
-|   |-- pipeline.py              # Orchestrates all feature groups in order
-|
-|-- model/
-|   |-- __init__.py
-|   |-- train.py                 # XGBoost training with early stopping
-|   |-- evaluate.py              # Metrics computation and reporting
-|   |-- artifacts.py             # Model saving/loading, metadata export
-|   |-- hyperparams.py           # Default hyperparameter configs
-|
-|-- scripts/
-|   |-- run_pipeline.py          # Full end-to-end: data prep -> train -> evaluate
-|   |-- run_data_prep.py         # Data preparation only
-|   |-- run_training.py          # Training only (from existing parquet)
-|   |-- run_evaluation.py        # Evaluation only (from existing model + test set)
-|
-|-- output/                      # Git-ignored runtime outputs
-    |-- data/
-    |   |-- train.parquet
-    |   |-- val.parquet
-    |   |-- test.parquet
-    |   |-- metadata.json
-    |
-    |-- models/
-    |   |-- model.json            # XGBoost model artifact
-    |   |-- model_config.json     # Hyperparameters used
-    |   |-- feature_columns.json  # Ordered feature list
-    |
-    |-- reports/
-        |-- quality_report.md
-        |-- evaluation_report.md
-        |-- feature_importance.png
+[1] parse_telemetry.py     --> telemetry.parquet
+[2] parse_arrivals.py      --> arrivals.parquet
+[3] parse_gtfs.py          --> stop_sequences.parquet, shapes, etc.
+[4] explode_rows.py        --> exploded.parquet  (telemetry x target_stops)
+[5] label_join.py          --> labeled.parquet    (+ time_to_arrival_seconds)
+[6] temporal_split.py      --> train/val/test.parquet
+[7] build_features.py      --> train/val/test_featured.parquet  (15 features)
+[7b] build_differentiator_features.py
+                            --> historical_segments.parquet (from train only)
+                            --> historical_dwells.parquet   (from train only)
+                            --> train/val/test_featured_v2.parquet (43 features)
+[8] train_*.py             --> models/*.ubj
+[9] evaluate.py            --> models/evaluation/*
 ```
 
-### Structure Rationale
+**Target variable:** `time_to_arrival_seconds` (raw seconds, range 10-7200s)
 
-- **`data/` vs `features/` separation:** Data loading/filtering/splitting is structural plumbing. Feature engineering is domain logic that changes frequently. Separating them means you can swap feature groups without touching the data pipeline.
-- **`features/pipeline.py` orchestrator:** Runs all feature groups in dependency order. Adding a new feature group means adding one import and one function call here.
-- **`model/` isolation:** Training, evaluation, and artifact management are independent of data preparation. You should be able to re-train from cached parquet without re-running data prep.
-- **`scripts/` entry points:** Separate scripts for each phase so you can iterate on training without waiting for data prep, or vice versa.
-- **`output/` git-ignored:** Parquet files, models, and reports are regenerated artifacts. Only code and config go in version control.
-
-## Data Flow
-
-### End-to-End Pipeline Flow
+### Proposed Pipeline (v1.1)
 
 ```
-[1] LOAD RAW DATA
-    |
-    |  JSONL telemetry files --> pd.DataFrame (one row per GPS packet)
-    |  Arrivals CSVs --> pd.DataFrame (one row per stop arrival event)
-    |  GTFS files --> lookup structures (shapes, stop_times, trips)
-    |  Weather CSV --> pd.DataFrame (one row per hour)
-    |  Timepoints XLSX --> Dict[route_id -> List[stop_ids with hold times]]
-    |
-    v
-[2] FILTER
-    |
-    |  Remove jAUnt/Shuttle vehicles
-    |  Keep only active service states (status 7, 71)
-    |  Remove NIS pattern (9998)
-    |  Remove records outside Auburn geo-bounds
-    |
-    v
-[3] FEATURE ENGINEERING (on telemetry-granularity DataFrame)
-    |
-    |  Core features: speed, heading_sin/cos, passenger_count, delay
-    |  Rolling features: speed_avg_30s..300s, distance_traveled, heading_change
-    |  Temporal features: hour, day, cyclical time, rush_hour, class_change
-    |  Weather join: temperature, precipitation, is_raining
-    |  Historical stats: segment_avg_time, dwell_time, vehicle_speed_factor
-    |
-    |  At this point: ~50 features per telemetry observation
-    |  Row count = number of valid telemetry packets (unchanged)
-    |
-    v
-[4] ROW EXPLOSION (per-stop expansion)  <--- CRITICAL MEMORY STEP
-    |
-    |  For each telemetry row:
-    |    Look up trip's stop sequence from GTFS
-    |    Identify remaining stops (after last_stop_id)
-    |    Create one row per remaining target stop
-    |    Add per-row features: route_distance_to_target, stops_remaining,
-    |                          haversine_to_target, scheduled_time_to_target
-    |
-    |  Row count MULTIPLIED by avg ~8-12 remaining stops per observation
-    |  Example: 500K telemetry rows -> 4-6M training rows
-    |
-    v
-[5] LABEL CREATION (vectorized join)
-    |
-    |  For each exploded row (vid, timestamp, target_stop_id):
-    |    Find next arrival of that vehicle at that stop in arrivals CSV
-    |    Compute: time_to_arrival_sec = arrival_time - telemetry_time
-    |    Drop rows with no matching arrival (no ground truth)
-    |    Drop rows with label > 3600s or < 0s
-    |
-    |  Typical survival rate: 50-70% of exploded rows get labels
-    |
-    v
-[6] TEMPORAL SPLIT
-    |
-    |  Sort by timestamp_ms
-    |  Train: first 70% of time range (e.g., weeks 1-3.5)
-    |  Val: next 15% (e.g., week 3.5-4.25)
-    |  Test: final 15% (e.g., week 4.25-5)
-    |  Save as Parquet with float32 dtypes
-    |
-    v
-[7] XGBOOST TRAINING
-    |
-    |  Load train.parquet and val.parquet
-    |  Create DMatrix objects (features + label)
-    |  Set categorical feature types for route_id, hour, day_of_week
-    |  Train with early stopping on validation MAE
-    |  Log training curves
-    |
-    v
-[8] EVALUATION
-    |
-    |  Load test.parquet + trained model
-    |  Predict on test set
-    |  Compute: MAE, RMSE, MAPE, R-squared
-    |  Slice by: route, stops_remaining bucket, time_of_day, distance bucket
-    |  Feature importance (gain, cover, weight)
-    |  Residual distribution analysis
-    |
-    v
-[9] ARTIFACT EXPORT
-    |
-    |  model.json (XGBoost native format)
-    |  feature_columns.json (ordered list for inference)
-    |  model_config.json (hyperparams, training metadata)
-    |  evaluation_report.md (human-readable summary)
-    |  feature_importance.json (for analysis)
+[1-6] UNCHANGED            --> train/val/test.parquet  (same as v1.0)
+
+[6.5] compute_baseline.py  --> historical_stop_to_stop.parquet  (from train only)
+                            --> train/val/test.parquet  (+ baseline_eta, residual columns)
+                                                         ^^^ MODIFIES IN PLACE
+
+[7b] build_differentiator_features.py  (MODIFIED)
+                            --> historical_segments.parquet (unchanged)
+                            --> historical_dwells.parquet   (unchanged)
+                            --> train/val/test_featured_v2.parquet
+                                TARGET_COL now = "residual"
+                                ALSO INCLUDES: baseline_eta column for reconstruction
+
+[8] train_*.py             (MODIFIED: target="residual", symmetric loss)
+                            --> models/*.ubj
+
+[9] evaluate.py            (MODIFIED: reconstruct = baseline_eta + pred_residual,
+                             then evaluate reconstructed vs actual)
 ```
 
-### Key Data Flows
+**Target variable:** `residual = time_to_arrival_seconds - baseline_eta` (centered ~0)
+**Inference formula:** `predicted_arrival = baseline_eta + predicted_residual`
 
-1. **Telemetry-to-features flow:** JSONL -> flat DataFrame -> rolling window enrichment -> temporal enrichment -> weather join. Each step adds columns but does not change row count. This is the "safe" part of the pipeline.
+## Component Responsibilities
 
-2. **Row explosion flow:** One telemetry row with `last_stop_id` and `trip_id` expands into N rows (one per remaining stop). This is where the data multiplies. The per-target-stop features (distance, stops_remaining, scheduled_time) are computed during explosion, not before.
+| Component | Current Responsibility | v1.1 Change | Effort |
+|-----------|----------------------|-------------|--------|
+| `parse_*.py` (1-3) | Parse raw data | None | -- |
+| `explode_rows.py` (4) | Create per-stop rows | None | -- |
+| `label_join.py` (5) | Compute ground truth labels | None | -- |
+| `temporal_split.py` (6) | Split by date | None | -- |
+| **`compute_baseline.py` (6.5)** | **NEW: Build baseline ETA for every row** | **New script** | **High** |
+| `build_differentiator_features.py` (7b) | Engineer 43 features + save parquets | Add `baseline_eta` and `residual` to output columns; change `TARGET_COL` | Medium |
+| `train_*.py` (8) | Train XGBoost | Change target, use symmetric loss, re-tune | Medium |
+| `evaluate.py` (9) | Evaluate on test set | Reconstruct actual from residual + baseline, compare | Medium |
 
-3. **Label join flow:** Exploded rows are matched to arrivals CSV. This is a left join on (vid, target_stop_id) where arrival_time > telemetry_time. Unmatched rows (no ground truth) are dropped.
+## Detailed Architecture: compute_baseline.py
 
-## Architectural Patterns
+This is the critical new component. It must:
 
-### Pattern 1: Two-Phase Data Prep (Pre-Explosion + Post-Explosion Features)
+1. Build two lookup tables from **training data only** (no leakage)
+2. Compute a blended baseline ETA for every row in train/val/test
+3. Compute the residual label for training
 
-**What:** Split feature engineering into features computed once per telemetry observation (rolling stats, temporal, weather) and features computed per target stop (distance, stops_remaining, scheduled_time). Compute the first set before row explosion, the second set during/after.
+### Baseline Definition
 
-**When to use:** Always, for this pipeline. Computing rolling window features after explosion would wastefully recompute identical values for every exploded copy of the same observation.
-
-**Trade-offs:** Slightly more complex pipeline orchestration, but dramatic memory and compute savings.
-
-**Example:**
-```python
-# Phase 1: Features on telemetry-level rows (cheap)
-df = compute_rolling_features(df)        # ~50 features, N rows
-df = compute_temporal_features(df)
-df = join_weather_data(df)
-
-# Phase 2: Explode (expensive -- row count multiplies)
-df_exploded = explode_per_stop(df, gtfs_stop_sequences)
-
-# Phase 3: Per-target features (on exploded rows)
-df_exploded = compute_distance_to_target(df_exploded, gtfs_calculator)
-df_exploded = compute_scheduled_time_to_target(df_exploded, stop_times)
 ```
-
-### Pattern 2: Chunked Explosion with Parquet Append
-
-**What:** Process telemetry data in day-sized chunks. For each chunk: compute features, explode, create labels, append to a growing Parquet file. Never hold the full exploded dataset in memory at once.
-
-**When to use:** When total exploded dataset exceeds available RAM (likely: 5 weeks of data at ~10 stops per observation could produce 5-10M rows with 50+ features).
-
-**Trade-offs:** Slightly slower due to I/O overhead, but prevents OOM crashes. Parquet append via PyArrow is efficient.
-
-**Example:**
-```python
-writer = None
-for day_file in sorted(telemetry_files):
-    chunk = load_and_filter(day_file)
-    chunk = compute_telemetry_features(chunk)
-    exploded = explode_per_stop(chunk, gtfs)
-    labeled = create_labels(exploded, arrivals)
-
-    table = pa.Table.from_pandas(labeled)
-    if writer is None:
-        writer = pq.ParquetWriter(output_path, table.schema)
-    writer.write_table(table)
-
-writer.close()
-```
-
-### Pattern 3: Temporal Split by Calendar Date, Not by Row Index
-
-**What:** Split train/val/test by calendar date boundaries, not by row-count percentages. This ensures no temporal leakage even after row explosion (where one observation time generates many rows).
-
-**When to use:** Always, for time-series transit data.
-
-**Trade-offs:** Split sizes are not perfectly balanced (some days have more data), but temporal integrity is preserved.
-
-**Example:**
-```python
-# With ~5 weeks of data (Nov 6 - Dec 14):
-# Train: Nov 6 - Dec 1   (~25 days, ~71%)
-# Val:   Dec 2 - Dec 8   (~7 days, ~15%)
-# Test:  Dec 9 - Dec 14  (~6 days, ~14%)
-train_mask = df['date'] <= '2025-12-01'
-val_mask   = (df['date'] > '2025-12-01') & (df['date'] <= '2025-12-08')
-test_mask  = df['date'] > '2025-12-08'
-```
-
-### Pattern 4: XGBoost Native API with DMatrix
-
-**What:** Use XGBoost's native `xgb.train()` API with DMatrix objects rather than the sklearn wrapper. This gives access to early stopping callbacks, custom evaluation metrics, and efficient categorical feature handling.
-
-**When to use:** When you need fine-grained control over training (which this pipeline does -- early stopping, categorical features, custom eval).
-
-**Trade-offs:** Slightly more boilerplate than sklearn's `fit()`, but more flexible and performant.
-
-**Example:**
-```python
-dtrain = xgb.DMatrix(
-    X_train, label=y_train,
-    feature_names=feature_columns,
-    enable_categorical=True
-)
-dval = xgb.DMatrix(X_val, label=y_val, feature_names=feature_columns, enable_categorical=True)
-
-params = {
-    'objective': 'reg:squarederror',
-    'eval_metric': 'mae',
-    'max_depth': 8,
-    'learning_rate': 0.05,
-    'subsample': 0.8,
-    'colsample_bytree': 0.8,
-    'min_child_weight': 50,
-    'tree_method': 'hist',
-}
-
-model = xgb.train(
-    params, dtrain,
-    num_boost_round=2000,
-    evals=[(dtrain, 'train'), (dval, 'val')],
-    early_stopping_rounds=50,
-    verbose_eval=25,
+baseline_eta = average(
+    segment_sum_eta,       # Sum of historical segment median travel times
+    stop_to_stop_eta       # Direct historical average from current stop to target stop
 )
 ```
+
+### Component 1: Segment-Sum ETA
+
+For each row (observation at current_stop heading to target_stop):
+- Identify all segments between current_stop and target_stop on the route
+- Look up each segment's median travel time from `historical_segments.parquet`
+- Sum them: `segment_sum_eta = SUM(segment_median[seg_i])` for all segments from current to target
+
+**Already exists:** `historical_segments.parquet` is computed in `build_differentiator_features.py` from training pings. It contains `(route_id, last_stop_id, hour_ct, day_type) -> segment_travel_median`. However, the current aggregation is per-segment (between consecutive stop transitions), not per-stop-pair cumulative. The baseline needs to **sum consecutive segment medians** from `last_stop_id` to `target_stop_id`.
+
+**Key consideration:** The segment medians are keyed by `(route_id, last_stop_id, hour_ct, day_type)`. For baseline computation, we need to traverse the stop sequence for the route and sum up medians for each intermediate segment. Segments missing from the lookup (sparse data) need a fallback strategy.
+
+### Component 2: Stop-to-Stop Historical Average
+
+For each row (observation at current_stop heading to target_stop):
+- Look up the historical average `time_to_arrival_seconds` for this `(route_id, current_stop, target_stop, hour, day_type)` combination from training data
+
+**Does NOT exist yet.** Must be computed from the training split of `labeled.parquet` (or `train.parquet`). This is a direct aggregation:
+
+```python
+stop_to_stop_agg = train_df.groupby(
+    ["route_id", "last_stop_id", "target_stop_id", "hour_ct", "day_type"]
+)["time_to_arrival_seconds"].agg(["median", "mean", "count"])
+```
+
+**Use median** (robust to outliers, consistent with segment approach).
+
+### Blending Strategy
+
+```python
+if both available:
+    baseline_eta = (segment_sum_eta + stop_to_stop_eta) / 2
+elif only segment_sum available:
+    baseline_eta = segment_sum_eta
+elif only stop_to_stop available:
+    baseline_eta = stop_to_stop_eta
+else:
+    baseline_eta = scheduled_time_to_target  # ultimate fallback
+```
+
+### Residual Computation
+
+```python
+residual = time_to_arrival_seconds - baseline_eta
+```
+
+This residual becomes the new training target. Positive residual = bus took longer than baseline predicted. Negative = bus was faster than baseline.
+
+## Data Flow: Training vs Inference
+
+### Training Time
+
+```
+                    TRAINING DATA ONLY
+                    (no val/test leakage)
+                           |
+                           v
+            +------------------------------+
+            |  Build Historical Lookups    |
+            |                              |
+            |  1. historical_segments      |  <-- already exists in v1.0
+            |     (route, stop, hour, day) |
+            |     -> segment_travel_median |
+            |                              |
+            |  2. historical_stop_to_stop  |  <-- NEW
+            |     (route, from, to, hr, d) |
+            |     -> median travel time    |
+            +------------------------------+
+                           |
+           applies to ALL splits (train + val + test)
+                           |
+                           v
+            +------------------------------+
+            |  For each row in split:      |
+            |                              |
+            |  1. Traverse stop sequence   |
+            |     from last_stop_id to     |
+            |     target_stop_id           |
+            |                              |
+            |  2. Sum segment medians      |
+            |     along the path           |
+            |     = segment_sum_eta        |
+            |                              |
+            |  3. Look up stop-to-stop     |
+            |     historical average       |
+            |     = stop_to_stop_eta       |
+            |                              |
+            |  4. Blend:                   |
+            |     baseline_eta = avg(      |
+            |       segment_sum_eta,       |
+            |       stop_to_stop_eta       |
+            |     )                        |
+            |                              |
+            |  5. residual =               |
+            |     actual - baseline_eta    |
+            +------------------------------+
+                           |
+                           v
+              XGBoost trains on residual
+              using 43 features (same as v1.0)
+```
+
+### Inference Time
+
+```
+            +------------------------------+
+            |  Live vehicle observation    |
+            |  (lat, lon, route, speed,    |
+            |   last_stop, target_stop)    |
+            +------------------------------+
+                           |
+              +------------+------------+
+              |                         |
+              v                         v
+    +-----------------+      +------------------+
+    | Baseline ETA    |      | Feature Eng.     |
+    | Calculator      |      | (same 43 feats)  |
+    |                 |      |                  |
+    | Uses same       |      | XGBoost model    |
+    | historical      |      | predicts         |
+    | lookup tables   |      | RESIDUAL         |
+    +-----------------+      +------------------+
+              |                         |
+              v                         v
+           baseline_eta         predicted_residual
+              |                         |
+              +------------+------------+
+                           |
+                           v
+              predicted_arrival_time =
+                baseline_eta + predicted_residual
+```
+
+**Critical inference requirement:** The historical lookup tables (`historical_segments.parquet`, `historical_stop_to_stop.parquet`) must be shipped alongside the model artifact. They are needed at inference time to compute baseline_eta.
+
+## Script Modification Map
+
+### NEW: `scripts/compute_baseline.py`
+
+**Purpose:** Compute baseline ETA and residual for every row in train/val/test splits.
+
+**Inputs:**
+- `data/processed/train.parquet` (source for building lookups)
+- `data/processed/val.parquet`
+- `data/processed/test.parquet`
+- `data/processed/stop_sequences.parquet` (for route stop ordering)
+- `data/processed/historical_segments.parquet` (from `build_differentiator_features.py`)
+
+**Outputs:**
+- `data/processed/historical_stop_to_stop.parquet` (new lookup)
+- `data/processed/train.parquet` (augmented with `baseline_eta`, `residual`)
+- `data/processed/val.parquet` (augmented)
+- `data/processed/test.parquet` (augmented)
+
+**Dependency:** Must run AFTER `temporal_split.py` and AFTER `build_differentiator_features.py` has produced `historical_segments.parquet`. Alternatively, could compute segment medians internally.
+
+**Key implementation detail:** The stop-to-stop lookup is built from `train.parquet` rows that already have `time_to_arrival_seconds`. This uses the actual arrival labels, not model predictions. The segment-sum approach uses `historical_segments.parquet` which is already computed from training pings only.
+
+### MODIFY: `scripts/build_differentiator_features.py`
+
+**Changes needed:**
+1. Add `baseline_eta` to `KEEP_EXTRA` list so it survives the column selection in `save_v2_parquet()`
+2. Change `TARGET_COL` from `"time_to_arrival_seconds"` to `"residual"` (or add a `RESIDUAL_COL` constant)
+3. Ensure `baseline_eta` column is passed through the feature pipeline without being dropped
+4. The `load_featured_v2()` function should return both residual (for training) and baseline_eta (for reconstruction)
+
+**Lines affected:**
+- Line 750: `TARGET_COL = "time_to_arrival_seconds"` --> needs dual-target support
+- Line 752: `KEEP_EXTRA = ["stops_away", "route_id"]` --> add `"baseline_eta"`, `"time_to_arrival_seconds"`
+- Line 861: `out_cols = list(FEATURE_COLS_V2) + [TARGET_COL]` --> include both targets
+
+### MODIFY: `scripts/train_baseline.py`, `train_asymmetric_quantile.py`, `run_optuna_batches.py`
+
+**Changes needed:**
+1. Replace `TARGET_COL = "time_to_arrival_seconds"` with residual target
+2. For `train_baseline.py`: remove asymmetric loss, use `reg:squarederror` (already is)
+3. For `train_asymmetric_quantile.py`: remove asymmetric section initially (symmetric loss for v1.1)
+4. Optuna tuning: re-tune for residual target distribution (may need different hyperparams since distribution is centered ~0 instead of right-skewed ~10-7200)
+
+**Specific code change pattern:**
+```python
+# Old: load target as raw seconds
+y_train = df_train[TARGET_COL].values  # TARGET_COL = "time_to_arrival_seconds"
+
+# New: load target as residual, keep baseline for reconstruction
+y_train = df_train["residual"].values
+baseline_train = df_train["baseline_eta"].values  # for analysis only
+
+# At evaluation time:
+y_pred_residual = bst.predict(dtest)
+y_pred_actual = baseline_test + y_pred_residual  # reconstruct
+final_mae = mae(y_test_actual, y_pred_actual)    # evaluate on actual seconds
+```
+
+### MODIFY: `scripts/evaluate.py`
+
+**Changes needed:**
+1. Load `baseline_eta` from test data alongside features
+2. After predicting residual, reconstruct: `predicted_arrival = baseline_eta + predicted_residual`
+3. Evaluate on reconstructed predictions vs actual `time_to_arrival_seconds`
+4. Add new analysis: baseline_eta quality assessment (MAE of baseline alone vs naive schedule)
+5. Add residual distribution analysis (should be approximately centered at 0 if baseline is good)
+
+**Critical:** All existing evaluation slicing (per-route, per-stops, per-TOD) should evaluate the **reconstructed** prediction, not the raw residual.
+
+### MODIFY: `scripts/build_features.py`
+
+**Changes needed:** Same pattern as `build_differentiator_features.py` -- propagate `baseline_eta` and `residual` through. However, since v1.1 uses the v2 feature pipeline, this script may not need modification if we only use `build_differentiator_features.py`.
+
+**Recommendation:** Modify only `build_differentiator_features.py` (the v2 pipeline) since all v1.1 training uses v2 features (43 features).
+
+## Data Leakage Prevention
+
+This is the most critical architectural concern. The baseline must be computed from training data only.
+
+### Leakage Points and Prevention
+
+| Leakage Risk | Where | Prevention |
+|---|---|---|
+| Stop-to-stop lookup uses val/test data | `compute_baseline.py` | Build lookup from `train.parquet` ONLY, then apply to all splits |
+| Segment medians use val/test data | `build_differentiator_features.py` | Already handled: `historical_segments.parquet` computed from train pings only (line 1016) |
+| Dwell medians use val/test data | `build_differentiator_features.py` | Already handled: `historical_dwells.parquet` computed from train pings only (line 1030) |
+| Baseline uses row's own actual label | `compute_baseline.py` | The stop-to-stop lookup is an AGGREGATE (median over many observations). Individual row's own contribution to the median is negligible with 1.5M+ training rows. Not a practical leakage concern. |
+| Historical lookup populated with future timestamps | `compute_baseline.py` | All training data is temporally before val/test data (temporal split enforced by `temporal_split.py`). No future leakage. |
+
+### Validation Strategy
+
+After computing baseline:
+1. Check that baseline_eta is non-negative for all rows
+2. Check that residual distribution is approximately centered (mean close to 0 for training data)
+3. Check that baseline MAE on test set is between naive schedule MAE (708.9s) and current model MAE (123.1s) -- a reasonable baseline should be somewhere in this range
+4. Check coverage: what fraction of rows get a valid segment_sum_eta? valid stop_to_stop_eta?
+
+### Expected Baseline Quality
+
+The baseline should be a strong predictor already:
+- `historical_segments.parquet` captures route/stop/hour/day_type patterns
+- Stop-to-stop historical averages directly capture the distribution of the target variable
+
+**Expected baseline MAE:** Likely in the 200-400s range (between naive schedule at 708.9s and XGBoost at 123.1s). The XGBoost model's job then becomes explaining the remaining variance.
+
+## Fallback Strategy for Sparse Lookups
+
+Not all `(route, from_stop, to_stop, hour, day_type)` combinations will have sufficient observations in training data. The fallback chain:
+
+```
+Level 1: Full key match (route, from_stop, to_stop, hour, day_type)
+    |
+    v (if no match or count < 10)
+Level 2: Relaxed key (route, from_stop, to_stop, hour)  -- ignore day_type
+    |
+    v (if no match)
+Level 3: Further relaxed (route, from_stop, to_stop)    -- ignore hour
+    |
+    v (if no match)
+Level 4: Use scheduled_time_to_target as baseline        -- ultimate fallback
+```
+
+For segment_sum_eta, missing individual segments should use the mean segment time for that route as a fallback, not zero.
+
+## Recommended Project Structure Changes
+
+```
+scripts/
+|-- compute_baseline.py          # NEW: baseline ETA computation
+|-- build_differentiator_features.py  # MODIFIED: include baseline_eta/residual
+|-- train_baseline.py            # MODIFIED: predict residual
+|-- run_optuna_batches.py        # MODIFIED: tune for residual target
+|-- train_asymmetric_quantile.py # MODIFIED: symmetric loss initially
+|-- evaluate.py                  # MODIFIED: reconstruct and evaluate
+
+data/processed/
+|-- historical_stop_to_stop.parquet  # NEW: stop-to-stop lookup table
+|-- train.parquet                    # AUGMENTED: + baseline_eta, residual
+|-- val.parquet                      # AUGMENTED: + baseline_eta, residual
+|-- test.parquet                     # AUGMENTED: + baseline_eta, residual
+```
+
+## Suggested Build Order
+
+The dependency chain dictates this build order:
+
+```
+Phase 1: Baseline Infrastructure
+  [1] compute_baseline.py
+      - Build historical_stop_to_stop lookup from train.parquet
+      - Compute segment_sum_eta using historical_segments + stop_sequences
+      - Compute blended baseline_eta for all splits
+      - Compute residual = actual - baseline_eta
+      - Augment train/val/test.parquet with new columns
+      - Validate: baseline MAE, coverage %, residual distribution
+
+Phase 2: Feature Pipeline Adaptation
+  [2] Modify build_differentiator_features.py
+      - Propagate baseline_eta and residual through feature pipeline
+      - Add both to KEEP_EXTRA for output parquets
+      - Dual target support (residual for training, baseline_eta for reconstruction)
+      - Re-run to produce updated train/val/test_featured_v2.parquet
+
+Phase 3: Training Pipeline Adaptation
+  [3] Modify train_baseline.py
+      - Change target to residual
+      - Keep reg:squarederror (symmetric)
+      - At evaluation: reconstruct predicted_actual = baseline + pred_residual
+      - Compare reconstructed MAE vs v1.0 baseline
+
+  [4] Modify run_optuna_batches.py
+      - Retune hyperparameters for residual distribution
+      - Residual is centered ~0 with potentially different variance structure
+      - May need different max_depth, learning_rate
+
+  [5] Modify train_asymmetric_quantile.py
+      - Initially: symmetric loss only (remove asymmetric section)
+      - Quantile models predict residual quantiles
+      - Reconstruct: actual_quantile = baseline + residual_quantile
+
+Phase 4: Evaluation Adaptation
+  [6] Modify evaluate.py
+      - Load baseline_eta alongside features
+      - Reconstruct predictions before all metric computation
+      - Add baseline quality analysis section
+      - Add residual distribution analysis
+      - Full comparison: v1.0 raw vs v1.1 residual
+```
+
+**Phase ordering rationale:**
+- Phase 1 first because all downstream scripts depend on baseline_eta/residual columns existing
+- Phase 2 before Phase 3 because training scripts import from the feature pipeline module
+- Phase 3 before Phase 4 because evaluation needs a trained model
+- Within Phase 3, baseline training (3) before Optuna (4) to verify the approach works before investing in tuning
+
+## Anti-Patterns to Avoid
+
+### Anti-Pattern 1: Computing Baseline After Feature Engineering
+
+**What people do:** Try to compute baseline_eta inside `build_differentiator_features.py` alongside other features.
+**Why it's wrong:** The baseline computation depends on the stop-to-stop historical lookup, which must be built from training data with actual labels. The feature pipeline should not be responsible for building new lookup tables AND computing residuals. Mixing concerns makes the code harder to test and debug.
+**Do this instead:** Compute baseline_eta in a separate script (`compute_baseline.py`) that runs between temporal_split and feature engineering. This keeps each script's responsibility clear.
+
+### Anti-Pattern 2: Using Val/Test Data in Lookup Tables
+
+**What people do:** Build the stop-to-stop historical average from the entire labeled dataset (train + val + test).
+**Why it's wrong:** This is data leakage. The baseline would incorporate future information, making residuals artificially small on val/test. Evaluation metrics would be optimistic and not reflect real-world performance.
+**Do this instead:** Build ALL lookup tables from `train.parquet` exclusively. Apply them to val/test for baseline computation.
+
+### Anti-Pattern 3: Not Carrying baseline_eta Through to Evaluation
+
+**What people do:** Compute residual as the target, train the model, then try to evaluate the residual directly (e.g., "residual MAE = 50s").
+**Why it's wrong:** A residual MAE of 50s is meaningless without reconstruction. The user cares about actual arrival time accuracy, not residual accuracy. You must reconstruct: `predicted_actual = baseline_eta + predicted_residual`, then compute MAE against actual arrival.
+**Do this instead:** Always carry `baseline_eta` through the entire pipeline. Every evaluation metric must be computed on reconstructed predictions.
+
+### Anti-Pattern 4: Overwriting Original Labels
+
+**What people do:** Replace `time_to_arrival_seconds` with `residual` in the parquet files, losing the original label.
+**Why it's wrong:** You need the original label for evaluation (to verify reconstructed predictions), for baseline quality assessment, and for debugging.
+**Do this instead:** ADD columns (`baseline_eta`, `residual`) alongside the existing `time_to_arrival_seconds`. Never delete the original label.
+
+### Anti-Pattern 5: Different Baseline Computation at Train vs Inference
+
+**What people do:** Use a slightly different formula or fallback strategy for computing baseline_eta at inference time vs training time.
+**Why it's wrong:** If the baseline is systematically different between training and inference, the residual model will produce biased predictions. The model learned to correct training-time baselines, not inference-time baselines.
+**Do this instead:** Extract the baseline computation into a reusable function/class that is identical between training-time `compute_baseline.py` and inference-time code. Ship the same lookup tables with the model.
 
 ## Scaling Considerations
 
-### Memory Budget for Row Explosion
-
-| Metric | Estimate | Notes |
-|--------|----------|-------|
-| Raw telemetry rows | ~500K-1M | 5 weeks, ~15-20K packets/day after filtering |
-| Avg remaining stops per observation | ~8-12 | Depends on where bus is on route |
-| Exploded rows | ~4-10M | This is the critical number |
-| Features per row | ~55 (float32) | 220 bytes/row |
-| Total memory (exploded) | ~1-2 GB | Fits in RAM but leaves little headroom |
-| After label join (50-70% survive) | ~2.5-7M rows | ~0.5-1.5 GB |
-
-**Recommendation:** With ~5 weeks of data and ~55 features, the exploded dataset is likely 1-2 GB. This fits in 16 GB RAM but is uncomfortable. Use the **chunked explosion pattern** (Pattern 2) for safety, processing one day at a time and writing to Parquet incrementally.
-
-### Scale Priorities
-
-| Scale | Architecture Adjustments |
-|-------|--------------------------|
-| Current (5 weeks, 23 routes) | Single-machine Python, Pandas, chunked by day. Train in <5 minutes on CPU. |
-| 3 months of data | Same architecture. Exploded dataset ~3-4 GB. Still fits in RAM with chunked processing. |
-| 6+ months of data | Consider downsampling telemetry (keep every 3rd observation), or use XGBoost external memory / Dask. |
-
-### Training Time Estimates
-
-| Dataset Size | tree_method | Estimated Training Time | Notes |
-|-------------|-------------|------------------------|-------|
-| 3M rows, 55 features | `hist` (CPU) | 2-5 minutes | Default recommendation |
-| 3M rows, 55 features | `gpu_hist` | 30-60 seconds | If CUDA GPU available |
-| 10M rows, 55 features | `hist` (CPU) | 10-20 minutes | Still feasible |
-
-## Anti-Patterns
-
-### Anti-Pattern 1: Computing Per-Target Features Before Explosion
-
-**What people do:** Try to compute `route_distance_to_stop` and `stops_remaining` on the original telemetry DataFrame by iterating over all possible target stops.
-**Why it's wrong:** You end up with nested loops (for each row, for each possible target stop) which is extremely slow and creates confusing multi-column DataFrames (distance_to_stop_1, distance_to_stop_2, ... distance_to_stop_N).
-**Do this instead:** First explode the rows (one row per target stop), then compute distance/stops_remaining as simple single-value columns. The explosion makes the computation trivially vectorizable.
-
-### Anti-Pattern 2: Random Train/Test Split
-
-**What people do:** Use `sklearn.model_selection.train_test_split(df, test_size=0.2, random_state=42)`.
-**Why it's wrong:** For time-series data, random splitting causes temporal leakage. The model sees future data during training (e.g., December afternoon data in train, December morning data in test). This produces optimistic evaluation metrics that do not reflect real-world performance.
-**Do this instead:** Always split by calendar date. Train on earlier dates, validate and test on later dates. This mimics real deployment where the model only has access to past data.
-
-### Anti-Pattern 3: Row-by-Row Label Matching
-
-**What people do:** Loop through each telemetry row, filter arrivals DataFrame for that vehicle and stop, find the next arrival. This is O(N * M) where N = telemetry rows and M = arrivals rows.
-**Why it's wrong:** With millions of exploded rows, row-by-row matching takes hours. The existing `label_creator.py` does this and it is the main bottleneck.
-**Do this instead:** Use a vectorized merge-asof approach. Sort both DataFrames by timestamp, then use `pd.merge_asof()` to find the next arrival for each telemetry record in O(N log N) time.
-
-```python
-# Vectorized label creation (fast)
-df_sorted = df.sort_values('timestamp_ms')
-arrivals_sorted = arrivals.sort_values('arrival_timestamp_ms')
-
-# For each (vid, target_stop_id) group, merge_asof to find next arrival
-labeled = pd.merge_asof(
-    df_sorted,
-    arrivals_sorted,
-    left_on='timestamp_ms',
-    right_on='arrival_timestamp_ms',
-    by=['vid', 'target_stop_id'],
-    direction='forward',
-    tolerance=3600000  # 1 hour max lookahead
-)
-labeled['time_to_arrival_sec'] = (
-    labeled['arrival_timestamp_ms'] - labeled['timestamp_ms']
-) / 1000.0
-```
-
-### Anti-Pattern 4: Normalizing Features for XGBoost
-
-**What people do:** Apply StandardScaler or MinMaxScaler to features before XGBoost training.
-**Why it's wrong:** XGBoost splits on threshold values (e.g., "if speed > 15 mph, go left"). Normalization does not change split ordering and provides zero benefit. It adds complexity (need to save/load scaler) and makes feature importance harder to interpret.
-**Do this instead:** Feed raw feature values directly. The existing `data_prep` pipeline correctly notes this: "No normalization -- GBDT splits on raw values; normalization adds no benefit."
-
-### Anti-Pattern 5: One Model Per Route
-
-**What people do:** Train separate XGBoost models for each of the 23 routes.
-**Why it's wrong:** With only ~5 weeks of data, splitting by route means each model sees 1/23rd of the data. Short routes with few trips will have tiny training sets. Also creates 23x maintenance burden.
-**Do this instead:** Train a single model with `route_id` as a categorical feature. XGBoost can learn route-specific patterns through tree splits on route_id. If a route truly behaves differently, the tree will branch on it. One model is simpler to train, evaluate, deploy, and maintain.
-
-## Integration Points
-
-### External Data Sources
-
-| Source | Integration Pattern | Notes |
-|--------|---------------------|-------|
-| JSONL telemetry (live_data/) | Batch file loading, one file per day | Already collected, ~5 weeks of data |
-| Arrivals CSV (raw_data/) | Pandas read_csv, column name mapping needed | Station names need mapping to stop IDs |
-| GTFS (gtfs_data/) | Load shapes.txt, trips.txt, stop_times.txt into lookup dicts | Shapes for route distance, stop_times for sequences |
-| Weather CSV (raw_data/) | Pandas read_csv, join on truncated hour | Hourly granularity |
-| Timepoints XLSX | openpyxl/pandas read_excel, parse route-stop hold times | 23 routes with mandatory hold times at certain stops |
-
-### Internal Boundaries
-
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| data/ -> features/ | DataFrame in, DataFrame out | Features module adds columns to existing DataFrame |
-| features/ -> data/row_exploder | DataFrame in, DataFrame out (larger) | Row count multiplies here |
-| data/ -> model/ | Parquet files on disk | Clean boundary: data prep writes Parquet, training reads Parquet |
-| model/train -> model/evaluate | Model object + test DMatrix | Evaluator receives trained model and test data |
-| model/ -> output/ | JSON/Parquet/Markdown files | All artifacts written to output directory |
-
-## Build Order (Dependency Chain)
-
-The pipeline components have strict build-order dependencies. This is the recommended implementation sequence:
-
-```
-Phase 1: Data Foundation
-  [1] config.py (constants, paths, feature lists)
-  [2] data/loaders.py (JSONL, CSV, GTFS, weather parsers)
-  [3] data/filters.py (vehicle/trip filtering)
-
-Phase 2: Feature Engineering
-  [4] features/core.py (heading sin/cos, basic transforms)
-  [5] features/temporal.py (hour, day, cyclical, rush hour)
-  [6] features/distance.py (GTFS route distance, haversine)
-  [7] features/rolling.py (rolling window stats)
-  [8] features/weather.py (weather join)
-  [9] features/historical.py (segment times from arrivals)
-  [10] features/schedule.py (timepoint hold times, scheduled baseline)
-  [11] features/pipeline.py (orchestrate all feature groups)
-
-Phase 3: Row Explosion + Labels
-  [12] data/row_exploder.py (per-stop expansion)
-  [13] data/labels.py (vectorized arrival matching)
-  [14] data/split.py (temporal train/val/test)
-
-Phase 4: Training + Evaluation
-  [15] model/hyperparams.py (default XGBoost config)
-  [16] model/train.py (DMatrix creation, xgb.train wrapper)
-  [17] model/evaluate.py (metrics, sliced analysis, reporting)
-  [18] model/artifacts.py (save/load model + metadata)
-
-Phase 5: Integration + CLI
-  [19] scripts/run_pipeline.py (end-to-end orchestration)
-  [20] scripts/run_data_prep.py (data-only mode)
-  [21] scripts/run_training.py (training-only mode)
-```
-
-**Critical dependency:** Row explosion (12) depends on GTFS distance calculator (6) and feature pipeline (11). Labels (13) depend on row explosion (12) and arrivals loader (2). Training (16) depends on split (14) producing Parquet files.
-
-**Parallelizable:** Feature modules (4-10) are mostly independent of each other and can be developed in parallel, as long as `features/pipeline.py` (11) integrates them in the correct order.
+| Concern | Current Scale | Impact |
+|---------|--------------|--------|
+| Segment-sum computation | 2.08M rows x ~8 stops avg traversal | O(N * S) where S = avg segments. With ~23 routes, max ~30 stops per route. Vectorizable with stop_sequences.parquet merge. Expect 1-5 minutes. |
+| Stop-to-stop lookup size | ~23 routes x ~30 stops x ~30 targets x 24 hours x 2 day_types | ~950K potential keys, but most are sparse. Realistic: 50-200K valid entries. Fits in memory easily. |
+| Augmented parquet size | Adding 2 float columns to 2.08M rows | ~16MB additional. Negligible. |
 
 ## Sources
 
-- [XGBoost 3.1.1 Official Documentation - Python Introduction](https://xgboost.readthedocs.io/en/stable/python/python_intro.html) -- HIGH confidence, verified current API patterns
-- [XGBoost External Memory Documentation](https://xgboost.readthedocs.io/en/stable/tutorials/external_memory.html) -- HIGH confidence, chunked processing patterns
-- [Train-Test Split Strategies for Time Series Data](https://apxml.com/courses/time-series-analysis-forecasting/chapter-6-model-evaluation-selection/train-test-split-time-series) -- MEDIUM confidence, temporal split best practices
-- [scikit-learn TimeSeriesSplit](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html) -- HIGH confidence, walk-forward validation reference
-- [Part-2: How to Design an ML System for ETA Prediction](https://mlsavvy.substack.com/p/part-2-how-to-design-an-ml-system) -- MEDIUM confidence, transit ETA architecture patterns
-- [MDPI: ETA Prediction Stacked Ensemble Approach](https://www.mdpi.com/2077-1312/14/2/177) -- MEDIUM confidence, feature engineering categories for ETA
-- Existing codebase: `mobile/src/ETA-Model/data_prep/` -- HIGH confidence, direct inspection of current pipeline architecture
+- **Uber DeepETA architecture:** [DeepETA: How Uber Predicts Arrival Times Using Deep Learning](https://www.uber.com/blog/deepeta-how-uber-predicts-arrival-times/) -- MEDIUM confidence, establishes industry precedent for residual prediction approach. Uber uses routing engine baseline + ML residual correction. Same pattern we're implementing with historical baseline + XGBoost residual.
+- **Existing codebase:** Direct inspection of all 13 scripts in `scripts/` directory -- HIGH confidence. Pipeline structure, column names, data flow verified by reading actual code.
+- **historical_segments.parquet:** Built from training data only in `build_differentiator_features.py` lines 1016-1026 -- HIGH confidence, verified no leakage.
+- **Hybrid LSTM-XGBoost Residual Correction:** [Springer article on SSA-LSTM-XGBoost](https://link.springer.com/article/10.1007/s11869-025-01867-5) -- LOW confidence (different domain: air quality), but validates the residual-correction pattern where an initial model's residuals are modeled by a second learner.
+- **Residual Error Modeling for Forecasts:** [MachineLearningMastery: Model Residual Errors](https://machinelearningmastery.com/model-residual-errors-correct-time-series-forecasts-python/) -- MEDIUM confidence, general technique for correcting forecasts using residual modeling.
 
 ---
-*Architecture research for: XGBoost Transit ETA Prediction Pipeline*
-*Researched: 2026-02-03*
+*Architecture research for: Residual-Based ETA Prediction Pipeline (v1.1)*
+*Researched: 2026-02-11*

@@ -1,366 +1,303 @@
 # Project Research Summary
 
-**Project:** Tiger Transit XGBoost ETA Model Migration
-**Domain:** Transit bus arrival time prediction (ML model replacement)
-**Researched:** 2026-02-03
+**Project:** Tiger Transit v1.1 Residual-Based ETA Prediction
+**Domain:** Transit bus arrival time prediction using XGBoost
+**Researched:** 2026-02-11
 **Confidence:** HIGH
 
 ## Executive Summary
 
-This project replaces the existing PyTorch ETA prediction model with XGBoost for the Tiger Transit campus bus system at Auburn University. Research shows XGBoost is the industry-standard approach for tabular transit ETA prediction, achieving MAE of 16-30 seconds on similar bus arrival tasks with far simpler infrastructure than deep learning (no GPU, no batching, no normalization). The recommended stack is Python 3.12 with XGBoost 3.1.3, pandas 2.3.3, and Optuna 4.7.0 for hyperparameter tuning.
+The v1.1 upgrade transforms the XGBoost ETA model from predicting raw arrival times (0-2000+ seconds) to predicting residuals (deviations from a historical baseline). This follows the industry-proven pattern used by Uber's DeepETA: a baseline predictor handles the structural component (distance, route, typical travel times), while the ML model focuses on explaining real-time deviations (traffic, weather, delays). The baseline is computed as the average of (1) summed segment medians along the route and (2) direct stop-to-stop historical averages, both derived exclusively from training data.
 
-The critical technical challenge is the per-stop row explosion pattern in the data pipeline. With approximately 500K telemetry observations expanding to 4-10M training rows (one row per remaining stop), memory management becomes the primary architectural concern. The chunked-by-day processing pattern with incremental Parquet writes is essential to avoid OOM crashes. Additionally, Auburn's timepoint-hold system (buses must wait at designated stops if running early) requires explicit feature engineering - without timepoint features, the model cannot explain why buses sit idle for minutes with zero delay.
+The critical architectural insight is that this approach requires NO new dependencies—the entire stack from v1.0 remains unchanged. The residual target fundamentally shifts which features matter: distance and stop-count features become redundant (absorbed by the baseline), while real-time condition features (speed anomalies, timepoint holds, weather) become dominant. The tighter, zero-centered residual distribution should help XGBoost focus capacity on learnable patterns rather than the gross time-distance relationship.
 
-The highest risks are data leakage (using future arrival information in features), label noise from imperfect telemetry-to-arrivals joins, and overfitting on only 5 weeks of training data. These are mitigated through strict temporal splitting, vectorized label matching with validation checks, and aggressive XGBoost regularization (max_depth=3-4, min_child_weight=10-50). The existing PyTorch pipeline has established patterns for most of these challenges - the migration path is well-understood.
+The primary risk is baseline quality variation by route. Routes with stable patterns (campus loops) will get excellent baselines, while sparse routes (Route 27 with only 96 test samples) may get poor baselines that the residual model cannot salvage. Three critical pitfalls must be avoided: (1) using test-period data to build baseline lookups (data leakage), (2) evaluating residual MAE instead of reconstructed final prediction MAE (meaningless metrics), and (3) missing baselines for sparse route/time combinations (requires robust fallback hierarchy).
 
 ## Key Findings
 
 ### Recommended Stack
 
-XGBoost 3.1.3 is the clear choice for this tabular regression task, offering native categorical support with optimal partition-based splits, built-in quantile regression for confidence intervals, and UBJSON serialization for production deployment. Compared to the existing PyTorch model, XGBoost trains in seconds rather than minutes, requires no GPU, no feature normalization, and provides interpretability through SHAP values.
+**Verdict: No new libraries required.** The residual-based approach is a mathematical transformation of the target variable, not a new algorithmic technique. Every operation needed—historical aggregations, residual computation, baseline reconstruction, diagnostic plots—is already covered by the validated v1.0 stack.
 
-**Core technologies:**
-- **XGBoost 3.1.3**: Gradient boosted trees with native categorical support and quantile regression — proven for transit ETA with MAE of 16-30s in peer-reviewed studies
-- **pandas 2.3.3**: Data processing and feature engineering — stick with 2.x to avoid pandas 3.0.0 breaking changes (CoW default, string dtype changes)
-- **Optuna 4.7.0**: Bayesian hyperparameter optimization with XGBoost pruning callbacks — far superior to grid search for 8+ parameters
-- **SHAP 0.50.0**: Model explainability with exact TreeExplainer for XGBoost — critical for debugging and validating feature impact
-- **scikit-learn 1.8.0**: Metrics, TimeSeriesSplit for temporal CV — standard evaluation toolkit
+**Core technologies (retained from v1.0):**
+- **XGBoost 3.1.3**: Core gradient boosting engine — symmetric squared error loss works for zero-centered residuals; stay on 3.1.3 (3.2.0 released yesterday, too new)
+- **pandas 2.3.3**: Historical lookups and baseline computation — groupby aggregations handle segment medians and stop-to-stop averages efficiently
+- **NumPy 2.4.2**: Residual arithmetic and reconstruction — `residual = actual - baseline`, `final_eta = baseline + predicted_residual`
+- **scikit-learn 1.8.0**: Evaluation metrics — MAE, RMSE on reconstructed predictions; scipy.stats comes free for residual diagnostics
+- **Optuna 4.7.0**: Hyperparameter tuning — fresh study needed because residual distribution differs from raw-seconds distribution
+- **pyarrow >=14.0**: Parquet I/O for historical lookup tables and augmented splits
 
-**Key differences from PyTorch:**
-- No feature normalization needed (tree-based, scale-invariant)
-- Native categorical encoding instead of embeddings
-- Full dataset training instead of batching
-- Quantile regression via `reg:quantileerror` instead of multi-head outputs
-- UBJSON model format instead of pickle (cross-version compatible)
+**What NOT to add:**
+- seaborn (matplotlib already handles residual plots)
+- statsmodels (heavyweight, scipy.stats sufficient)
+- XGBoost 3.2.0 (released Feb 10, day-one risk)
+- pandas 3.0.0 (breaking changes, no benefit)
+- Polars (baseline lookups are small, pandas fast enough)
 
 ### Expected Features
 
-**Must have (table stakes):**
-- **distance_to_target** (route distance along GTFS shape) — single most predictive feature in all transit ETA literature
-- **scheduled_time_to_target** — schedule is the strongest prior; XGBoost learns residuals around it
-- **lateness_now** (current schedule deviation) — strongest real-time signal of whether bus is running fast/slow
-- **current_speed** and **stops_remaining** — direct measures of vehicle state and dwell time accumulation
-- **time_of_day** (as raw minutes, not cyclical) and **day_of_week** (as native categorical) — capture temporal patterns
-- **precipitation** and **temperature** — weather demonstrably slows buses (5-15% impact)
+The residual target fundamentally changes feature importance. Features that encode route structure and distance become redundant (the baseline already captured that signal), while features that explain deviations from historical norms become dominant.
 
-**Should have (competitive):**
-- **rolling_avg_speed** (30s/60s/120s/180s windows) — smooths GPS noise, captures traffic trends
-- **is_timepoint**, **timepoints_remaining**, **time_until_next_timepoint_departure** — Auburn-specific mandatory hold features (highest-value differentiator)
-- **historical_segment_time_mean/std** — learned priors for each route segment at each hour-of-day
-- **historical_dwell_time_mean** — cumulative expected boarding time across remaining stops
-- **is_rush_hour**, **class_let_out_recently** — Auburn-specific temporal signals (class dismissal creates surge boarding)
+**Features gaining importance (explain deviations):**
+- **speed_mean_{30,60,120,180}s**: Real-time traffic state — if current speed is slower than historical median, residual is positive (late)
+- **speed_ratio**: Direct anomaly detector — `current_speed / historical_median_speed` literally generates the residual
+- **time_until_next_timepoint_departure**: Timepoint holds are NOT in baseline medians — remains top feature
+- **precipitation_mm**: Systematic weather slowdowns exceed average-weather baseline
+- **acceleration**: Trend indicator (decelerating = approaching delay)
+- **is_rush_hour / class_let_out_recently**: Temporal demand anomalies
+- **timepoint_adherence**: Schedule deviation propagates to future delays
+- **is_idle / seconds_idle**: Active real-time delay accumulation
 
-**Defer (v2+):**
-- **passenger_load** boarding correlation — current load field available but low priority
-- **segment_id** as categorical — adds marginal value if historical segment times already included
-- **speed_trend** (derivative of rolling averages) — diminishing returns with small dataset
-- **event features** (game days, special events) — insufficient data with only 5 weeks
+**Features losing importance (absorbed by baseline):**
+- **stop_index**: Was #2 in v1.0 (SHAP 120.2) — baseline already sums medians to this stop
+- **distance_to_target**: Baseline is a function of distance
+- **stops_remaining**: More stops = larger baseline; residual should not scale with stops
+- **segment_travel_median/p25/p75**: These FEED the baseline — expect near-zero importance
+- **pattern_id**: Was #3 in v1.0 (SHAP 119.0) — only route-specific deviation patterns remain relevant
+- **scheduled_time_to_target**: Baseline uses actuals (more accurate than schedule)
 
-**Anti-features (never include):**
-- Raw lat/lon (use route_progress and distance_to_target instead)
-- Cyclical sin/cos for time_of_day (trees can't split efficiently on non-monotonic features)
-- One-hot encoded categoricals (use XGBoost native categorical support)
-- Normalized features (zero benefit for tree models)
-- Future arrival information like dwell_sec at target stop (data leakage)
+**New features worth adding:**
+- **baseline_eta** (P1 — required): The baseline value itself, so model knows residual context (10s residual on 30s baseline != 10s on 600s baseline)
+- **baseline_confidence** (P2): Measure of baseline reliability (e.g., percentile spread) — model should know when baseline is uncertain
+- **baseline_component_diff** (P2): Disagreement between segment-sum and stop-to-stop components signals unreliable baseline
+- **lateness_at_last_timepoint** (P2): More informative than clock-time adherence for predicting upcoming holds
+
+**Anti-features (avoid):**
+- Using segment_travel_median as both feature AND baseline component (creates collinearity)
+- Normalizing residuals by baseline_eta (predicting relative error creates heteroscedastic target)
+- Removing "absorbed" features entirely (baseline is imperfect; features may capture baseline errors)
+- Asymmetric loss on residuals initially (semantics change; start symmetric)
 
 ### Architecture Approach
 
-The pipeline is a linear data flow from raw sources through feature engineering to XGBoost training. The critical architectural decision is the two-phase feature engineering pattern: compute telemetry-level features (rolling stats, weather) BEFORE row explosion, then compute per-target-stop features (distance, stops_remaining) AFTER explosion. This avoids wastefully recomputing identical rolling window values for every exploded copy of the same observation.
+The residual approach inserts a new pipeline step between temporal splitting and feature engineering. The existing 9-script pipeline gains one new script (`compute_baseline.py`) and modifies four existing scripts.
 
 **Major components:**
-1. **Data Loaders** — parse JSONL telemetry, CSV arrivals, GTFS, weather, timepoints Excel into DataFrames
-2. **Filters** — exclude jAUnt/Shuttle vehicles, inactive trips, invalid GPS, depot patterns
-3. **Feature Pipeline** — two-phase: pre-explosion (rolling/weather/temporal), post-explosion (distance/scheduled time)
-4. **Row Exploder** — expand each telemetry row into N rows (one per remaining stop) — **critical memory step**
-5. **Label Creator** — vectorized merge_asof to join exploded rows with arrivals CSV for ground truth
-6. **Splitter** — temporal split by calendar date (train: weeks 1-3.5, val: 3.5-4.25, test: 4.25-5)
-7. **Trainer** — XGBoost DMatrix with native categorical support, early stopping on validation MAE
-8. **Evaluator** — metrics by route/stop-bucket/time-of-day, SHAP feature importance, residual analysis
 
-**Key patterns:**
-- **Chunked explosion with Parquet append**: Process data day-by-day to avoid OOM on 4-10M exploded rows
-- **Temporal split by date, not row index**: Prevents future data leaking into training set
-- **XGBoost native API with DMatrix**: Use `xgb.train()` not sklearn wrapper for categorical support and early stopping
-- **Vectorized label joins**: Use `pd.merge_asof()` not row-by-row loops (O(N log N) vs O(N*M))
+1. **compute_baseline.py (NEW)** — Builds historical lookup tables from training data only, computes blended baseline ETA for all splits, generates residual labels
+   - Input: `train.parquet`, `val.parquet`, `test.parquet`, `historical_segments.parquet`, `stop_sequences.parquet`
+   - Output: `historical_stop_to_stop.parquet` (new lookup), augmented splits with `baseline_eta` and `residual` columns
+   - Baseline formula: `avg(segment_median_sum, stop_to_stop_historical_avg)` with fallback hierarchy for sparse combinations
+
+2. **build_differentiator_features.py (MODIFIED)** — Propagates baseline_eta and residual through feature pipeline, changes target column from `time_to_arrival_seconds` to `residual`
+   - Add `baseline_eta` to `KEEP_EXTRA` list
+   - Dual-target support: residual for training, baseline_eta for reconstruction
+   - Retain all 43 existing features for first experiment (prune after SHAP analysis)
+
+3. **train_*.py scripts (MODIFIED)** — Train on residual target with symmetric loss, reconstruct at evaluation
+   - Change target: `y_train = df["residual"]` instead of `df["time_to_arrival_seconds"]`
+   - Use `reg:squarederror` (symmetric) initially; defer asymmetric to v1.2
+   - Fresh Optuna study (target distribution is zero-centered, not right-skewed)
+   - At eval: `final_pred = baseline_eta + predicted_residual`, then compute MAE on final_pred
+
+4. **evaluate.py (MODIFIED)** — Reconstruct predictions before all metrics, add baseline quality analysis
+   - Load `baseline_eta` alongside features
+   - Reconstruct: `predicted_arrival = baseline_eta + predicted_residual`
+   - Report three MAEs: (1) v1.0 raw model (123.1s), (2) baseline-only, (3) v1.1 final
+   - Add residual distribution analysis (should be centered ~0 if baseline is good)
+
+**Data flow:**
+```
+[1-6] UNCHANGED: parse, explode, label, split
+   |
+[6.5] compute_baseline.py: Build lookups from TRAIN ONLY, apply to all splits
+   |
+[7b] build_differentiator_features.py: Add baseline_eta to features, target = residual
+   |
+[8] train_*.py: XGBoost predicts residual
+   |
+[9] evaluate.py: Reconstruct final_eta = baseline + residual, compare to v1.0
+```
+
+**Critical leakage prevention:**
+- All baseline lookups built from `train.parquet` (Nov 6-29) ONLY
+- Same frozen lookups applied to val/test for baseline computation
+- Never include val/test data in historical aggregates
 
 ### Critical Pitfalls
 
-1. **Data leakage through future arrival information** — Including dwell_sec, boardings, alightings from the target stop's arrival as features creates leakage (this data doesn't exist at prediction time). The existing PyTorch pipeline has this issue in `build_feature_vector()`. Use only historical averages, never current-trip actuals. Verified by checking if model achieves suspiciously high accuracy (MAE < 15s on 5+ min predictions).
+1. **Baseline uses test-period data (data leakage)** — The baseline must be computed from training data (before Nov 30) exclusively. If validation (Dec 1-6) or test (Dec 8-18) data leaks into historical aggregates, the baseline will be biased toward test distribution, artificially reducing residuals and inflating evaluation metrics. **Prevention:** Build `historical_stop_to_stop.parquet` from `train.parquet` only; assert `max(baseline_source.timestamp) < val_start_date`.
 
-2. **Random train/test splitting of temporal data** — Random shuffling causes temporal leakage (model sees future in training). Always split by calendar date with train < val < test timestamps and a gap period between splits. Existing pipeline does this correctly with `time_based_split()`.
+2. **Evaluating residual MAE instead of final prediction MAE (meaningless metrics)** — The model predicts residuals, but the metric that matters is `MAE(actual_arrival, baseline_eta + predicted_residual)`, not `MAE(actual_residual, predicted_residual)`. Residual MAE of 80s tells you nothing about whether v1.1 beats v1.0's 123.1s MAE. **Prevention:** Always evaluate on reconstructed predictions; report three MAEs side-by-side: v1.0 raw, baseline-only, v1.1 final.
 
-3. **Correlated row explosion** — Single telemetry snapshot generates N rows with identical features but different labels. Naive k-fold CV treats these as independent, inflating metrics. Use `GroupKFold` with groups = trip_id, or subsample approach sequences (sample_rate 5-10). Verify train/val gap prevents same-trip boundary leakage.
+3. **Missing baseline for sparse route/stop/time combinations (data loss)** — Fine-grained `(route, stop, hour, day_type)` keys have limited observations in 24 days of training data. Route 27 (96 test samples) and evening/weekend runs are at risk. If both baseline components are NaN, residual is undefined. **Prevention:** Implement fallback hierarchy—(1) blended average, (2) segment-sum only, (3) route-level median, (4) scheduled_time_to_target. Report tier distribution; if >30% use tier 3+, baseline is too sparse.
 
-4. **Asymmetric loss implementation errors** — Porting the 5x overestimation penalty to XGBoost custom objective requires correct gradient/hessian. Common mistakes: hessian of zero (prevents tree growth), sign errors (optimizes wrong direction), non-smooth kink at error=0. Alternative: use `reg:quantileerror` with `quantile_alpha=0.65` which naturally penalizes underestimation more.
+4. **Heavy-tail residual distribution dominated by outliers under squared loss** — Residuals will have heavy tails (breakdowns, detours). A single +600s residual contributes 360,000 to squared loss, distorting the model to accommodate outliers. This is worse for residuals than raw targets because residuals can be extreme in both directions. **Prevention:** Plot residual distribution before training; if kurtosis > 5 or extreme outliers (>5x IQR), consider Huber loss (`reg:pseudohubererror`) or winsorize to [P1, P99].
 
-5. **Label noise from telemetry-to-arrivals joins** — Timezone mismatches (DST boundaries), loop route ambiguity (bus visits same stop twice), stop name mapping failures create systematic label errors. Use transition-based matching (detect when nextStopId changes) not simple forward-search. Validate with distribution plots, check for 3600s spikes (timezone bug), require join success rate > 60%.
-
-6. **Timepoint hold modeling failures** — Auburn buses hold at timepoint stops if early. Without explicit timepoint features, model can't explain why speed=0 for minutes. Add `is_approaching_timepoint`, `time_until_next_timepoint_departure` features. Identify timepoints from GTFS or Excel spreadsheet.
-
-7. **Overfitting on 5 weeks of data** — Only ~25 service days, limited weather variation, few special events. Use aggressive regularization: max_depth=3-4, min_child_weight=10-50, subsample=0.7, eta=0.01-0.05, early_stopping_rounds=50. Feature selection: start with top 10-15 features, not all 50+.
+5. **Segment-median sum accumulates errors over many stops (error propagation)** — The baseline sums 8+ segment medians for far stops. Errors compound if there's systematic bias (e.g., consistently underestimating a time-of-day). Routes with 15+ stops (Route 1) will have higher baseline error variance for far stops, creating heteroscedastic residuals. **Prevention:** Analyze baseline MAE by stops_remaining bucket; if growth is super-linear (3x+ at 7 stops vs 1 stop), consider weighting the two baseline components by distance (more weight to direct stop-to-stop for far stops).
 
 ## Implications for Roadmap
 
-Based on research, suggested phase structure:
+Based on combined research, the implementation requires three distinct phases: baseline infrastructure, feature/training adaptation, and evaluation/comparison. The dependency chain is strict—baseline must exist before residual labels can be created, residuals must exist before training, model must exist before evaluation.
 
-### Phase 1: Data Foundation
-**Rationale:** Must establish reliable data loading, filtering, and GTFS integration before any feature engineering. The existing PyTorch pipeline has working loaders but needs adaptation for XGBoost (no normalization, different label format).
-
-**Delivers:**
-- Clean telemetry DataFrame (filtered, GPS validated)
-- Arrivals CSV with stop name mapping to GTFS stop IDs
-- GTFS route distance calculator (shapes.txt, stop_times.txt integration)
-- Weather data join pipeline
-
-**Addresses:**
-- Table stakes infrastructure for distance_to_target feature (highest priority)
-- Prevents GPS noise pitfall through filtering
-- Prevents integration gotchas (timepoint mapping, weather join by hour)
-
-**Avoids:**
-- Building on unstable data foundation
-- Discovering GTFS integration issues late in development
-
-**Research flag:** No additional research needed — well-documented patterns.
-
-### Phase 2: Core Feature Engineering
-**Rationale:** Build the minimum viable feature set (table stakes only) to establish baseline model performance. This validates the data pipeline and provides a performance benchmark before adding complexity.
+### Phase 1: Baseline Infrastructure
+**Rationale:** All downstream work depends on having valid baseline_eta and residual columns. This is the foundational data transformation that enables the entire residual approach.
 
 **Delivers:**
-- Telemetry-level features: speed, heading, lateness_now, temporal features
-- Weather join (temperature, precipitation)
-- Basic GTFS features: distance_to_target, stops_remaining, scheduled_time_to_target
+- `compute_baseline.py` script that builds historical lookups and computes baselines
+- `historical_stop_to_stop.parquet` lookup table (new artifact)
+- Augmented `train/val/test.parquet` with `baseline_eta` and `residual` columns
+- Baseline quality report (per-route MAE, fallback tier distribution, residual distribution stats)
 
-**Addresses:**
-- Table stakes features from FEATURES.md
-- Two-phase feature pattern (pre-explosion features computed here)
+**Addresses (from FEATURES.md):**
+- Baseline computation logic (segment-sum + stop-to-stop blending)
+- Fallback hierarchy for sparse combinations
+- Residual label creation with correct sign convention
 
-**Avoids:**
-- Feature engineering pitfall: includes only "available at prediction time" features
-- No normalization (XGBoost anti-pattern)
+**Avoids (from PITFALLS.md):**
+- Pitfall #2: Baseline uses test-period data (build from train.parquet only)
+- Pitfall #3: Missing baseline for sparse combos (implement 4-tier fallback)
+- Pitfall #14: Residual sign confusion (assert mean ~0, spot-check 3-5 rows)
 
-**Research flag:** No additional research needed — standard pandas operations.
+**Success criteria:**
+- Baseline-only MAE reported on test set (between 708.9s naive schedule and 123.1s v1.0 model)
+- Residual distribution mean within +/-30s on training data
+- No split has >5% NaN baselines after fallback
+- Per-route baseline MAE variance <10x (identify problematic routes early)
 
-### Phase 3: Row Explosion & Label Creation
-**Rationale:** This is the critical memory and correctness bottleneck. Must be implemented carefully with chunked processing and vectorized joins. Separate phase because it's architecturally distinct from feature engineering.
-
-**Delivers:**
-- Per-stop row explosion (telemetry rows → N rows per remaining stop)
-- Chunked-by-day processing with Parquet append to avoid OOM
-- Vectorized label creation via merge_asof
-- Label quality validation (distribution plots, join success rate)
-
-**Addresses:**
-- Row explosion anti-pattern (chunked processing prevents OOM)
-- Label noise pitfall (vectorized joins + validation checks)
-- Correlated row inflation (adds trip_id grouping for GroupKFold)
-
-**Avoids:**
-- O(N*M) row-by-row label matching
-- Memory crashes from holding full exploded dataset
-- Silent label quality issues
-
-**Research flag:** Needs targeted research on Parquet chunking patterns and merge_asof optimization if performance issues arise.
-
-### Phase 4: Temporal Splitting & Data Validation
-**Rationale:** Clean boundary between data preparation and model training. Temporal split is critical enough to warrant separate validation phase.
+### Phase 2: Feature and Training Adaptation
+**Rationale:** With baselines computed, adapt the feature pipeline and training scripts to use residual targets. Fresh hyperparameter tuning is required because the residual distribution (zero-centered, tighter range) differs fundamentally from raw-seconds distribution (right-skewed, 0-2000+).
 
 **Delivers:**
-- Train/val/test split by calendar date (70/15/15)
-- Gap period between splits (minimum 1 service day)
-- Data quality report: feature distributions, label statistics, correlation matrix
-- Final Parquet files for training
+- Modified `build_differentiator_features.py` (propagates baseline_eta, target = residual)
+- Modified `train_baseline.py` (symmetric squared error on residuals)
+- Fresh Optuna study with adjusted search ranges for residual target
+- Trained v1.1 model artifact with residual predictions
+- SHAP analysis showing expected importance shift (speed features up, distance features down)
 
-**Addresses:**
-- Temporal leakage pitfall (date-based split, not random)
-- Data validation before training investment
+**Uses (from STACK.md):**
+- XGBoost 3.1.3 with `reg:squarederror` objective
+- Optuna 4.7.0 for fresh hyperparameter search
+- pandas/NumPy for residual arithmetic and reconstruction
+- scipy.stats (via scikit-learn) for residual distribution diagnostics
 
-**Avoids:**
-- Discovering temporal leakage after model training
-- Training on low-quality data
+**Implements (from ARCHITECTURE.md):**
+- Dual-target support in feature pipeline (residual for training, baseline_eta for reconstruction)
+- Reconstruction at evaluation: `final_pred = baseline_eta + predicted_residual`
+- All 43 existing features retained initially; add `baseline_eta` as feature #44
 
-**Research flag:** No additional research needed — standard temporal split patterns.
+**Avoids (from PITFALLS.md):**
+- Pitfall #8: Optuna search space not adjusted (fresh study with ranges tuned for residuals)
+- Pitfall #5: Heavy-tail residuals dominate loss (check distribution before training; consider Huber if kurtosis > 5)
+- Pitfall #1: Baseline leaking into features (run SHAP to confirm historical median features drop in importance)
 
-### Phase 5: Baseline XGBoost Model
-**Rationale:** Train first model with conservative hyperparameters on core features only. Establishes performance floor and validates pipeline end-to-end before adding complexity.
+**Success criteria:**
+- Optuna best params differ from v1.0 (residual distribution is different)
+- SHAP shows `speed_ratio` and `speed_mean_*` in top 5 (real-time features gain importance)
+- SHAP shows `distance_to_target` and `stops_remaining` drop to bottom 10 (spatial features absorbed)
+- Training converges without oscillation (residual distribution is learnable)
 
-**Delivers:**
-- XGBoost model with reg:squarederror objective
-- Conservative regularization (max_depth=3-4, min_child_weight=50)
-- Early stopping on validation MAE
-- Baseline metrics: MAE, RMSE, MAPE overall and by route
-
-**Addresses:**
-- Overfitting pitfall (aggressive regularization from start)
-- Native categorical support for day_of_week, route_id
-
-**Avoids:**
-- Over-engineering before validating basics
-- Tuning on unstable baseline
-
-**Research flag:** No additional research needed — well-documented XGBoost patterns.
-
-### Phase 6: Differentiator Features
-**Rationale:** Add high-value features (rolling speeds, timepoints, historical stats) after baseline validates pipeline. These require additional complexity but provide competitive accuracy.
+### Phase 3: Evaluation and Comparison
+**Rationale:** The final test is whether v1.1 beats v1.0's 123.1s MAE on the same test set. The evaluation must reconstruct final predictions and compare apples-to-apples. This phase also establishes what the residual model contributes beyond the baseline alone.
 
 **Delivers:**
-- Rolling speed features (30s/60s/120s/180s windows)
-- Timepoint features (is_timepoint, timepoints_remaining, time_until_next_timepoint_departure)
-- Historical segment times and dwell times (computed from training set only)
-- Auburn-specific temporal features (is_rush_hour, class_let_out_recently)
+- Modified `evaluate.py` with reconstruction logic and baseline-only comparison
+- Side-by-side evaluation report: v1.0 raw MAE vs baseline-only MAE vs v1.1 final MAE
+- Per-route breakdown (identify which routes benefit most from residual approach)
+- Per-stops_remaining and per-hour slicing on reconstructed predictions
+- Residual error analysis (are corrections helping or hurting?)
 
-**Addresses:**
-- Differentiator features from FEATURES.md
-- Timepoint hold modeling pitfall (explicit timepoint features)
+**Addresses (from FEATURES.md):**
+- Validation that feature importance shifts occurred as predicted
+- Identification of routes where baseline is insufficient (candidates for route-specific tuning)
+- Decision on whether to prune low-importance features for v1.2
 
-**Avoids:**
-- Historical feature leakage (computed from train split only)
+**Avoids (from PITFALLS.md):**
+- Pitfall #4: Evaluating residual MAE not final MAE (all metrics on reconstructed predictions)
+- Pitfall #11: Not comparing against baseline-only (report baseline-only MAE as context)
+- Pitfall #13: MAPE on residuals (MAPE only on final predictions, not residuals)
 
-**Research flag:** Timepoint Excel parsing may need targeted research if format is non-standard.
-
-### Phase 7: Asymmetric Loss & Quantile Regression
-**Rationale:** Replicate the existing PyTorch model's 5x overestimation penalty. Separate phase because custom objectives require careful validation and are independent of feature engineering.
-
-**Delivers:**
-- XGBoost custom objective with asymmetric loss (or quantile regression alternative)
-- Gradient/hessian unit tests on synthetic data
-- Comparison: asymmetric vs. quantile vs. baseline squared error
-- Multi-quantile model for P50/P80 predictions
-
-**Addresses:**
-- Parity with existing PyTorch asymmetric loss
-- Quantile regression for confidence intervals
-
-**Avoids:**
-- Custom objective pitfalls (hessian=0, sign errors, non-smooth loss)
-
-**Research flag:** May need research on XGBoost quantile regression parameter tuning if custom objective proves unstable.
-
-### Phase 8: Hyperparameter Tuning
-**Rationale:** After features and loss function are stable, optimize model capacity. Uses Optuna for Bayesian search with TimeSeriesSplit cross-validation.
-
-**Delivers:**
-- Optuna study with 100-200 trials
-- Hyperparameter search space: max_depth (3-8), learning_rate (0.01-0.1), subsample, colsample, min_child_weight, reg_alpha/lambda
-- XGBoostPruningCallback for early trial stopping
-- Best hyperparameters + tuning report
-
-**Addresses:**
-- Optimal model capacity vs. overfitting trade-off
-- Grouped CV (by trip_id) to prevent correlated row inflation
-
-**Avoids:**
-- Manual hyperparameter grid search (inefficient for 8+ params)
-
-**Research flag:** No additional research needed — standard Optuna patterns.
-
-### Phase 9: Evaluation & Explainability
-**Rationale:** Comprehensive evaluation before deployment. Sliced metrics reveal where model fails; SHAP values validate feature logic.
-
-**Delivers:**
-- Metrics by route, stops_remaining bucket, time_of_day, distance bucket
-- Residual analysis: systematic bias detection
-- SHAP feature importance (global) and sample explanations (local)
-- Comparison report vs. existing PyTorch model
-
-**Addresses:**
-- Model validation beyond aggregate MAE
-- Explainability for debugging and stakeholder trust
-
-**Avoids:**
-- Deploying model with hidden failure modes
-- Black-box predictions
-
-**Research flag:** No additional research needed — SHAP TreeExplainer is well-documented.
-
-### Phase 10: Production Artifacts & Deployment Prep
-**Rationale:** Package model, metadata, and feature computation logic for integration with Tiger Transit backend.
-
-**Delivers:**
-- model.ubj (UBJSON format, cross-version compatible)
-- feature_columns.json (ordered list for inference)
-- model_config.json (hyperparameters, training metadata)
-- Feature computation module (same logic as training pipeline, < 500ms latency)
-
-**Addresses:**
-- Production deployment requirements
-- Model serialization best practices (UBJSON, not pickle)
-
-**Avoids:**
-- Pickle serialization anti-pattern
-- Feature computation drift between training and inference
-
-**Research flag:** No additional research needed — XGBoost model I/O is standardized.
+**Success criteria:**
+- v1.1 final MAE < 123.1s (beats v1.0 on same test set)
+- Baseline-only MAE provides context (gap between baseline and v1.1 shows model contribution)
+- Per-route evaluation identifies winners and losers (some routes may not benefit)
+- Residual predictions improve baseline (positive contribution, not hurting)
 
 ### Phase Ordering Rationale
 
-- **Foundation first (1-2):** Data loading and core features establish stable baseline before complexity
-- **Explosion as bottleneck (3):** Row explosion is architecturally distinct and memory-critical, needs dedicated focus
-- **Baseline before optimization (5 before 6-8):** Validate simple model before investing in advanced features and tuning
-- **Loss function after features (7):** Custom objectives are independent of features, easier to validate on stable feature set
-- **Tuning after loss (8):** Hyperparameter search requires stable objective function
-- **Evaluation last (9):** Comprehensive analysis after model is finalized
+- **Phase 1 first:** All downstream scripts depend on `baseline_eta` and `residual` columns existing in parquets. Cannot train or evaluate without baseline.
+- **Phase 2 before Phase 3:** Evaluation needs a trained model. Training needs residual targets.
+- **Within Phase 2:** Modify feature pipeline before training scripts (training imports from feature pipeline module). Train baseline model before Optuna (verify approach works before investing compute in tuning).
+- **No parallelization:** Strict dependency chain. Each phase consumes outputs of previous phase.
 
-This order minimizes rework: each phase builds on validated foundations, and expensive phases (hyperparameter tuning, feature engineering) happen after cheap validation phases.
+**Dependencies discovered from research:**
+- Baseline computation requires `historical_segments.parquet` (already exists from v1.0 feature pipeline)
+- Baseline uses `stop_sequences.parquet` for route traversal (already exists from GTFS parsing)
+- Residual labels require both actual arrival labels AND baseline_eta (circular dependency avoided by temporal holdout)
+- Evaluation requires baseline_eta propagated through to test_featured_v2.parquet
 
 ### Research Flags
 
-Phases likely needing deeper research during planning:
-- **Phase 3 (Row Explosion):** If memory issues persist, may need research on Dask or XGBoost external_memory mode
-- **Phase 6 (Timepoint Features):** If timepoint Excel format is non-standard or stop name mapping is ambiguous
-- **Phase 7 (Asymmetric Loss):** If custom objective proves unstable, may need research on alternative quantile regression approaches
+**Needs research during planning:**
+- **Phase 1 (baseline):** STANDARD PATTERN — pandas groupby aggregations and lookup merges are well-documented. Skip `/gsd:research-phase`. Uber DeepETA blog provides architectural precedent.
+- **Phase 2 (training):** STANDARD PATTERN — XGBoost residual prediction with symmetric loss is straightforward. Optuna tuning follows same process as v1.0. Skip research unless heavy-tail distribution requires Huber loss investigation.
+- **Phase 3 (evaluation):** STANDARD PATTERN — Reconstruction is simple arithmetic. Evaluation framework exists. Skip research.
 
-Phases with standard patterns (skip research-phase):
-- **Phase 1, 2, 4, 5, 8, 9, 10:** Well-documented pandas, XGBoost, and Optuna patterns with high-confidence sources
+**Standard patterns (no additional research needed):**
+- Historical lookup table construction (v1.0 already does this for segments/dwells)
+- Residual computation and reconstruction (basic arithmetic)
+- XGBoost training with changed target (same API, different column)
+- SHAP analysis (same process as v1.0)
+
+**Potential research triggers during implementation:**
+- If baseline-only MAE > 300s (much worse than expected): research better baseline algorithms
+- If residual distribution has kurtosis > 8 (extreme outliers): research robust loss functions beyond Huber
+- If Route 27/235 have >50% missing baselines: research sparse-data baseline strategies
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | XGBoost 3.1.3, pandas 2.3.3, Optuna 4.7.0 all verified from official docs and PyPI. Version compatibility confirmed. |
-| Features | MEDIUM-HIGH | Feature importance rankings from peer-reviewed transit ETA papers (Zhu et al., autonomous shuttle study). Auburn-specific features (timepoints, class changes) are domain inference. |
-| Architecture | HIGH | Two-phase feature pattern, chunked explosion, temporal split all verified from official XGBoost docs and existing codebase analysis. |
-| Pitfalls | HIGH | Data leakage, temporal splitting, custom objectives verified from XGBoost official docs. Domain-specific pitfalls (timepoints, label noise) verified from existing codebase issues. |
+| Stack | HIGH | No new dependencies needed. All operations covered by v1.0 stack. XGBoost docs confirm `reg:squarederror` works for residuals. |
+| Features | MEDIUM-HIGH | Theoretical predictions about importance shifts are sound (based on what baseline captures), but actual SHAP rankings need empirical validation. New features (baseline_eta, baseline_confidence) are novel. |
+| Architecture | HIGH | Pipeline modifications are well-defined. Uber DeepETA validates the residual approach at scale. Codebase inspection confirms exact integration points. |
+| Pitfalls | HIGH | Grounded in codebase analysis and XGBoost best practices. Data leakage, evaluation metrics, and sparse baseline pitfalls are well-documented risks. |
 
 **Overall confidence:** HIGH
 
-The recommended stack, architecture patterns, and critical pitfalls are all verified from official documentation or existing codebase analysis. Feature prioritization has medium confidence because Auburn-specific features (timepoint holds, class dismissal patterns) are domain inferences rather than peer-reviewed findings, but the core transit ETA features (distance, schedule, speed) have high-confidence literature support.
+The residual-based approach is a proven pattern (Uber DeepETA, DeeprETA paper) applied to an existing validated pipeline. The stack requires zero changes (high confidence there). The architecture is a single new script plus minor modifications to four existing scripts (well-scoped). The primary uncertainty is empirical: will the baseline be good enough (expected MAE 200-400s) and will the residual model learn meaningful corrections? These questions can only be answered by building Phase 1 and measuring baseline quality.
 
 ### Gaps to Address
 
-**Timepoint stop identification:** The timepoint Excel spreadsheet format needs inspection during Phase 6 planning. If stop names don't map cleanly to GTFS stop IDs, may require manual mapping table or fuzzy matching validation.
+**Gap 1: Baseline quality is unknowable until built**
+- Research predicts baseline MAE between 200-400s (between naive schedule at 708.9s and v1.0 at 123.1s), but this is untested.
+- **Mitigation:** Phase 1 includes baseline quality report. If baseline-only MAE > 300s, the residual model faces an uphill battle. Consider this a "fail fast" checkpoint before investing in Phases 2-3.
 
-**Label quality threshold:** Research identifies that 60% join success rate is the minimum acceptable, but doesn't specify optimal rate. During Phase 3, establish target (70%+?) based on existing pipeline performance.
+**Gap 2: Optimal baseline blending weights are assumed equal (50/50)**
+- The baseline averages segment-sum and stop-to-stop components with equal weight. This is simple but may be suboptimal (one component might be consistently better).
+- **Mitigation:** Start with equal weights for v1.1. If baseline quality varies dramatically by route/distance, consider learned per-route weights in v1.2.
 
-**Optimal sample rate for approach sequences:** Research suggests sample_rate 5-10 to reduce correlated rows, but optimal value depends on telemetry ping frequency. Validate during Phase 3 with train/val metric comparison.
+**Gap 3: Feature importance shifts are predicted but not validated**
+- The theory says `speed_ratio` and real-time features should gain importance while `distance_to_target` should drop. This is logical but unproven on Tiger Transit data.
+- **Mitigation:** Phase 2 includes SHAP analysis as a success criterion. If importance patterns do NOT shift as predicted, it signals the baseline is not capturing what we think it is.
 
-**Quantile regression vs. custom objective trade-off:** Research presents both options for asymmetric loss but doesn't definitively recommend one. During Phase 7, prototype both and compare stability/accuracy.
+**Gap 4: Route 27 and Route 235 may have insufficient baseline coverage**
+- Route 27 has only 96 test samples. Route 235 has no timepoint data. Sparse routes may have >30% NaN baselines even with fallback.
+- **Mitigation:** Phase 1 reports per-route fallback tier distribution. If Route 27/235 are unrecoverable, document this as a known limitation and exclude from v1.1 evaluation (same as v1.0 handled sparse routes).
 
-**Historical feature computation:** Research specifies "compute from training set only" but doesn't detail the aggregation logic (mean by segment/hour? median? weighted by recency?). Phase 6 needs design decision informed by existing pipeline's `segment_avg_travel_time_sec` logic.
+**Gap 5: Asymmetric loss semantics for residuals are deferred**
+- v1.0 used 3:1 asymmetric loss (penalize overprediction). For residuals, the sign convention changes and applying asymmetric loss is non-trivial. Starting with symmetric loss is safe but may leave performance on the table.
+- **Mitigation:** Defer asymmetric loss to v1.2 after establishing symmetric baseline. Unit test sign conventions carefully if/when adding asymmetric.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- XGBoost 3.1.3 Official Documentation (parameter reference, categorical data, model I/O, custom objectives)
-- pandas 2.3.3 PyPI and release notes (version compatibility, breaking changes in 3.0.0)
-- scikit-learn 1.8.0 documentation (TimeSeriesSplit, metrics)
-- Optuna 4.7.0 documentation (XGBoostPruningCallback, TPE sampler)
-- SHAP 0.50.0 documentation (TreeExplainer)
-- Existing Tiger Transit codebase (`data_prep.py`, `pipeline.py`, `label_creator.py`, `config.py`)
+- Existing codebase: `build_differentiator_features.py`, `train_baseline.py`, `evaluate.py`, `temporal_split.py` — Direct inspection of all scripts, column names, data flow, existing feature engineering
+- XGBoost 3.1.3 documentation: Parameters, base_score auto-estimation, reg:squarederror objective — Official docs confirm behavior with zero-centered targets
+- pandas 2.3.3 documentation: groupby aggregations for baseline computation — Standard pandas operations
+- v1.0 SHAP rankings: `eval_shap_meta.json`, `eval_report.md` — Empirical feature importance baseline for comparison
 
 ### Secondary (MEDIUM confidence)
-- [XGBoost-Based Travel Time Prediction (Zhu et al., 2022)](https://onlinelibrary.wiley.com/doi/10.1155/2022/3504704) — feature importance analysis
-- [Arrival Time Prediction for Autonomous Shuttles (arxiv 2401.05322)](https://arxiv.org/html/2401.05322) — dwell time modeling, lag features
-- [Bus Arrival Time Prediction Using ML (2025)](https://www.researchgate.net/publication/397281321_Bus_Arrival_Time_Prediction_Using_Machine_Learning_Approaches) — XGBoost MAE benchmarks
-- [Scalable Transit Delay Prediction (arxiv 2601.18521)](https://arxiv.org/html/2601.18521) — temporal leakage prevention
-- [Part-2: How to Design an ML System for ETA Prediction](https://mlsavvy.substack.com/p/part-2-how-to-design-an-ml-system) — architecture patterns
-- [Transit App: Better Predictions](https://blog.transitapp.com/better-predictions/) — real-world ETA challenges
-- NVIDIA: Categorical Features in XGBoost — partition-based splits
+- Uber DeepETA blog post — Industry precedent for baseline + residual architecture, but different domain (rideshare, not transit)
+- DeeprETA paper (arXiv 2206.02127) — Post-processing residual ETA at scale, validates approach
+- Google Maps ETA with GNNs (arXiv 2108.11482) — Discusses supersegment approach to avoid segment accumulation errors
+- Transit App blog on ETA prediction challenges — Domain expertise on transit-specific pitfalls
+- MachineLearningMastery residual modeling tutorial — General technique for residual correction in forecasting
 
 ### Tertiary (LOW confidence)
-- DoorDash ETA Predictions blog — general ML ETA context (not XGBoost-specific)
-- Uber DeepETA blog — neural approach, less relevant for tabular data
+- Mathematical collinearity effects paper — Theory on correlated features in tree models, but abstract (not transit-specific)
+- Hybrid LSTM-XGBoost residual paper (Springer) — Different domain (air quality), but validates residual correction pattern
 
 ---
-*Research completed: 2026-02-03*
+*Research completed: 2026-02-11*
 *Ready for roadmap: yes*
