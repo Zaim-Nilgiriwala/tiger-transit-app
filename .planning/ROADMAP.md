@@ -48,11 +48,11 @@ Plans:
   3. Optuna completes a fresh study with best parameters that differ from v1.0 (confirming the different target distribution was accounted for)
   4. Both squared error and Huber loss are tested, with the better-performing objective selected based on validation MAE
   5. Outlier trimming removes the worst 1-2% of training samples, and training converges without loss oscillation
-**Plans**: TBD (1-3 plans)
+**Plans**: 2 plans
 
 Plans:
-- [ ] 08-01: Modify feature pipeline and training scripts for residual target
-- [ ] 08-02: Optuna tuning, outlier trimming, and Huber loss comparison
+- [ ] 08-01-PLAN.md -- Update feature pipeline for v1.1 (drop lateness_now, add 3 baselines, residual target, rebuild parquets)
+- [ ] 08-02-PLAN.md -- Optuna tuning with GPU, outlier trimming, Huber comparison, deterministic final model
 
 ### Phase 9: Evaluation and Comparison
 **Goal**: Definitive proof that v1.1 beats v1.0, with reconstructed predictions evaluated apples-to-apples on the same test set
