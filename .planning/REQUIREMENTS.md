@@ -15,11 +15,11 @@
 
 ### Training Pipeline
 
-- [ ] **TRAIN-01**: Modify training scripts to use residual as target variable (preserve original time_to_arrival_seconds alongside)
-- [ ] **TRAIN-02**: Add baseline_eta as feature #44 in the feature matrix (so model learns residuals scale with trip length)
-- [ ] **TRAIN-03**: Fresh Optuna hyperparameter tuning with new study name, adjusted search space for zero-centered residual target distribution
-- [ ] **TRAIN-04**: Implement outlier trimming (remove worst 1-2% training samples by Z-score or percentile before training)
-- [ ] **TRAIN-05**: Test Huber loss (reg:pseudohubererror) alongside squared error, report which performs better on validation set
+- [x] **TRAIN-01**: Modify training scripts to use residual as target variable (preserve original time_to_arrival_seconds alongside)
+- [x] **TRAIN-02**: Add baseline_eta as feature #44 in the feature matrix (so model learns residuals scale with trip length)
+- [x] **TRAIN-03**: Fresh Optuna hyperparameter tuning with new study name, adjusted search space for zero-centered residual target distribution
+- [x] **TRAIN-04**: Implement outlier trimming (remove worst 1-2% training samples by Z-score or percentile before training)
+- [x] **TRAIN-05**: Test Huber loss (reg:pseudohubererror) alongside squared error, report which performs better on validation set
 
 ### Evaluation
 
@@ -59,11 +59,11 @@
 | BASE-03 | Phase 7 | Complete |
 | BASE-04 | Phase 7 | Complete |
 | BASE-05 | Phase 7 | Complete |
-| TRAIN-01 | Phase 8 | Pending |
-| TRAIN-02 | Phase 8 | Pending |
-| TRAIN-03 | Phase 8 | Pending |
-| TRAIN-04 | Phase 8 | Pending |
-| TRAIN-05 | Phase 8 | Pending |
+| TRAIN-01 | Phase 8 | Complete |
+| TRAIN-02 | Phase 8 | Complete |
+| TRAIN-03 | Phase 8 | Complete |
+| TRAIN-04 | Phase 8 | Complete |
+| TRAIN-05 | Phase 8 | Complete |
 | EVAL-01 | Phase 9 | Pending |
 | EVAL-02 | Phase 9 | Pending |
 | EVAL-03 | Phase 9 | Pending |
@@ -77,4 +77,4 @@
 
 ---
 *Requirements defined: 2026-02-11*
-*Last updated: 2026-02-12 after Phase 7 completion*
+*Last updated: 2026-02-17 after Phase 8 completion*

@@ -19,7 +19,7 @@ Phases 1-6 delivered the initial XGBoost ETA model: 123.1s MAE across 23 routes,
 **Milestone Goal:** Rearchitect the XGBoost model to predict residuals (actual - baseline_ETA) instead of raw seconds, beating v1.0's 123.1s MAE on the same test set.
 
 - [x] **Phase 7: Baseline Infrastructure** - Compute historical baselines and residual labels for all data splits ✓
-- [ ] **Phase 8: Training Adaptation** - Retrain XGBoost on residual targets with fresh hyperparameter tuning
+- [x] **Phase 8: Training Adaptation** - Retrain XGBoost on residual targets with fresh hyperparameter tuning ✓
 - [ ] **Phase 9: Evaluation and Comparison** - Prove v1.1 beats v1.0 with reconstructed prediction metrics
 
 ## Phase Details
@@ -51,8 +51,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 08-01-PLAN.md -- Update feature pipeline for v1.1 (drop lateness_now, add 3 baselines, residual target, rebuild parquets)
-- [ ] 08-02-PLAN.md -- Optuna tuning with GPU, outlier trimming, Huber comparison, deterministic final model
+- [x] 08-01-PLAN.md -- Update feature pipeline for v1.1 (drop lateness_now, add 3 baselines, residual target, rebuild parquets)
+- [x] 08-02-PLAN.md -- Optuna tuning with GPU, outlier trimming, Huber comparison, deterministic final model
 
 ### Phase 9: Evaluation and Comparison
 **Goal**: Definitive proof that v1.1 beats v1.0, with reconstructed predictions evaluated apples-to-apples on the same test set
@@ -76,9 +76,9 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 7. Baseline Infrastructure | v1.1 | 1/1 | Complete | 2026-02-11 |
-| 8. Training Adaptation | v1.1 | 0/2 | Not started | - |
+| 8. Training Adaptation | v1.1 | 2/2 | Complete | 2026-02-17 |
 | 9. Evaluation and Comparison | v1.1 | 0/1 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-11*
-*Last updated: 2026-02-12*
+*Last updated: 2026-02-17*
