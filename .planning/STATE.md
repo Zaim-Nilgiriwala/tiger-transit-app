@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 
 ## Current Position
 
-Phase: 7 of 9 (Baseline Infrastructure)
-Plan: 1 of 1 in current phase
-Status: Phase complete
-Last activity: 2026-02-11 -- Completed 07-01-PLAN.md (baseline computation pipeline)
+Phase: 8 of 9 (Training Adaptation)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-17 -- Completed 08-01-PLAN.md (feature pipeline v1.1)
 
-Progress: [#####               ] 25% (1/4 plans)
+Progress: [##########          ] 50% (2/4 plans)
 
 ## Model Performance Tracker
 
@@ -28,7 +28,7 @@ Progress: [#####               ] 25% (1/4 plans)
 | v1.1 S2S-only (P7) | 130.0s | -- | 81.7% | 0 | -- |
 | v1.1 SegSum-only (P7) | 254.3s | -- | 64.1% | 0 | -- |
 | v1.1 Blended (P7) | 179.3s | -- | 74.7% | 0 | -- |
-| **v1.1 target** | **< 123.1s** | -- | -- | 44 | TBD |
+| **v1.1 target** | **< 123.1s** | -- | -- | 45 | TBD |
 
 ## Accumulated Context
 
@@ -50,6 +50,12 @@ Phase 7 decisions:
 - S2S uses mean aggregation; segment-sum uses median (complementary statistics)
 - Intermediate baselines (baseline_s2s, baseline_seg_sum) stored in parquets for transparency
 
+Phase 8 decisions:
+- lateness_now removed from PHASE3_FEATURE_COLS (14 features, down from 15)
+- 3 baseline features added: baseline_s2s, baseline_seg_sum, baseline_eta (FEATURE_COLS_V2 = 45)
+- TARGET_COL = residual (model learns deviation from blended baseline)
+- time_to_arrival_seconds and baseline_eta preserved in KEEP_EXTRA for reconstruction (final_pred = baseline_eta + predicted_residual)
+
 ### Blockers/Concerns
 
 - Route 27 has only 96 test samples and highest blend MAE (527.4s) -- sparse baseline persists
@@ -58,6 +64,6 @@ Phase 7 decisions:
 
 ## Session Continuity
 
-Last session: 2026-02-11
-Stopped at: Completed 07-01-PLAN.md (baseline computation pipeline)
+Last session: 2026-02-17
+Stopped at: Completed 08-01-PLAN.md (feature pipeline v1.1)
 Resume file: None
