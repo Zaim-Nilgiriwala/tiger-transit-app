@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Accurate arrival time predictions for all remaining stops on a bus route, accounting for timepoint holds, schedule adherence, and real-world conditions.
-**Current focus:** Phase 8 -- Training Adaptation (v1.1 Model Reapproach)
+**Current focus:** Phase 8 complete -- ready for Phase 9 (Deployment)
 
 ## Current Position
 
 Phase: 8 of 9 (Training Adaptation)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-17 -- Completed 08-01-PLAN.md (feature pipeline v1.1)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-02-17 -- Completed 08-02-PLAN.md (v1.1 residual model training)
 
-Progress: [##########          ] 50% (2/4 plans)
+Progress: [###############     ] 75% (3/4 plans)
 
 ## Model Performance Tracker
 
@@ -28,7 +28,7 @@ Progress: [##########          ] 50% (2/4 plans)
 | v1.1 S2S-only (P7) | 130.0s | -- | 81.7% | 0 | -- |
 | v1.1 SegSum-only (P7) | 254.3s | -- | 64.1% | 0 | -- |
 | v1.1 Blended (P7) | 179.3s | -- | 74.7% | 0 | -- |
-| **v1.1 target** | **< 123.1s** | -- | -- | 45 | TBD |
+| **v1.1 Residual (P8)** | **102.8s** | **208.9s** | **85.5%** | **45** | **656** |
 
 ## Accumulated Context
 
@@ -54,16 +54,20 @@ Phase 8 decisions:
 - lateness_now removed from PHASE3_FEATURE_COLS (14 features, down from 15)
 - 3 baseline features added: baseline_s2s, baseline_seg_sum, baseline_eta (FEATURE_COLS_V2 = 45)
 - TARGET_COL = residual (model learns deviation from blended baseline)
-- time_to_arrival_seconds and baseline_eta preserved in KEEP_EXTRA for reconstruction (final_pred = baseline_eta + predicted_residual)
+- time_to_arrival_seconds and baseline_eta preserved in KEEP_EXTRA for reconstruction
+- Pseudo-Huber loss (reg:pseudohubererror) won over squared error (huber_slope=8.32)
+- High gamma (4.52) helps conservative splits on zero-centered residual targets
+- Deterministic final model: 656 rounds (best_iteration + 1), no early stopping
+- Z-score 2.5 trimming removes 4.14% of training data (49,932 samples)
 
 ### Blockers/Concerns
 
-- Route 27 has only 96 test samples and highest blend MAE (527.4s) -- sparse baseline persists
-- Blended baseline (179.3s) is worse than v1.0 (123.1s) -- residual model must recover this gap
-- S2S alone (130.0s) is close to v1.0 -- residual model may benefit more from S2S-only baseline in v1.2
+- Route 27 still has only 96 test samples and highest MAE (425.2s) -- sparse data issue persists
+- RMSE slightly increased (208.9s vs 202.8s) despite MAE improvement -- Huber loss trades extreme-error precision for average-error accuracy
+- S2S alone (130.0s) is close to v1.0 -- residual model with S2S-only baseline in v1.2 could further improve
 
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 08-01-PLAN.md (feature pipeline v1.1)
+Stopped at: Completed 08-02-PLAN.md (v1.1 residual model training)
 Resume file: None
