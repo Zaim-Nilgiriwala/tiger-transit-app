@@ -15,7 +15,7 @@ import time
 from pathlib import Path
 
 
-TARGET_TRIALS = 150
+TARGET_TRIALS = 100
 BATCH_SIZE = 25  # trials per invocation
 
 
@@ -24,7 +24,7 @@ def count_trials():
     try:
         import optuna
         storage = optuna.storages.RDBStorage(url="sqlite:///models/optuna_study.db")
-        study = optuna.load_study(study_name="tiger_transit_tuning", storage=storage)
+        study = optuna.load_study(study_name="v1_1_residual_tuning", storage=storage)
         return len(study.trials)
     except Exception:
         return 0
