@@ -14,7 +14,7 @@ Retrain the XGBoost model to predict residuals (actual - baseline_eta) instead o
 ## Implementation Decisions
 
 ### Loss function & outlier handling
-- Z-score threshold (2.5 sigma) for outlier trimming -- removes ~1.2% of training samples
+- Z-score threshold (2.5 sigma) for outlier trimming -- removes ~4.14% of training samples (heavy-tailed residuals; within 5% contamination threshold)
 - Compare both Huber and squared error loss on validation MAE + per-route breakdown
 - Overall validation MAE is the deciding metric -- per-route breakdown is informational, not a tiebreaker
 - If losses are close, overall MAE wins regardless of per-route differences
