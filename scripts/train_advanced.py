@@ -1,41 +1,42 @@
 """
-train_advanced.py - Phase 5 Advanced Training Pipeline (Plan 01: Optuna Tuning).
+train_advanced.py - Phase 8 v1.1 Residual Training Pipeline.
 
-Uses Optuna with TimeSeriesSplit cross-validation and MedianPruner to find
-optimal XGBoost hyperparameters. Retrains the best configuration on full
-training data and evaluates on held-out test set.
-
-Purpose: The Phase 4 model used all 3000 rounds with hand-tuned hyperparameters
-(175.7s MAE). Optuna will find optimal learning_rate, max_depth, regularization,
-and num_boost_round for significant MAE improvement.
+Trains XGBoost to predict residuals (actual - baseline_eta) with fresh Optuna
+hyperparameter tuning, z-score outlier trimming, GPU auto-detection, Huber vs
+squared error comparison, and deterministic final model training.
 
 Strategy: Two-stage tuning for practical runtime.
-  Stage 1: 150 Optuna trials using train/val holdout (fast -- 1 model per trial)
+  Stage 1: 100 Optuna trials using subsampled train/val holdout
+           (9 hyperparameters + conditional huber_slope, 2 loss functions)
   Stage 2: Verify best params with 4-fold TimeSeriesSplit CV on train+val
-  Final:   Retrain best config on full train, evaluate on held-out test
+  Final:   Retrain best config deterministically on full trimmed train,
+           evaluate on held-out test with reconstructed MAE
 
-Phase 5 Pipeline:
-  Plan 01 (this script): Optuna hyperparameter tuning -> models/tuned_v1.ubj
-  Plan 02 (train_asymmetric_quantile.py): Asymmetric loss + quantile models
-    - Loads best_params from models/tuned_metrics.json
-    - Trains asymmetric loss model -> models/asymmetric_v1.ubj
-    - Trains P20/P50/P75 quantile models -> models/quantile_p{20,50,75}_v1.ubj
-    - Generates comparison table -> models/phase5_comparison.json
+Pipeline:
+  1. Load v1.1 featured parquets (45 features, residual target)
+  2. Apply z-score 2.5 outlier trimming to training data only
+  3. Run 100 Optuna trials comparing reg:squarederror vs reg:pseudohubererror
+  4. Verify best params with 4-fold TimeSeriesSplit CV
+  5. Retrain final model deterministically (exact round count, no early stopping)
+  6. Evaluate with reconstructed MAE (baseline_eta + predicted_residual)
+  7. Save model and metrics
 
 Usage:
     python scripts/train_advanced.py                      # Full pipeline
     python scripts/train_advanced.py --skip-tuning        # Skip Optuna, retrain only
     python scripts/train_advanced.py --batch 25           # Run 25 Optuna trials
+    python scripts/train_advanced.py --tuning-only        # Optuna only, no retrain
 
 Input:
     data/processed/{train,val,test}_featured_v2.parquet
 
 Output:
-    models/tuned_v1.ubj           - XGBoost model retrained with best hyperparameters
-    models/tuned_metrics.json     - Tuned model metrics with Optuna study summary
+    models/v1_1_residual.ubj       - XGBoost model trained on residuals
+    models/v1_1_metrics.json       - Metrics with reconstructed MAE, Optuna summary
 """
 
 import argparse
+import gc
 import json
 import sys
 import time
@@ -62,24 +63,61 @@ from build_differentiator_features import (
 )
 
 # ---------------------------------------------------------------------------
+# GPU Auto-Detection
+# ---------------------------------------------------------------------------
+
+
+def detect_xgb_device():
+    """Auto-detect GPU availability for XGBoost. Returns 'cuda' or 'cpu'."""
+    try:
+        dm = xgb.DMatrix(np.zeros((2, 1)), label=[0, 1])
+        bst = xgb.train({"device": "cuda", "tree_method": "hist"},
+                         dm, num_boost_round=1, verbose_eval=False)
+        del bst, dm
+        return "cuda"
+    except Exception:
+        return "cpu"
+
+
+# ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
 
 MODELS_DIR = Path("models")
 SEED = 42
-N_TRIALS = 150
+N_TRIALS = 100
 N_CV_SPLITS = 4
-EARLY_STOPPING_ROUNDS_CV = 15
-EARLY_STOPPING_ROUNDS_FINAL = 100
+STUDY_NAME = "v1_1_residual_tuning"
+STUDY_DB = "sqlite:///models/optuna_study.db"
+Z_SCORE_THRESHOLD = 2.5
+
+DEVICE = detect_xgb_device()
+print(f"XGBoost device: {DEVICE}")
 
 FIXED_PARAMS = {
-    "objective": "reg:squarederror",
     "eval_metric": "mae",
     "tree_method": "hist",
-    "device": "cuda",
+    "device": DEVICE,
     "max_cat_to_onehot": 10,
     "seed": SEED,
 }
+
+
+# ---------------------------------------------------------------------------
+# Outlier Trimming
+# ---------------------------------------------------------------------------
+
+
+def trim_outliers(y, z_threshold=Z_SCORE_THRESHOLD):
+    """Remove outliers by z-score on target values. Returns boolean mask of rows to keep."""
+    mean = y.mean()
+    std = y.std()
+    z_scores = np.abs((y - mean) / std)
+    mask = z_scores <= z_threshold
+    n_removed = (~mask).sum()
+    pct_removed = n_removed / len(y) * 100
+    print(f"  Outlier trimming (z <= {z_threshold}): removed {n_removed:,} of {len(y):,} samples ({pct_removed:.1f}%)")
+    return mask
 
 
 # ---------------------------------------------------------------------------
@@ -142,18 +180,14 @@ def distance_bucket(dist):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Optuna hyperparameter tuning for Tiger Transit ETA model")
+    parser = argparse.ArgumentParser(description="v1.1 Optuna hyperparameter tuning for Tiger Transit residual ETA model")
     parser.add_argument("--batch", type=int, default=0,
                         help="Run N trials per invocation (0=all). Uses SQLite storage for persistence.")
     parser.add_argument("--skip-tuning", action="store_true",
-                        help="Skip Optuna, load best_params from tuned_metrics.json, retrain+eval only")
+                        help="Skip Optuna, load best_params from v1_1_metrics.json, retrain+eval only")
     parser.add_argument("--tuning-only", action="store_true",
                         help="Run Optuna trials only, skip retrain/eval (use with --batch)")
     return parser.parse_args()
-
-
-# SQLite storage path for persistent Optuna study
-STUDY_DB = "sqlite:///models/optuna_study.db"
 
 
 def main():
@@ -164,7 +198,7 @@ def main():
     # ------------------------------------------------------------------
     # 1. Load data
     # ------------------------------------------------------------------
-    print("Loading v2 featured data...")
+    print("Loading v1.1 featured data (45 features, residual target)...")
     df_train = load_featured_v2("train")
     df_val = load_featured_v2("val")
     df_test = load_featured_v2("test")
@@ -173,6 +207,7 @@ def main():
     print(f"  val:   {df_val.shape}")
     print(f"  test:  {df_test.shape}")
     print(f"  Features: {len(FEATURE_COLS_V2)}")
+    print(f"  Target: {TARGET_COL}")
 
     # Test set -- never touched during tuning
     X_test = df_test[FEATURE_COLS_V2].copy()
@@ -181,10 +216,13 @@ def main():
     # Test metadata for sliced evaluation
     test_route_ids = df_test["route_id"].astype(int).values
     test_stops_away = df_test["stops_away"].values
-    test_scheduled = df_test["scheduled_time_to_target"].values.astype(float)
     test_distances = df_test["distance_to_target"].values.astype(float)
     test_minutes = df_test["minutes_since_midnight"].values
     test_hour_ct = (test_minutes // 60).astype(int)
+
+    # Reconstruction columns for test set
+    test_baseline_eta = df_test["baseline_eta"].values
+    test_actual_seconds = df_test["time_to_arrival_seconds"].values
 
     # Training arrays
     X_train = df_train[FEATURE_COLS_V2].copy()
@@ -193,21 +231,35 @@ def main():
     y_val = df_val[TARGET_COL].values
 
     # ------------------------------------------------------------------
-    # 2. Stage 1: Optuna search using subsampled train/val holdout
-    #    Uses SQLite storage for persistence across batch runs
+    # 2. Outlier trimming on training data only
+    # ------------------------------------------------------------------
+    print("\nApplying outlier trimming to training data...")
+    trim_mask = trim_outliers(y_train, Z_SCORE_THRESHOLD)
+    X_train_trimmed = X_train[trim_mask].reset_index(drop=True)
+    y_train_trimmed = y_train[trim_mask]
+
+    # Store trimming stats for metrics
+    n_trimmed = int((~trim_mask).sum())
+    pct_trimmed = n_trimmed / len(y_train) * 100
+
+    print(f"  Training data: {len(y_train):,} -> {len(y_train_trimmed):,} after trimming")
+
+    # ------------------------------------------------------------------
+    # 3. Stage 1: Optuna search using subsampled trimmed train / val holdout
     # ------------------------------------------------------------------
     if not args.skip_tuning:
         # 10% subsample for fast Optuna search, verify on full data later
         SEARCH_FRAC = 0.10
         rng = np.random.RandomState(SEED)
-        search_train_idx = rng.choice(len(y_train), size=int(len(y_train) * SEARCH_FRAC), replace=False)
+        search_train_idx = rng.choice(len(y_train_trimmed), size=int(len(y_train_trimmed) * SEARCH_FRAC), replace=False)
         search_train_idx.sort()
+        # Validation subsample from untrimmed validation data
         search_val_idx = rng.choice(len(y_val), size=int(len(y_val) * SEARCH_FRAC), replace=False)
         search_val_idx.sort()
 
         print(f"\nPre-building DMatrix objects for Optuna search ({SEARCH_FRAC:.0%} subsample)...")
         dtrain_search = xgb.DMatrix(
-            X_train.iloc[search_train_idx], label=y_train[search_train_idx], enable_categorical=True
+            X_train_trimmed.iloc[search_train_idx], label=y_train_trimmed[search_train_idx], enable_categorical=True
         )
         dval_search = xgb.DMatrix(
             X_val.iloc[search_val_idx], label=y_val[search_val_idx], enable_categorical=True
@@ -218,32 +270,46 @@ def main():
         def objective(trial):
             from optuna_integration import XGBoostPruningCallback
 
+            objective_name = trial.suggest_categorical(
+                "objective", ["reg:squarederror", "reg:pseudohubererror"]
+            )
             params = {
                 **FIXED_PARAMS,
-                "max_depth": trial.suggest_int("max_depth", 3, 8),
-                "learning_rate": trial.suggest_float("learning_rate", 0.03, 0.3, log=True),
-                "min_child_weight": trial.suggest_int("min_child_weight", 5, 100),
+                "objective": objective_name,
+                "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.3, log=True),
+                "max_depth": trial.suggest_int("max_depth", 3, 10),
                 "subsample": trial.suggest_float("subsample", 0.5, 1.0),
-                "colsample_bytree": trial.suggest_float("colsample_bytree", 0.5, 1.0),
-                "reg_alpha": trial.suggest_float("reg_alpha", 1e-3, 10.0, log=True),
-                "reg_lambda": trial.suggest_float("reg_lambda", 1e-3, 10.0, log=True),
+                "colsample_bytree": trial.suggest_float("colsample_bytree", 0.3, 1.0),
+                "min_child_weight": trial.suggest_int("min_child_weight", 1, 100),
+                "reg_alpha": trial.suggest_float("reg_alpha", 1e-4, 10.0, log=True),
+                "reg_lambda": trial.suggest_float("reg_lambda", 1e-4, 10.0, log=True),
+                "gamma": trial.suggest_float("gamma", 0.0, 5.0),
             }
-            num_boost_round = trial.suggest_int("num_boost_round", 200, 600)
+            if objective_name == "reg:pseudohubererror":
+                params["huber_slope"] = trial.suggest_float("huber_slope", 1.0, 100.0, log=True)
+
+            num_boost_round = trial.suggest_int("num_boost_round", 200, 2000)
 
             pruning_callback = XGBoostPruningCallback(trial, "val-mae")
-
             bst = xgb.train(
                 params,
                 dtrain_search,
                 num_boost_round=num_boost_round,
                 evals=[(dval_search, "val")],
-                early_stopping_rounds=EARLY_STOPPING_ROUNDS_CV,
+                early_stopping_rounds=15,
                 verbose_eval=False,
                 callbacks=[pruning_callback],
             )
 
+            trial.set_user_attr("best_iteration", int(bst.best_iteration))
+            trial.set_user_attr("objective_type", objective_name)
             preds = bst.predict(dval_search, iteration_range=(0, bst.best_iteration + 1))
-            return float(np.mean(np.abs(y_val_search - preds)))
+            val_mae = float(np.mean(np.abs(y_val_search - preds)))
+
+            del bst  # Free GPU memory between trials (XGBoost issue #3045)
+            gc.collect()
+
+            return val_mae
 
         optuna.logging.set_verbosity(optuna.logging.WARNING)
 
@@ -251,8 +317,8 @@ def main():
         storage = optuna.storages.RDBStorage(url=STUDY_DB)
         study = optuna.create_study(
             direction="minimize",
-            pruner=optuna.pruners.MedianPruner(n_startup_trials=10),
-            study_name="tiger_transit_tuning",
+            pruner=optuna.pruners.MedianPruner(n_startup_trials=10, n_warmup_steps=50),
+            study_name=STUDY_NAME,
             storage=storage,
             load_if_exists=True,
         )
@@ -275,13 +341,26 @@ def main():
         n_pruned = len([t for t in study.trials if t.state == optuna.trial.TrialState.PRUNED])
         n_complete = len([t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE])
 
+        # Count how many trials used each objective
+        n_squared = 0
+        n_huber = 0
+        for t in study.trials:
+            if t.state in (optuna.trial.TrialState.COMPLETE, optuna.trial.TrialState.PRUNED):
+                obj_type = t.params.get("objective", "unknown")
+                if obj_type == "reg:squarederror":
+                    n_squared += 1
+                elif obj_type == "reg:pseudohubererror":
+                    n_huber += 1
+
         stage1_time = time.time() - start_time
         print(f"\nStage 1 status ({stage1_time/60:.1f} min)")
         print(f"  Total trials: {total_trials}")
         print(f"  Pruned trials: {n_pruned}")
         print(f"  Complete trials: {n_complete}")
+        print(f"  Objective split: {n_squared} squarederror, {n_huber} pseudohubererror")
         print(f"  Best trial: #{study.best_trial.number}")
         print(f"  Best val MAE: {study.best_trial.value:.2f}s")
+        print(f"  Best objective: {study.best_trial.user_attrs.get('objective_type', study.best_trial.params.get('objective', 'unknown'))}")
         print(f"  Best params:")
         for k, v in study.best_trial.params.items():
             print(f"    {k}: {v}")
@@ -295,19 +374,23 @@ def main():
         best_trial = study.best_trial
     else:
         # Load best params from existing metrics
-        print("\nSkipping tuning, loading best_params from tuned_metrics.json...")
-        with open(MODELS_DIR / "tuned_metrics.json") as f:
+        print("\nSkipping tuning, loading best_params from v1_1_metrics.json...")
+        with open(MODELS_DIR / "v1_1_metrics.json") as f:
             existing = json.load(f)
         best_trial = None
         n_pruned = existing.get("study_summary", {}).get("n_pruned", 0)
         n_complete = existing.get("study_summary", {}).get("n_complete", 0)
+        n_squared = existing.get("study_summary", {}).get("n_squarederror", 0)
+        n_huber = existing.get("study_summary", {}).get("n_pseudohubererror", 0)
 
     # ------------------------------------------------------------------
-    # 3. Stage 2: Verify best params with TimeSeriesSplit CV
+    # 4. Stage 2: Verify best params with TimeSeriesSplit CV
     # ------------------------------------------------------------------
     if best_trial is not None:
+        best_objective = best_trial.user_attrs.get("objective_type", best_trial.params.get("objective", "reg:squarederror"))
         best_params_full = {
             **FIXED_PARAMS,
+            "objective": best_objective,
             "max_depth": best_trial.params["max_depth"],
             "learning_rate": best_trial.params["learning_rate"],
             "min_child_weight": best_trial.params["min_child_weight"],
@@ -315,14 +398,22 @@ def main():
             "colsample_bytree": best_trial.params["colsample_bytree"],
             "reg_alpha": best_trial.params["reg_alpha"],
             "reg_lambda": best_trial.params["reg_lambda"],
+            "gamma": best_trial.params["gamma"],
         }
-        best_num_boost_round = best_trial.params["num_boost_round"]
+        if best_objective == "reg:pseudohubererror":
+            best_params_full["huber_slope"] = best_trial.params["huber_slope"]
+
+        # Use best_iteration from Optuna trial for deterministic training
+        best_n_rounds = best_trial.user_attrs.get("best_iteration", best_trial.params["num_boost_round"]) + 1
     else:
         bp = existing["best_params"]
-        best_params_full = {**FIXED_PARAMS, **bp}
-        best_num_boost_round = existing["best_num_boost_round"]
+        best_objective = existing.get("best_objective", "reg:squarederror")
+        best_params_full = {**FIXED_PARAMS, "objective": best_objective, **bp}
+        best_n_rounds = existing["best_n_rounds"]
 
     print(f"\nStage 2: Verifying best params with {N_CV_SPLITS}-fold TimeSeriesSplit CV...")
+    print(f"  Objective: {best_objective}")
+    print(f"  Rounds: {best_n_rounds}")
 
     import pandas as pd
     df_cv = pd.concat([df_train, df_val], ignore_index=True)
@@ -332,8 +423,13 @@ def main():
     tscv = TimeSeriesSplit(n_splits=N_CV_SPLITS)
     cv_maes = []
     for fold_idx, (train_idx, val_idx) in enumerate(tscv.split(X_cv_df)):
+        # Apply outlier trimming to each fold's training portion independently
+        fold_y_train = y_cv[train_idx]
+        fold_trim_mask = trim_outliers(fold_y_train, Z_SCORE_THRESHOLD)
+        fold_train_trimmed_idx = train_idx[fold_trim_mask]
+
         dtrain_fold = xgb.DMatrix(
-            X_cv_df.iloc[train_idx], label=y_cv[train_idx], enable_categorical=True
+            X_cv_df.iloc[fold_train_trimmed_idx], label=y_cv[fold_train_trimmed_idx], enable_categorical=True
         )
         dval_fold = xgb.DMatrix(
             X_cv_df.iloc[val_idx], label=y_cv[val_idx], enable_categorical=True
@@ -342,160 +438,156 @@ def main():
         bst_cv = xgb.train(
             best_params_full,
             dtrain_fold,
-            num_boost_round=best_num_boost_round,
+            num_boost_round=best_n_rounds,
             evals=[(dval_fold, "val")],
-            early_stopping_rounds=EARLY_STOPPING_ROUNDS_CV,
             verbose_eval=False,
         )
 
-        preds = bst_cv.predict(dval_fold, iteration_range=(0, bst_cv.best_iteration + 1))
+        preds = bst_cv.predict(dval_fold)
         fold_mae = float(np.mean(np.abs(y_cv[val_idx] - preds)))
         cv_maes.append(fold_mae)
-        print(f"  Fold {fold_idx}: MAE={fold_mae:.2f}s (best_iter={bst_cv.best_iteration})")
+        print(f"  Fold {fold_idx}: MAE={fold_mae:.2f}s")
+        del bst_cv
+        gc.collect()
 
     cv_mean_mae = float(np.mean(cv_maes))
     cv_std_mae = float(np.std(cv_maes))
     print(f"  CV Mean MAE: {cv_mean_mae:.2f}s (+/- {cv_std_mae:.2f}s)")
 
     # ------------------------------------------------------------------
-    # 4. Retrain best config on full train set
+    # 5. Retrain best config on full trimmed train set (deterministic)
     # ------------------------------------------------------------------
-    print(f"\nRetraining best config on train split (val for early stopping)...")
+    print(f"\nDeterministic final retrain: {best_n_rounds} rounds, no early stopping...")
+    print(f"  Training on {len(y_train_trimmed):,} trimmed samples")
 
-    dtrain = xgb.DMatrix(X_train, label=y_train, enable_categorical=True)
+    dtrain = xgb.DMatrix(X_train_trimmed, label=y_train_trimmed, enable_categorical=True)
     dval = xgb.DMatrix(X_val, label=y_val, enable_categorical=True)
     dtest = xgb.DMatrix(X_test, label=y_test, enable_categorical=True)
 
-    # Use 5x the Optuna-found rounds for final retrain, letting early stopping find optimal
-    final_num_rounds = min(best_num_boost_round * 5, 3000)
     bst = xgb.train(
         best_params_full,
         dtrain,
-        num_boost_round=final_num_rounds,
+        num_boost_round=best_n_rounds,
         evals=[(dtrain, "train"), (dval, "val")],
-        early_stopping_rounds=EARLY_STOPPING_ROUNDS_FINAL,
+        # NO early_stopping_rounds -- deterministic
         verbose_eval=100,
     )
 
-    print(f"\nBest iteration: {bst.best_iteration}")
-    print(f"Best validation MAE: {bst.best_score:.2f}s")
+    print(f"\nFinal model trained: {best_n_rounds} rounds (deterministic)")
 
     # ------------------------------------------------------------------
-    # 5. Evaluate on test set
+    # 6. Evaluate on test set -- both residual and reconstructed
     # ------------------------------------------------------------------
-    y_pred = bst.predict(dtest, iteration_range=(0, bst.best_iteration + 1))
-    xgb_mae = mae(y_test, y_pred)
-    xgb_rmse = rmse(y_test, y_pred)
-    xgb_mape = mape(y_test, y_pred)
+    y_pred_residual = bst.predict(dtest)
 
-    naive_mae = mae(y_test, test_scheduled)
-    naive_rmse = rmse(y_test, test_scheduled)
-    improvement_vs_naive = (naive_mae - xgb_mae) / naive_mae * 100
+    # Residual metrics (on residual target)
+    residual_mae_val = mae(y_test, y_pred_residual)
+    residual_rmse_val = rmse(y_test, y_pred_residual)
+
+    # Reconstructed metrics: final ETA = baseline_eta + predicted_residual
+    y_pred_eta = test_baseline_eta + y_pred_residual
+    reconstructed_mae_val = mae(test_actual_seconds, y_pred_eta)
+    reconstructed_rmse_val = rmse(test_actual_seconds, y_pred_eta)
+    reconstructed_mape_val = mape(test_actual_seconds, y_pred_eta)
 
     print(f"\nTest set results:")
-    print(f"  Tuned MAE:  {xgb_mae:.1f}s")
-    print(f"  Tuned RMSE: {xgb_rmse:.1f}s")
-    print(f"  Tuned MAPE: {xgb_mape:.1f}%")
-    print(f"  Naive MAE:  {naive_mae:.1f}s")
-    print(f"  vs Naive:   {improvement_vs_naive:.1f}%")
+    print(f"  Residual MAE (on residual target):     {residual_mae_val:.1f}s")
+    print(f"  Residual RMSE (on residual target):    {residual_rmse_val:.1f}s")
+    print(f"  Reconstructed MAE (vs actual seconds): {reconstructed_mae_val:.1f}s")
+    print(f"  Reconstructed RMSE (vs actual seconds):{reconstructed_rmse_val:.1f}s")
+    print(f"  Reconstructed MAPE:                    {reconstructed_mape_val:.1f}%")
+    print(f"  v1.0 MAE: 123.1s")
+    print(f"  v1.1 vs v1.0: {'BETTER' if reconstructed_mae_val < 123.1 else 'WORSE'} ({abs(reconstructed_mae_val - 123.1):.1f}s {'improvement' if reconstructed_mae_val < 123.1 else 'regression'})")
 
     # ------------------------------------------------------------------
-    # 6. Sliced metrics
+    # 7. Sliced metrics (reconstructed)
     # ------------------------------------------------------------------
 
-    # Per-route
+    # Per-route (reconstructed)
     print(f"\n{'='*60}")
-    print("Per-route metrics:")
+    print("Per-route metrics (reconstructed):")
     print(f"{'='*60}")
     unique_routes = sorted(set(test_route_ids))
     per_route = {}
-    print(f"  {'Route':>8s}  {'N':>8s}  {'MAE':>8s}  {'RMSE':>8s}")
-    print(f"  {'-'*8}  {'-'*8}  {'-'*8}  {'-'*8}")
+    print(f"  {'Route':>8s}  {'N':>8s}  {'Recon MAE':>10s}  {'Recon RMSE':>11s}  {'Resid MAE':>10s}")
+    print(f"  {'-'*8}  {'-'*8}  {'-'*10}  {'-'*11}  {'-'*10}")
     for rid in unique_routes:
         mask = test_route_ids == rid
         n = int(mask.sum())
-        r_mae = mae(y_test[mask], y_pred[mask])
-        r_rmse = rmse(y_test[mask], y_pred[mask])
-        per_route[str(rid)] = {"mae": round(r_mae, 2), "rmse": round(r_rmse, 2), "n": n}
-        print(f"  {rid:>8d}  {n:>8d}  {r_mae:>8.1f}  {r_rmse:>8.1f}")
+        r_recon_mae = mae(test_actual_seconds[mask], y_pred_eta[mask])
+        r_recon_rmse = rmse(test_actual_seconds[mask], y_pred_eta[mask])
+        r_resid_mae = mae(y_test[mask], y_pred_residual[mask])
+        per_route[str(rid)] = {
+            "reconstructed_mae": round(r_recon_mae, 2),
+            "reconstructed_rmse": round(r_recon_rmse, 2),
+            "residual_mae": round(r_resid_mae, 2),
+            "n": n,
+        }
+        print(f"  {rid:>8d}  {n:>8d}  {r_recon_mae:>10.1f}  {r_recon_rmse:>11.1f}  {r_resid_mae:>10.1f}")
 
     # Per stops_away bucket
     print(f"\n{'='*60}")
-    print("Per stops_away bucket:")
+    print("Per stops_away bucket (reconstructed):")
     print(f"{'='*60}")
     buckets_order = ["1", "2-3", "4-6", "7+"]
     bucket_labels = np.array([stops_bucket(s) for s in test_stops_away])
     per_stops_bucket = {}
-    print(f"  {'Bucket':>8s}  {'N':>8s}  {'MAE':>8s}  {'RMSE':>8s}")
-    print(f"  {'-'*8}  {'-'*8}  {'-'*8}  {'-'*8}")
+    print(f"  {'Bucket':>8s}  {'N':>8s}  {'Recon MAE':>10s}  {'Recon RMSE':>11s}")
+    print(f"  {'-'*8}  {'-'*8}  {'-'*10}  {'-'*11}")
     for b in buckets_order:
         mask = bucket_labels == b
         n = int(mask.sum())
         if n == 0:
             continue
-        b_mae = mae(y_test[mask], y_pred[mask])
-        b_rmse = rmse(y_test[mask], y_pred[mask])
-        per_stops_bucket[b] = {"mae": round(b_mae, 2), "rmse": round(b_rmse, 2), "n": n}
-        print(f"  {b:>8s}  {n:>8d}  {b_mae:>8.1f}  {b_rmse:>8.1f}")
+        b_recon_mae = mae(test_actual_seconds[mask], y_pred_eta[mask])
+        b_recon_rmse = rmse(test_actual_seconds[mask], y_pred_eta[mask])
+        per_stops_bucket[b] = {"reconstructed_mae": round(b_recon_mae, 2), "reconstructed_rmse": round(b_recon_rmse, 2), "n": n}
+        print(f"  {b:>8s}  {n:>8d}  {b_recon_mae:>10.1f}  {b_recon_rmse:>11.1f}")
 
     # Per time-of-day bucket
     print(f"\n{'='*60}")
-    print("Per time-of-day bucket (Central Time):")
+    print("Per time-of-day bucket (reconstructed, Central Time):")
     print(f"{'='*60}")
     tod_order = ["morning", "midday", "afternoon", "evening"]
     tod_labels = np.array([tod_bucket(h) for h in test_hour_ct])
     per_tod = {}
-    print(f"  {'TOD':>12s}  {'N':>8s}  {'MAE':>8s}  {'RMSE':>8s}")
-    print(f"  {'-'*12}  {'-'*8}  {'-'*8}  {'-'*8}")
+    print(f"  {'TOD':>12s}  {'N':>8s}  {'Recon MAE':>10s}  {'Recon RMSE':>11s}")
+    print(f"  {'-'*12}  {'-'*8}  {'-'*10}  {'-'*11}")
     for t in tod_order:
         mask = tod_labels == t
         n = int(mask.sum())
         if n == 0:
             continue
-        t_mae = mae(y_test[mask], y_pred[mask])
-        t_rmse = rmse(y_test[mask], y_pred[mask])
-        per_tod[t] = {"mae": round(t_mae, 2), "rmse": round(t_rmse, 2), "n": n}
-        print(f"  {t:>12s}  {n:>8d}  {t_mae:>8.1f}  {t_rmse:>8.1f}")
+        t_recon_mae = mae(test_actual_seconds[mask], y_pred_eta[mask])
+        t_recon_rmse = rmse(test_actual_seconds[mask], y_pred_eta[mask])
+        per_tod[t] = {"reconstructed_mae": round(t_recon_mae, 2), "reconstructed_rmse": round(t_recon_rmse, 2), "n": n}
+        print(f"  {t:>12s}  {n:>8d}  {t_recon_mae:>10.1f}  {t_recon_rmse:>11.1f}")
 
     # Per distance bucket
     print(f"\n{'='*60}")
-    print("Per distance bucket:")
+    print("Per distance bucket (reconstructed):")
     print(f"{'='*60}")
     dist_order = ["<1km", "1-3km", "3-5km", "5km+"]
     dist_labels = np.array([distance_bucket(d) for d in test_distances])
     per_distance = {}
-    print(f"  {'Distance':>10s}  {'N':>8s}  {'MAE':>8s}  {'RMSE':>8s}")
-    print(f"  {'-'*10}  {'-'*8}  {'-'*8}  {'-'*8}")
+    print(f"  {'Distance':>10s}  {'N':>8s}  {'Recon MAE':>10s}  {'Recon RMSE':>11s}")
+    print(f"  {'-'*10}  {'-'*8}  {'-'*10}  {'-'*11}")
     for d in dist_order:
         mask = dist_labels == d
         n = int(mask.sum())
         if n == 0:
             continue
-        d_mae = mae(y_test[mask], y_pred[mask])
-        d_rmse = rmse(y_test[mask], y_pred[mask])
-        per_distance[d] = {"mae": round(d_mae, 2), "rmse": round(d_rmse, 2), "n": n}
-        print(f"  {d:>10s}  {n:>8d}  {d_mae:>8.1f}  {d_rmse:>8.1f}")
-
-    # ------------------------------------------------------------------
-    # 7. Load Phase 4 differentiator metrics for comparison
-    # ------------------------------------------------------------------
-    diff_metrics_path = MODELS_DIR / "differentiator_metrics.json"
-    with open(diff_metrics_path) as f:
-        diff_metrics = json.load(f)
-
-    diff_mae = diff_metrics["xgboost"]["mae"]
-    diff_rmse = diff_metrics["xgboost"]["rmse"]
-    baseline_mae = diff_metrics["comparison"]["baseline_mae"]
-
-    improvement_vs_diff = (diff_mae - xgb_mae) / diff_mae * 100
-    improvement_vs_baseline = (baseline_mae - xgb_mae) / baseline_mae * 100
+        d_recon_mae = mae(test_actual_seconds[mask], y_pred_eta[mask])
+        d_recon_rmse = rmse(test_actual_seconds[mask], y_pred_eta[mask])
+        per_distance[d] = {"reconstructed_mae": round(d_recon_mae, 2), "reconstructed_rmse": round(d_recon_rmse, 2), "n": n}
+        print(f"  {d:>10s}  {n:>8d}  {d_recon_mae:>10.1f}  {d_recon_rmse:>11.1f}")
 
     # ------------------------------------------------------------------
     # 8. Save artifacts
     # ------------------------------------------------------------------
 
     # Model
-    model_path = MODELS_DIR / "tuned_v1.ubj"
+    model_path = MODELS_DIR / "v1_1_residual.ubj"
     bst.save_model(str(model_path))
     print(f"\nSaved model: {model_path}")
 
@@ -504,43 +596,52 @@ def main():
 
     # Metrics JSON
     metrics = {
-        "model": "tuned_v1",
-        "best_iteration": int(bst.best_iteration),
+        "model": "v1_1_residual",
+        "version": "1.1",
+        "target": TARGET_COL,
         "num_features": len(FEATURE_COLS_V2),
+        "num_boost_rounds": best_n_rounds,
+        "device": DEVICE,
+        "best_objective": best_objective,
         "best_params": bp_for_json,
-        "best_num_boost_round": best_num_boost_round,
+        "best_n_rounds": best_n_rounds,
         "best_cv_mae": round(cv_mean_mae, 2),
         "cv_std_mae": round(cv_std_mae, 2),
         "cv_fold_maes": [round(m, 2) for m in cv_maes],
         "best_holdout_mae": round(best_trial.value, 2) if best_trial else None,
-        "naive_baseline": {"mae": round(naive_mae, 2), "rmse": round(naive_rmse, 2)},
-        "xgboost": {
-            "mae": round(xgb_mae, 2),
-            "rmse": round(xgb_rmse, 2),
-            "mape": round(xgb_mape, 2),
+        "reconstructed_mae": round(reconstructed_mae_val, 2),
+        "reconstructed_rmse": round(reconstructed_rmse_val, 2),
+        "reconstructed_mape": round(reconstructed_mape_val, 2),
+        "residual_mae": round(residual_mae_val, 2),
+        "residual_rmse": round(residual_rmse_val, 2),
+        "outlier_trimming": {
+            "z_threshold": Z_SCORE_THRESHOLD,
+            "n_removed": n_trimmed,
+            "pct_removed": round(pct_trimmed, 2),
+            "train_size_before": len(y_train),
+            "train_size_after": len(y_train_trimmed),
         },
-        "improvement_vs_naive_pct": round(improvement_vs_naive, 2),
+        "study_summary": {
+            "study_name": STUDY_NAME,
+            "n_trials": n_complete + n_pruned,
+            "n_pruned": n_pruned,
+            "n_complete": n_complete,
+            "n_squarederror": n_squared,
+            "n_pseudohubererror": n_huber,
+            "best_trial_number": best_trial.number if best_trial else None,
+        },
+        "comparison_v1_0": {
+            "v1_0_mae": 123.1,
+            "v1_1_reconstructed_mae": round(reconstructed_mae_val, 2),
+            "improvement_seconds": round(123.1 - reconstructed_mae_val, 2),
+            "improvement_pct": round((123.1 - reconstructed_mae_val) / 123.1 * 100, 2),
+        },
         "per_route": per_route,
         "per_stops_bucket": per_stops_bucket,
         "per_time_of_day": per_tod,
         "per_distance": per_distance,
-        "study_summary": {
-            "n_trials": n_complete + n_pruned,
-            "n_pruned": n_pruned,
-            "n_complete": n_complete,
-            "best_trial_number": best_trial.number if best_trial else None,
-        },
-        "comparison": {
-            "baseline_mae": baseline_mae,
-            "differentiator_mae": diff_mae,
-            "differentiator_rmse": diff_rmse,
-            "tuned_mae": round(xgb_mae, 2),
-            "tuned_rmse": round(xgb_rmse, 2),
-            "improvement_vs_differentiator_pct": round(improvement_vs_diff, 2),
-            "improvement_vs_baseline_pct": round(improvement_vs_baseline, 2),
-        },
     }
-    metrics_path = MODELS_DIR / "tuned_metrics.json"
+    metrics_path = MODELS_DIR / "v1_1_metrics.json"
     with open(metrics_path, "w") as f:
         json.dump(metrics, f, indent=2)
     print(f"Saved metrics: {metrics_path}")
@@ -551,35 +652,39 @@ def main():
     elapsed = time.time() - start_time
 
     print(f"\n{'='*60}")
-    print("=== PHASE 5 PLAN 01 RESULTS: OPTUNA TUNING ===")
+    print("=== PHASE 8 PLAN 02 RESULTS: v1.1 RESIDUAL TRAINING ===")
     print(f"{'='*60}")
     total_trials = n_complete + n_pruned
     print(f"  Optuna trials:       {total_trials} ({n_pruned} pruned, {n_complete} complete)")
+    print(f"  Objective split:     {n_squared} squarederror, {n_huber} pseudohubererror")
+    print(f"  Best objective:      {best_objective}")
     if best_trial:
         print(f"  Best holdout MAE:    {best_trial.value:.2f}s")
         print(f"  Best trial:          #{best_trial.number}")
     print(f"  CV Mean MAE:         {cv_mean_mae:.2f}s (+/- {cv_std_mae:.2f}s)")
+    print(f"  Final rounds:        {best_n_rounds} (deterministic)")
+    print(f"  Device:              {DEVICE}")
     print(f"  Elapsed time:        {elapsed/60:.1f} minutes")
 
-    print(f"\n  Comparison:")
-    print(f"  Differentiator MAE:  {diff_mae:.1f}s")
-    print(f"  Tuned MAE:           {xgb_mae:.1f}s")
-    print(f"  Improvement:         {improvement_vs_diff:.1f}% ({diff_mae - xgb_mae:.1f}s reduction)")
+    print(f"\n  Outlier trimming:")
+    print(f"    Z-score threshold: {Z_SCORE_THRESHOLD}")
+    print(f"    Samples removed:   {n_trimmed:,} ({pct_trimmed:.1f}%)")
+
+    print(f"\n  Key metrics:")
+    print(f"    Residual MAE:      {residual_mae_val:.1f}s")
+    print(f"    Reconstructed MAE: {reconstructed_mae_val:.1f}s")
+    print(f"    v1.0 MAE:          123.1s")
+    print(f"    v1.1 vs v1.0:      {'BETTER' if reconstructed_mae_val < 123.1 else 'WORSE'} ({abs(reconstructed_mae_val - 123.1):.1f}s)")
 
     print(f"\n  Progressive improvement chain:")
-    print(f"    Naive:              {naive_mae:.1f}s")
-    print(f"    Baseline (P3):     {baseline_mae:.1f}s ({(naive_mae - baseline_mae) / naive_mae * 100:.1f}% vs naive)")
-    print(f"    Differentiator(P4):{diff_mae:.1f}s ({(naive_mae - diff_mae) / naive_mae * 100:.1f}% vs naive)")
-    print(f"    Tuned (P5):        {xgb_mae:.1f}s ({improvement_vs_naive:.1f}% vs naive)")
-
-    # Gate check
-    if xgb_mae < diff_mae:
-        print(f"\n  PASS: Tuned MAE ({xgb_mae:.1f}s) < Differentiator MAE ({diff_mae:.1f}s)")
-    else:
-        print(f"\n  WARN: Tuned MAE ({xgb_mae:.1f}s) >= Differentiator MAE ({diff_mae:.1f}s)")
+    print(f"    Naive (schedule):  708.9s")
+    print(f"    Baseline (P3):     394.7s")
+    print(f"    Differentiator(P4):175.7s")
+    print(f"    Tuned (P5/v1.0):   123.1s")
+    print(f"    v1.1 Residual:     {reconstructed_mae_val:.1f}s")
 
     print(f"\n{'='*60}")
-    print("TUNING COMPLETE")
+    print("v1.1 TRAINING COMPLETE")
     print(f"{'='*60}")
     print(f"  Model:       {model_path}")
     print(f"  Metrics:     {metrics_path}")
