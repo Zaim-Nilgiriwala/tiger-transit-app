@@ -723,7 +723,8 @@ ROLLING_FEATURE_COLS = (
 # Phase 3 baseline features (from build_features.py)
 PHASE3_FEATURE_COLS = [
     "distance_to_target", "scheduled_time_to_target", "current_speed",
-    "route_progress", "stops_remaining", "stop_index", "lateness_now",
+    "route_progress", "stops_remaining", "stop_index",
+    # lateness_now REMOVED (zero variance -- scheduled_eta == eta in EtaSpot data)
     "minutes_since_midnight", "day_of_week", "route_id", "pattern_id",
     "precipitation_mm", "temperature_c", "passenger_load", "is_idle",
 ]
@@ -742,14 +743,21 @@ PHASE4_FEATURE_COLS = (
     ]
 )
 
-# Combined v2 feature set
-FEATURE_COLS_V2 = PHASE3_FEATURE_COLS + PHASE4_FEATURE_COLS
+# Phase 7 baseline features (from augmented parquets)
+BASELINE_FEATURE_COLS = [
+    "baseline_s2s",
+    "baseline_seg_sum",
+    "baseline_eta",
+]
+
+# Combined v2 feature set (14 phase3 + 28 phase4 + 3 baselines = 45)
+FEATURE_COLS_V2 = PHASE3_FEATURE_COLS + PHASE4_FEATURE_COLS + BASELINE_FEATURE_COLS
 
 CATEGORICAL_COLS_V2 = ["day_of_week", "route_id", "pattern_id"]
 
-TARGET_COL = "time_to_arrival_seconds"
+TARGET_COL = "residual"
 
-KEEP_EXTRA = ["stops_away", "route_id"]
+KEEP_EXTRA = ["stops_away", "route_id", "time_to_arrival_seconds", "baseline_eta"]
 
 SPLITS = ["train", "val", "test"]
 
