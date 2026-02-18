@@ -1,15 +1,21 @@
 """
 build_baselines.py - Baseline ETA computation pipeline for Tiger Transit v1.1.
 
-Computes historical baseline ETAs using a tiered fallback hierarchy, progress-
-decile destination-specific baselines, a 70/30 blend, and residual labels.
-Augments the existing train/val/test parquets with baseline_eta and residual
-columns.
+Computes historical baseline ETAs using a 4D tiered fallback hierarchy
+(elapsed + segment + is_stopped + on_time_bin), stop-to-stop averages,
+and residual labels. Augments the existing train/val/test parquets with
+baseline_eta and residual columns.
 
 Baselines computed:
   BASE-01: Stop-to-stop average lookup (3-tier fallback hierarchy)
-  BASE-02: Progress-decile destination-specific baseline (4-tier fallback)
-  BASE-03: 70/30 blend of BASE-02 and BASE-01 (seg_sum / s2s)
+  BASE-02: 4D destination-specific baseline (6-tier fallback, no day_type)
+          Tier A: (route, last, target, elapsed, segment, is_stopped, on_time_bin)
+          Tier B: (route, last, target, elapsed, segment, is_stopped)
+          Tier C: (route, last, target, elapsed, segment)
+          Tier D: (route, last, target, elapsed)
+          Tier E: (route, last, target, segment)
+          Tier F: (route, last, target)
+  BASE-03: SegSum-only (no S2S blend — SegSum dominates at every stops_away)
   BASE-04: Residual labels (time_to_arrival_seconds - baseline_eta)
   BASE-05: Diagnostic report (MAE, per-route breakdown, error distribution)
 
@@ -38,7 +44,7 @@ import pandas as pd
 DATA_DIR = Path("data/processed")
 DIAG_DIR = Path("models/diagnostics")
 
-MIN_OBS = 5
+MIN_OBS = 2
 SPLITS = ["train", "val", "test"]
 
 TOD_BUCKETS = {
@@ -71,6 +77,24 @@ def load_stop_sequences() -> pd.DataFrame:
     # Ensure route_id is plain int64 (not nullable Int64)
     ss["route_id"] = ss["route_id"].astype("int64")
     return ss
+
+
+def derive_last_stop_progress(df: pd.DataFrame, ss: pd.DataFrame) -> pd.DataFrame:
+    """Join last_stop_id against stop_sequences to get last_stop_progress.
+
+    last_stop_id is the next stop the bus is approaching.  When last_stop_id=0
+    (no stop assigned), last_stop_progress is set to NaN.
+    """
+    lookup = ss[["route_id", "stop_id", "stop_progress"]].rename(
+        columns={"stop_id": "last_stop_id", "stop_progress": "last_stop_progress"}
+    )
+    n_before = len(df)
+    df = df.merge(lookup, on=["route_id", "last_stop_id"], how="left")
+    assert len(df) == n_before, (
+        f"Row explosion on last_stop_progress merge: {n_before} -> {len(df)}"
+    )
+    # last_stop_id == 0 won't match anything → already NaN
+    return df
 
 
 # ---------------------------------------------------------------------------
@@ -253,130 +277,285 @@ def apply_s2s_fallback(df: pd.DataFrame, tier1: pd.DataFrame,
 
 
 # ---------------------------------------------------------------------------
-# BASE-02: Progress-Decile Destination-Specific Baseline
+# BASE-02: 4D Destination-Specific Baseline
 #
-# Uses (route_id, last_stop_id, target_stop_id, prog_decile, hour_ct, day_type)
-# as the lookup key. prog_decile = floor((target_stop_progress - progress) * 10)
-# clipped to [0, 9]. This captures remaining-distance awareness without needing
-# to reconstruct route paths or sum individual segments.
+# Four binning dimensions:
+#   - elapsed_decile: quantile bins of seconds since last stop event
+#   - segment_decile: normalised remaining progress within last_stop→target span
+#   - is_stopped: binary (speed == 0) — +22s systematic bias when stopped
+#   - on_time_bin: 4-bin schedule deviation (<0, 0-1, 2-5, 6+)
 #
-# Tiered fallback:
-#   Tier A: (route_id, last_stop_id, target_stop_id, prog_decile, hour_ct, day_type) median
-#   Tier B: (route_id, last_stop_id, target_stop_id, prog_decile, day_type) median  (drop hour)
-#   Tier C: (route_id, last_stop_id, target_stop_id, hour_ct, day_type) median      (drop prog)
-#   Tier D: (route_id, last_stop_id, target_stop_id, day_type) median               (broadest)
+# No day_type (99% weekday — halves cell counts for no benefit).
+# MIN_OBS=2 for maximum specificity.
+#
+# Tiered fallback (6 tiers + S2S final):
+#   Tier A: (route, last, target, elapsed, segment, is_stopped, on_time_bin)
+#   Tier B: (route, last, target, elapsed, segment, is_stopped)
+#   Tier C: (route, last, target, elapsed, segment)
+#   Tier D: (route, last, target, elapsed)
+#   Tier E: (route, last, target, segment)
+#   Tier F: (route, last, target)
 #   Final:  Fill remaining NaN from baseline_s2s
 # ---------------------------------------------------------------------------
 
 
-def _add_prog_decile(df: pd.DataFrame) -> pd.DataFrame:
-    """Add prog_decile column: floor((target_stop_progress - progress) * 10) clipped to [0, 9]."""
-    remaining_prog = df["target_stop_progress"] - df["progress"]
-    df["prog_decile"] = np.floor(remaining_prog * 10).clip(0, 9).astype(int)
+def _add_segment_decile(df: pd.DataFrame) -> pd.DataFrame:
+    """Add segment_decile column using last_stop_progress for fine-grained binning.
+
+    Normalises remaining progress by the last_stop-to-target_stop span so that
+    even 1-stop-away observations get full 0-9 decile resolution.
+
+    Fallback: rows with NaN last_stop_progress use the old route-level formula.
+    """
+    remaining = df["target_stop_progress"].values - df["progress"].values
+    span = df["target_stop_progress"].values - df["last_stop_progress"].values
+
+    # Handle circular route wrap-around
+    remaining = np.where(remaining < 0, remaining + 1.0, remaining)
+    span = np.where(span <= 0, span + 1.0, span)
+
+    # Normalize: 0 = at target, 1 = at last_stop, >1 = before last_stop
+    normalized = remaining / span
+
+    # Bin: full 0-9 resolution for buses between last_stop and target
+    # Buses before last_stop (normalized > 1) clip to decile 9
+    decile = np.floor(normalized * 10).clip(0, 9)
+
+    # Fallback for NaN last_stop_progress: use old prog_decile
+    nan_mask = df["last_stop_progress"].isna().values
+    if nan_mask.any():
+        fallback_remaining = (
+            df["target_stop_progress"].values[nan_mask]
+            - df["progress"].values[nan_mask]
+        )
+        fallback = np.floor(fallback_remaining * 10).clip(0, 9)
+        decile[nan_mask] = fallback
+
+    df["segment_decile"] = decile.astype(int)
     return df
 
 
-def build_seg_sum_lookups(train: pd.DataFrame) -> tuple:
-    """Build tiered progress-decile destination-specific lookups from training data.
+def _add_is_stopped(df: pd.DataFrame) -> pd.DataFrame:
+    """Add is_stopped column: 1 if speed == 0, else 0."""
+    df["is_stopped"] = (df["speed"] == 0).astype(int)
+    return df
 
-    Returns (tier_a, tier_b, tier_c, tier_d) DataFrames.
+
+def _add_on_time_bin(df: pd.DataFrame) -> pd.DataFrame:
+    """Add on_time_bin column: 4-bin encoding of last_stop_on_time.
+
+    Bins: <0 -> 0, 0-1 -> 1, 2-5 -> 2, 6+ -> 3.
+    NaN last_stop_on_time -> -1 (sentinel).
     """
-    train = _add_prog_decile(train)
+    ot = df["last_stop_on_time"].values.copy().astype(float)
+    nan_mask = np.isnan(ot)
+    result = np.where(ot < 0, 0, np.where(ot <= 1, 1, np.where(ot <= 5, 2, 3)))
+    result[nan_mask] = -1
+    df["on_time_bin"] = result.astype(int)
+    return df
 
-    # Tier A: (route_id, last_stop_id, target_stop_id, prog_decile, hour_ct, day_type) median
-    agg_a = train.groupby(
-        ["route_id", "last_stop_id", "target_stop_id", "prog_decile", "hour_ct", "day_type"]
+
+def _compute_elapsed_bins(train: pd.DataFrame, n_bins: int = 10) -> np.ndarray:
+    """Compute elapsed-time quantile bin edges from training data.
+
+    Returns bin_edges array of length n_bins+1 for use with np.digitize.
+    """
+    secs = (train["timestamp_ms"] - train["last_stop_time_ms"]) / 1000
+    valid = secs[secs.notna() & (secs >= 0)]
+    _, bin_edges = pd.qcut(valid, n_bins, retbins=True, duplicates="drop")
+    # Extend edges to cover all possible values
+    bin_edges[0] = 0.0
+    bin_edges[-1] = np.inf
+    return bin_edges
+
+
+def _add_elapsed_decile(df: pd.DataFrame, bin_edges: np.ndarray) -> pd.DataFrame:
+    """Add elapsed_decile column using pre-computed quantile bin edges.
+
+    elapsed_decile = quantile bin (0 to n_bins-1) of seconds since last stop.
+    Rows with missing last_stop_time_ms get elapsed_decile = -1 (sentinel).
+    """
+    secs = (df["timestamp_ms"] - df["last_stop_time_ms"]) / 1000
+    # np.digitize returns 1..n_bins; subtract 1 for 0-indexed, clip to valid range
+    n_bins = len(bin_edges) - 1
+    decile = np.digitize(secs, bin_edges, right=True).clip(1, n_bins) - 1
+    # Mark NaN / negative as -1 sentinel
+    invalid = secs.isna() | (secs < 0)
+    decile[invalid] = -1
+    df["elapsed_decile"] = decile.astype(int)
+    return df
+
+
+def build_seg_sum_lookups(train: pd.DataFrame, elapsed_bin_edges: np.ndarray) -> tuple:
+    """Build tiered elapsed+segment destination-specific lookups from training data.
+
+    4D tier hierarchy (no day_type — 99% weekday makes it useless):
+      Tier A: (route, last, target, elapsed, segment, is_stopped, on_time_bin)
+      Tier B: (route, last, target, elapsed, segment, is_stopped)
+      Tier C: (route, last, target, elapsed, segment)
+      Tier D: (route, last, target, elapsed)
+      Tier E: (route, last, target, segment)
+      Tier F: (route, last, target)
+
+    Returns (tier_a, tier_b, tier_c, tier_d, tier_e, tier_f) DataFrames.
+    """
+    train = _add_segment_decile(train)
+    train = _add_elapsed_decile(train, elapsed_bin_edges)
+    train = _add_is_stopped(train)
+    train = _add_on_time_bin(train)
+
+    # Only use rows with valid elapsed_decile for tiers A-D
+    valid_elapsed = train["elapsed_decile"] >= 0
+
+    # Tier A: most specific — all 4 dimensions
+    agg_a = train[valid_elapsed].groupby(
+        ["route_id", "last_stop_id", "target_stop_id",
+         "elapsed_decile", "segment_decile", "is_stopped", "on_time_bin"]
     ).agg(
         baseline_seg_sum=("time_to_arrival_seconds", "median"),
         _count=("time_to_arrival_seconds", "count"),
     ).reset_index()
     tier_a = agg_a[agg_a["_count"] >= MIN_OBS].drop(columns=["_count"])
-    print(f"  Tier A (route, last, target, decile, hour, day): {len(tier_a):,} combos")
+    print(f"  Tier A (route, last, target, elapsed, segment, stopped, ot): {len(tier_a):,} combos")
 
-    # Tier B: (route_id, last_stop_id, target_stop_id, prog_decile, day_type) median (drop hour)
-    agg_b = train.groupby(
-        ["route_id", "last_stop_id", "target_stop_id", "prog_decile", "day_type"]
+    # Tier B: drop on_time_bin
+    agg_b = train[valid_elapsed].groupby(
+        ["route_id", "last_stop_id", "target_stop_id",
+         "elapsed_decile", "segment_decile", "is_stopped"]
     ).agg(
         _seg_b=("time_to_arrival_seconds", "median"),
         _count=("time_to_arrival_seconds", "count"),
     ).reset_index()
     tier_b = agg_b[agg_b["_count"] >= MIN_OBS].drop(columns=["_count"])
-    print(f"  Tier B (route, last, target, decile, day):       {len(tier_b):,} combos")
+    print(f"  Tier B (route, last, target, elapsed, segment, stopped):     {len(tier_b):,} combos")
 
-    # Tier C: (route_id, last_stop_id, target_stop_id, hour_ct, day_type) median (drop prog)
-    agg_c = train.groupby(
-        ["route_id", "last_stop_id", "target_stop_id", "hour_ct", "day_type"]
+    # Tier C: drop is_stopped
+    agg_c = train[valid_elapsed].groupby(
+        ["route_id", "last_stop_id", "target_stop_id",
+         "elapsed_decile", "segment_decile"]
     ).agg(
         _seg_c=("time_to_arrival_seconds", "median"),
         _count=("time_to_arrival_seconds", "count"),
     ).reset_index()
     tier_c = agg_c[agg_c["_count"] >= MIN_OBS].drop(columns=["_count"])
-    print(f"  Tier C (route, last, target, hour, day):         {len(tier_c):,} combos")
+    print(f"  Tier C (route, last, target, elapsed, segment):              {len(tier_c):,} combos")
 
-    # Tier D: (route_id, last_stop_id, target_stop_id, day_type) median (broadest)
-    agg_d = train.groupby(
-        ["route_id", "last_stop_id", "target_stop_id", "day_type"]
+    # Tier D: elapsed only
+    agg_d = train[valid_elapsed].groupby(
+        ["route_id", "last_stop_id", "target_stop_id", "elapsed_decile"]
     ).agg(
         _seg_d=("time_to_arrival_seconds", "median"),
         _count=("time_to_arrival_seconds", "count"),
     ).reset_index()
     tier_d = agg_d[agg_d["_count"] >= MIN_OBS].drop(columns=["_count"])
-    print(f"  Tier D (route, last, target, day):               {len(tier_d):,} combos")
+    print(f"  Tier D (route, last, target, elapsed):                       {len(tier_d):,} combos")
 
-    return tier_a, tier_b, tier_c, tier_d
+    # Tier E: segment only (fallback for missing elapsed)
+    agg_e = train.groupby(
+        ["route_id", "last_stop_id", "target_stop_id", "segment_decile"]
+    ).agg(
+        _seg_e=("time_to_arrival_seconds", "median"),
+        _count=("time_to_arrival_seconds", "count"),
+    ).reset_index()
+    tier_e = agg_e[agg_e["_count"] >= MIN_OBS].drop(columns=["_count"])
+    print(f"  Tier E (route, last, target, segment):                       {len(tier_e):,} combos")
+
+    # Tier F: broadest — just route + stops
+    agg_f = train.groupby(
+        ["route_id", "last_stop_id", "target_stop_id"]
+    ).agg(
+        _seg_f=("time_to_arrival_seconds", "median"),
+        _count=("time_to_arrival_seconds", "count"),
+    ).reset_index()
+    tier_f = agg_f[agg_f["_count"] >= MIN_OBS].drop(columns=["_count"])
+    print(f"  Tier F (route, last, target):                                {len(tier_f):,} combos")
+
+    return tier_a, tier_b, tier_c, tier_d, tier_e, tier_f
 
 
 def apply_seg_sum_fallback(df: pd.DataFrame, tier_a: pd.DataFrame,
                            tier_b: pd.DataFrame, tier_c: pd.DataFrame,
-                           tier_d: pd.DataFrame,
+                           tier_d: pd.DataFrame, tier_e: pd.DataFrame,
+                           tier_f: pd.DataFrame,
+                           elapsed_bin_edges: np.ndarray,
                            split_name: str) -> pd.DataFrame:
-    """Apply progress-decile tiered fallback to produce baseline_seg_sum column."""
+    """Apply 6-tier 4D fallback to produce baseline_seg_sum column."""
     n_before = len(df)
 
-    # Add prog_decile
-    df = _add_prog_decile(df)
+    # Add all required columns
+    df = _add_segment_decile(df)
+    df = _add_elapsed_decile(df, elapsed_bin_edges)
+    df = _add_is_stopped(df)
+    df = _add_on_time_bin(df)
 
-    # --- Tier A merge ---
+    # --- Tier A: (route, last, target, elapsed, segment, is_stopped, on_time_bin) ---
     df = df.merge(
         tier_a,
-        on=["route_id", "last_stop_id", "target_stop_id", "prog_decile", "hour_ct", "day_type"],
+        on=["route_id", "last_stop_id", "target_stop_id",
+            "elapsed_decile", "segment_decile", "is_stopped", "on_time_bin"],
         how="left",
     )
     assert len(df) == n_before, f"Seg Tier A merge explosion: {n_before} -> {len(df)}"
     ta_filled = df["baseline_seg_sum"].notna().sum()
 
-    # --- Tier B fill (drop hour) ---
+    # --- Tier B: drop on_time_bin ---
     mask_b = df["baseline_seg_sum"].isna()
     if mask_b.any():
-        b_merge = df.loc[mask_b, ["route_id", "last_stop_id", "target_stop_id", "prog_decile", "day_type"]].merge(
-            tier_b, on=["route_id", "last_stop_id", "target_stop_id", "prog_decile", "day_type"], how="left"
+        b_merge = df.loc[mask_b, ["route_id", "last_stop_id", "target_stop_id",
+                                   "elapsed_decile", "segment_decile", "is_stopped"]].merge(
+            tier_b, on=["route_id", "last_stop_id", "target_stop_id",
+                        "elapsed_decile", "segment_decile", "is_stopped"], how="left"
         )
         df.loc[mask_b, "baseline_seg_sum"] = b_merge["_seg_b"].values
     tb_filled = df["baseline_seg_sum"].notna().sum() - ta_filled
 
-    # --- Tier C fill (drop prog_decile) ---
+    # --- Tier C: drop is_stopped ---
     mask_c = df["baseline_seg_sum"].isna()
     if mask_c.any():
-        c_merge = df.loc[mask_c, ["route_id", "last_stop_id", "target_stop_id", "hour_ct", "day_type"]].merge(
-            tier_c, on=["route_id", "last_stop_id", "target_stop_id", "hour_ct", "day_type"], how="left"
+        c_merge = df.loc[mask_c, ["route_id", "last_stop_id", "target_stop_id",
+                                   "elapsed_decile", "segment_decile"]].merge(
+            tier_c, on=["route_id", "last_stop_id", "target_stop_id",
+                        "elapsed_decile", "segment_decile"], how="left"
         )
         df.loc[mask_c, "baseline_seg_sum"] = c_merge["_seg_c"].values
     tc_filled = df["baseline_seg_sum"].notna().sum() - ta_filled - tb_filled
 
-    # --- Tier D fill (broadest: route + last + target + day_type) ---
+    # --- Tier D: elapsed only ---
     mask_d = df["baseline_seg_sum"].isna()
     if mask_d.any():
-        d_merge = df.loc[mask_d, ["route_id", "last_stop_id", "target_stop_id", "day_type"]].merge(
-            tier_d, on=["route_id", "last_stop_id", "target_stop_id", "day_type"], how="left"
+        d_merge = df.loc[mask_d, ["route_id", "last_stop_id", "target_stop_id",
+                                   "elapsed_decile"]].merge(
+            tier_d, on=["route_id", "last_stop_id", "target_stop_id",
+                        "elapsed_decile"], how="left"
         )
         df.loc[mask_d, "baseline_seg_sum"] = d_merge["_seg_d"].values
     td_filled = df["baseline_seg_sum"].notna().sum() - ta_filled - tb_filled - tc_filled
+
+    # --- Tier E: segment only ---
+    mask_e = df["baseline_seg_sum"].isna()
+    if mask_e.any():
+        e_merge = df.loc[mask_e, ["route_id", "last_stop_id", "target_stop_id",
+                                   "segment_decile"]].merge(
+            tier_e, on=["route_id", "last_stop_id", "target_stop_id",
+                        "segment_decile"], how="left"
+        )
+        df.loc[mask_e, "baseline_seg_sum"] = e_merge["_seg_e"].values
+    te_filled = df["baseline_seg_sum"].notna().sum() - ta_filled - tb_filled - tc_filled - td_filled
+
+    # --- Tier F: broadest (route + stops only) ---
+    mask_f = df["baseline_seg_sum"].isna()
+    if mask_f.any():
+        f_merge = df.loc[mask_f, ["route_id", "last_stop_id", "target_stop_id"]].merge(
+            tier_f, on=["route_id", "last_stop_id", "target_stop_id"], how="left"
+        )
+        df.loc[mask_f, "baseline_seg_sum"] = f_merge["_seg_f"].values
+    tf_filled = df["baseline_seg_sum"].notna().sum() - ta_filled - tb_filled - tc_filled - td_filled - te_filled
 
     # --- Final fallback: fill from baseline_s2s ---
     mask_final = df["baseline_seg_sum"].isna()
     if mask_final.any() and "baseline_s2s" in df.columns:
         df.loc[mask_final, "baseline_seg_sum"] = df.loc[mask_final, "baseline_s2s"]
-    tf_filled = df["baseline_seg_sum"].notna().sum() - ta_filled - tb_filled - tc_filled - td_filled
+    ts2s_filled = df["baseline_seg_sum"].notna().sum() - ta_filled - tb_filled - tc_filled - td_filled - te_filled - tf_filled
 
     still_nan = df["baseline_seg_sum"].isna().sum()
     total = len(df)
@@ -386,11 +565,14 @@ def apply_seg_sum_fallback(df: pd.DataFrame, tier_a: pd.DataFrame,
     print(f"    Tier B: {tb_filled:,} ({tb_filled/total*100:.1f}%)")
     print(f"    Tier C: {tc_filled:,} ({tc_filled/total*100:.1f}%)")
     print(f"    Tier D: {td_filled:,} ({td_filled/total*100:.1f}%)")
-    print(f"    S2S fallback: {tf_filled:,} ({tf_filled/total*100:.2f}%)")
+    print(f"    Tier E: {te_filled:,} ({te_filled/total*100:.1f}%)")
+    print(f"    Tier F: {tf_filled:,} ({tf_filled/total*100:.1f}%)")
+    print(f"    S2S fallback: {ts2s_filled:,} ({ts2s_filled/total*100:.2f}%)")
     print(f"    Still NaN: {still_nan:,} ({still_nan/total*100:.2f}%)")
 
-    # Drop temp column
-    df.drop(columns=["prog_decile"], inplace=True)
+    # Drop temp columns
+    df.drop(columns=["segment_decile", "elapsed_decile", "is_stopped", "on_time_bin"],
+            inplace=True)
 
     return df
 
@@ -401,24 +583,12 @@ def apply_seg_sum_fallback(df: pd.DataFrame, tier_a: pd.DataFrame,
 
 
 def blend_baselines(df: pd.DataFrame) -> pd.DataFrame:
-    """70/30 blend of segment-sum and s2s baselines.
+    """Set baseline_eta to SegSum only (no S2S blend).
 
-    Weights: 0.7 * seg_sum + 0.3 * s2s (seg_sum is more accurate after
-    progress-decile upgrade). Where one is NaN: use the non-NaN one.
+    Blending with S2S always hurts — SegSum dominates at every stops_away value.
+    baseline_s2s is kept as a separate column for the model to use as a feature.
     """
-    s2s = df["baseline_s2s"].values
-    seg = df["baseline_seg_sum"].values
-
-    both_valid = np.isfinite(s2s) & np.isfinite(seg)
-    s2s_only = np.isfinite(s2s) & ~np.isfinite(seg)
-    seg_only = ~np.isfinite(s2s) & np.isfinite(seg)
-
-    blend = np.full(len(df), np.nan)
-    blend[both_valid] = 0.7 * seg[both_valid] + 0.3 * s2s[both_valid]
-    blend[s2s_only] = s2s[s2s_only]
-    blend[seg_only] = seg[seg_only]
-
-    df["baseline_eta"] = blend
+    df["baseline_eta"] = df["baseline_seg_sum"].copy()
     return df
 
 
@@ -450,8 +620,8 @@ def print_diagnostics(splits_data: dict, ss: pd.DataFrame):
     # a. Overall MAE for all three methods
     print("\n--- Overall MAE on Test Set ---")
     for method, col in [("S2S-only", "baseline_s2s"),
-                        ("Seg-sum (prog-decile)", "baseline_seg_sum"),
-                        ("Blended (70/30)", "baseline_eta")]:
+                        ("SegSum-4D", "baseline_seg_sum"),
+                        ("baseline_eta (=SegSum)", "baseline_eta")]:
         valid = test[col].notna() & test["time_to_arrival_seconds"].notna()
         if valid.sum() > 0:
             mae = (test.loc[valid, "time_to_arrival_seconds"] - test.loc[valid, col]).abs().mean()
@@ -595,22 +765,38 @@ def main():
     train = pd.read_parquet(train_path)
     print(f"  {len(train):,} rows")
 
+    # Drop old baseline columns from previous runs (if present)
+    old_cols = ["baseline_s2s", "baseline_seg_sum", "baseline_eta",
+                "residual", "last_stop_progress"]
+    existing_old = [c for c in old_cols if c in train.columns]
+    if existing_old:
+        train.drop(columns=existing_old, inplace=True)
+        print(f"  Dropped old columns: {existing_old}")
+
     # Add derived columns
     train = add_ct_hour(train)
     train["day_type"] = train["is_weekday"].astype(int)
+    train = derive_last_stop_progress(train, ss)
+    lsp_nan = train["last_stop_progress"].isna().sum()
+    print(f"  last_stop_progress NaN: {lsp_nan:,} ({lsp_nan/len(train)*100:.1f}%)")
 
     # --- BASE-01: S2S Lookup Tables ---
     print("\n--- BASE-01: Building S2S Lookup Tables ---")
     tier1 = build_tier1_lookup(train)
-    print(f"  Tier 1 combos (>=5 obs): {len(tier1):,}")
+    print(f"  Tier 1 combos (>={MIN_OBS} obs): {len(tier1):,}")
     tier2 = build_tier2_lookup(train)
-    print(f"  Tier 2 combos (>=5 obs): {len(tier2):,}")
+    print(f"  Tier 2 combos (>={MIN_OBS} obs): {len(tier2):,}")
     tier3 = build_tier3_lookup(train, ss)
-    print(f"  Tier 3 combos (>=5 obs): {len(tier3):,}")
+    print(f"  Tier 3 combos (>={MIN_OBS} obs): {len(tier3):,}")
 
-    # --- BASE-02: Progress-Decile Destination-Specific Lookup Tables ---
-    print("\n--- BASE-02: Building Progress-Decile Lookups ---")
-    seg_a, seg_b, seg_c, seg_d = build_seg_sum_lookups(train)
+    # --- Elapsed-time decile bins ---
+    print("\n--- Computing elapsed-time decile bins ---")
+    elapsed_bin_edges = _compute_elapsed_bins(train)
+    print(f"  Bin edges: {np.round(elapsed_bin_edges, 1)}")
+
+    # --- BASE-02: 4D Destination-Specific Lookup Tables ---
+    print("\n--- BASE-02: Building 4D Lookups ---")
+    seg_a, seg_b, seg_c, seg_d, seg_e, seg_f = build_seg_sum_lookups(train, elapsed_bin_edges)
 
     # --- Process all splits ---
     print("\n" + "=" * 60)
@@ -630,7 +816,8 @@ def main():
         print(f"  Loaded {n_original:,} rows")
 
         # Drop old baseline columns from previous runs (if present)
-        old_cols = ["baseline_s2s", "baseline_seg_sum", "baseline_eta", "residual"]
+        old_cols = ["baseline_s2s", "baseline_seg_sum", "baseline_eta",
+                    "residual", "last_stop_progress"]
         existing_old = [c for c in old_cols if c in df.columns]
         if existing_old:
             df.drop(columns=existing_old, inplace=True)
@@ -639,6 +826,7 @@ def main():
         # Add derived columns
         df = add_ct_hour(df)
         df["day_type"] = df["is_weekday"].astype(int)
+        df = derive_last_stop_progress(df, ss)
 
         # Apply S2S fallback
         print("\n  Applying S2S fallback hierarchy...")
@@ -647,15 +835,15 @@ def main():
             f"Row count changed after S2S: {n_original} -> {len(df)}"
         )
 
-        # Apply segment-sum fallback (progress-decile, 4-tier)
-        print("\n  Applying progress-decile fallback hierarchy...")
-        df = apply_seg_sum_fallback(df, seg_a, seg_b, seg_c, seg_d, split_name)
+        # Apply segment-sum fallback (4D, 6-tier)
+        print("\n  Applying 4D fallback hierarchy...")
+        df = apply_seg_sum_fallback(df, seg_a, seg_b, seg_c, seg_d, seg_e, seg_f, elapsed_bin_edges, split_name)
         assert len(df) == n_original, (
             f"Row count changed after seg-sum: {n_original} -> {len(df)}"
         )
 
-        # Blend
-        print("\n  Blending baselines (70/30 seg/s2s)...")
+        # Blend (SegSum-only, no S2S blend)
+        print("\n  Setting baseline_eta = SegSum...")
         df = blend_baselines(df)
         be_nan = df["baseline_eta"].isna().sum()
         print(
@@ -693,9 +881,10 @@ def main():
         original["baseline_eta"] = df["baseline_eta"].values
         original["residual"] = df["residual"].values
 
-        # Also store intermediate baselines for diagnostic reference
+        # Also store intermediate baselines and last_stop_progress
         original["baseline_s2s"] = df["baseline_s2s"].values
         original["baseline_seg_sum"] = df["baseline_seg_sum"].values
+        original["last_stop_progress"] = df["last_stop_progress"].values
 
         assert len(original) == n_original, (
             f"Row count changed during write: {n_original} -> {len(original)}"
@@ -704,7 +893,7 @@ def main():
         original.to_parquet(path)
         print(
             f"  Wrote {path} ({n_original:,} rows, "
-            f"new cols: baseline_eta, residual, baseline_s2s, baseline_seg_sum)"
+            f"new cols: baseline_eta, residual, baseline_s2s, baseline_seg_sum, last_stop_progress)"
         )
 
     # --- Final verification ---
