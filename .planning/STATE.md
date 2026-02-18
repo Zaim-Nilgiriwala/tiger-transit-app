@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Accurate arrival time predictions for all remaining stops on a bus route, accounting for timepoint holds, schedule adherence, and real-world conditions.
-**Current focus:** Baseline rebuild complete -- v1.1 retrained with progress-decile baselines
+**Current focus:** PROJECT COMPLETE -- v1.1 evaluation delivered
 
 ## Current Position
 
-Phase: 8 of 9 (Training Adaptation)
-Plan: 2 of 2 in current phase (+ baseline rebuild)
-Status: Baseline rebuild complete, model retrained
-Last activity: 2026-02-17 -- Rebuilt segment-sum baseline with progress-decile lookup, retrained v1.1
+Phase: 9 of 9 (Evaluation and Comparison)
+Plan: 1 of 1 in current phase
+Status: Complete
+Last activity: 2026-02-17 -- Completed 09-01-PLAN.md (v1.1 evaluation report)
 
-Progress: [###############     ] 75% (3/4 plans)
+Progress: [####################] 100% (17/18 plans complete, all phases done)
 
 ## Model Performance Tracker
 
@@ -31,7 +31,9 @@ Progress: [###############     ] 75% (3/4 plans)
 | v1.1 Residual-old (P8) | 102.8s | 208.9s | 85.5% | 45 | 656 |
 | v1.1 SegSum-new (prog-decile) | 109.4s | -- | 84.6% | 0 | -- |
 | v1.1 Blended-new (70/30) | 111.1s | -- | 84.3% | 0 | -- |
-| **v1.1 Residual (retrained)** | **94.6s** | **204.6s** | **86.7%** | **45** | **274** |
+| v1.1 Residual (prog-decile) | 94.6s | 204.6s | 86.7% | 45 | 274 |
+| v1.1 SegSum-4D (baseline) | 91.9s | -- | 87.0% | 0 | -- |
+| **v1.1 Residual (4D baselines)** | **85.6s** | **186.8s** | **87.9%** | **45** | **274** |
 
 ## Accumulated Context
 
@@ -53,11 +55,12 @@ Phase 7 decisions:
 
 Baseline rebuild decisions:
 - Replaced stops_away lookup (254.3s MAE) with progress-decile destination-specific lookup (109.4s MAE)
-- New key: (route_id, last_stop_id, target_stop_id, prog_decile, hour_ct, day_type)
-- prog_decile = floor((target_stop_progress - progress) * 10) clipped to [0, 9]
-- 4-tier fallback: A (full key, 93.3%), B (drop hour), C (drop prog), D (broadest), then S2S fallback
-- Changed blend from 50/50 to 70/30 (seg/s2s) since seg_sum now more accurate
-- Baseline rebuild alone dropped model MAE from 102.8s to 94.0s (with old hyperparams)
+- Then replaced prog-decile with 4D tiered approach: (elapsed_decile, segment_decile, is_stopped, on_time_bin)
+- 4D SegSum baseline MAE: 91.9s (best baseline yet); S2S: 129.0s
+- baseline_eta = SegSum only (no S2S blend -- SegSum dominates at every stops_away)
+- 6-tier fallback: A (all 4 dims) through F (route+stops only), then S2S final fallback
+- No day_type (99% weekday -- halves cell counts for no benefit)
+- Model retrained on 4D baselines: 85.6s MAE (was 94.6s on prog-decile baselines)
 
 Phase 8 decisions:
 - lateness_now removed from PHASE3_FEATURE_COLS (14 features, down from 15)
@@ -69,13 +72,19 @@ Phase 8 decisions:
 - Deterministic final model: 274 rounds (best_iteration + 1), no early stopping
 - Z-score 2.5 trimming removes 1.4% of training data (16,444 samples)
 
+Phase 9 decisions:
+- All v1.1 metrics computed live from model + test data (no saved JSON workarounds)
+- Self-contained HTML report with base64 embedded charts (no external dependencies)
+- v1.0 DMatrix reconstructed with lateness_now=0.0 for feature compatibility
+
 ### Blockers/Concerns
 
-- Route 27 still has only 96 test samples and highest MAE (399.2s) -- sparse data issue persists
-- Optuna retune (94.6s) didn't improve over old-params run (94.0s) -- old hyperparams were already good for this data shape
+- Route 27 still has only 96 test samples and highest MAE (386.5s) -- sparse data issue persists
+- Data sync issue RESOLVED: model trained on same 4D baselines in featured_v2 parquets
+- v1.1 evaluation complete: 85.6s MAE, 30.5% improvement over v1.0
 
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Rebuilt baselines with progress-decile lookup, retrained v1.1 (94.6s MAE)
+Stopped at: Completed 09-01-PLAN.md -- Project complete
 Resume file: None
