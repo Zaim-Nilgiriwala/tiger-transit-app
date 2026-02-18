@@ -23,11 +23,11 @@
 
 ### Evaluation
 
-- [ ] **EVAL-01**: Reconstruct final predictions (baseline_eta + predicted_residual) and compute MAE/RMSE on test set
-- [ ] **EVAL-02**: Side-by-side comparison: v1.1 final MAE vs v1.0 123.1s MAE (the success metric -- must be lower)
-- [ ] **EVAL-03**: SHAP feature importance analysis showing expected shift from spatial to real-time condition features
-- [ ] **EVAL-04**: Per-route comparison table (v1.1 vs v1.0 MAE per route, wins/losses identified)
-- [ ] **EVAL-05**: Residual distribution analysis (histogram, QQ plot, skew/kurtosis) to document target distribution and inform loss function choice
+- [x] **EVAL-01**: Reconstruct final predictions (baseline_eta + predicted_residual) and compute MAE/RMSE on test set
+- [x] **EVAL-02**: Side-by-side comparison: v1.1 final MAE vs v1.0 123.1s MAE (the success metric -- must be lower)
+- [x] **EVAL-03**: SHAP feature importance analysis showing expected shift from spatial to real-time condition features
+- [x] **EVAL-04**: Per-route comparison table (v1.1 vs v1.0 MAE per route, wins/losses identified)
+- [x] **EVAL-05**: Residual distribution analysis (histogram, QQ plot, skew/kurtosis) to document target distribution and inform loss function choice
 
 ## Future Requirements
 
@@ -64,11 +64,11 @@
 | TRAIN-03 | Phase 8 | Complete |
 | TRAIN-04 | Phase 8 | Complete |
 | TRAIN-05 | Phase 8 | Complete |
-| EVAL-01 | Phase 9 | Pending |
-| EVAL-02 | Phase 9 | Pending |
-| EVAL-03 | Phase 9 | Pending |
-| EVAL-04 | Phase 9 | Pending |
-| EVAL-05 | Phase 9 | Pending |
+| EVAL-01 | Phase 9 | Complete |
+| EVAL-02 | Phase 9 | Complete |
+| EVAL-03 | Phase 9 | Complete |
+| EVAL-04 | Phase 9 | Complete |
+| EVAL-05 | Phase 9 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 15 total
@@ -77,4 +77,4 @@
 
 ---
 *Requirements defined: 2026-02-11*
-*Last updated: 2026-02-17 after Phase 8 completion*
+*Last updated: 2026-02-17 after Phase 9 completion*
