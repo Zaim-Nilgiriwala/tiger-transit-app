@@ -64,10 +64,10 @@ Plans:
   3. Per-route comparison table identifies which routes improved and which regressed, with majority of routes showing improvement
   4. SHAP analysis shows real-time condition features (speed_mean_*, speed_ratio) gaining importance relative to spatial features (stop_index, distance_to_target) compared to v1.0
   5. Residual distribution analysis (histogram, skew, kurtosis) documents the target distribution characteristics for informing future loss function decisions
-**Plans**: TBD (1-2 plans)
+**Plans**: 1 plan
 
 Plans:
-- [ ] 09-01: Reconstruct predictions, compare to v1.0, SHAP analysis, per-route breakdown, residual diagnostics
+- [ ] 09-01-PLAN.md -- Build v1.1 evaluation script with self-contained HTML report (headline comparison, per-route table, SHAP analysis, residual diagnostics)
 
 ## Progress
 
