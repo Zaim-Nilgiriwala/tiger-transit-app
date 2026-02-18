@@ -1,14 +1,15 @@
 """
 build_baselines.py - Baseline ETA computation pipeline for Tiger Transit v1.1.
 
-Computes historical baseline ETAs using a tiered fallback hierarchy, segment-
-median-sum baselines, a 50/50 blend, and residual labels. Augments the existing
-train/val/test parquets with baseline_eta and residual columns.
+Computes historical baseline ETAs using a tiered fallback hierarchy, progress-
+decile destination-specific baselines, a 70/30 blend, and residual labels.
+Augments the existing train/val/test parquets with baseline_eta and residual
+columns.
 
 Baselines computed:
   BASE-01: Stop-to-stop average lookup (3-tier fallback hierarchy)
-  BASE-02: Segment-median-sum baseline (stop-distance median with tiered fallback)
-  BASE-03: 50/50 blend of BASE-01 and BASE-02
+  BASE-02: Progress-decile destination-specific baseline (4-tier fallback)
+  BASE-03: 70/30 blend of BASE-02 and BASE-01 (seg_sum / s2s)
   BASE-04: Residual labels (time_to_arrival_seconds - baseline_eta)
   BASE-05: Diagnostic report (MAE, per-route breakdown, error distribution)
 
@@ -252,90 +253,130 @@ def apply_s2s_fallback(df: pd.DataFrame, tier1: pd.DataFrame,
 
 
 # ---------------------------------------------------------------------------
-# BASE-02: Segment-Median-Sum Baseline
+# BASE-02: Progress-Decile Destination-Specific Baseline
 #
-# Uses (route_id, last_stop_id, stops_away, hour_ct, day_type) as the lookup
-# key. This captures a DIFFERENT aggregation axis than S2S (which uses
-# target_stop_id instead of stops_away). The median-based estimate provides
-# a complementary signal to the mean-based S2S baseline.
+# Uses (route_id, last_stop_id, target_stop_id, prog_decile, hour_ct, day_type)
+# as the lookup key. prog_decile = floor((target_stop_progress - progress) * 10)
+# clipped to [0, 9]. This captures remaining-distance awareness without needing
+# to reconstruct route paths or sum individual segments.
 #
 # Tiered fallback:
-#   Tier A: (route_id, last_stop_id, stops_away, hour_ct, day_type) median
-#   Tier B: (route_id, last_stop_id, stops_away, day_type) median
-#   Tier C: (route_id, stops_away, hour_ct, day_type) median
+#   Tier A: (route_id, last_stop_id, target_stop_id, prog_decile, hour_ct, day_type) median
+#   Tier B: (route_id, last_stop_id, target_stop_id, prog_decile, day_type) median  (drop hour)
+#   Tier C: (route_id, last_stop_id, target_stop_id, hour_ct, day_type) median      (drop prog)
+#   Tier D: (route_id, last_stop_id, target_stop_id, day_type) median               (broadest)
+#   Final:  Fill remaining NaN from baseline_s2s
 # ---------------------------------------------------------------------------
 
 
-def build_seg_sum_lookups(train: pd.DataFrame) -> tuple:
-    """Build tiered segment-sum lookups from training data.
+def _add_prog_decile(df: pd.DataFrame) -> pd.DataFrame:
+    """Add prog_decile column: floor((target_stop_progress - progress) * 10) clipped to [0, 9]."""
+    remaining_prog = df["target_stop_progress"] - df["progress"]
+    df["prog_decile"] = np.floor(remaining_prog * 10).clip(0, 9).astype(int)
+    return df
 
-    Returns (tier_a, tier_b, tier_c) DataFrames.
+
+def build_seg_sum_lookups(train: pd.DataFrame) -> tuple:
+    """Build tiered progress-decile destination-specific lookups from training data.
+
+    Returns (tier_a, tier_b, tier_c, tier_d) DataFrames.
     """
-    # Tier A: (route_id, last_stop_id, stops_away, hour_ct, day_type) median
+    train = _add_prog_decile(train)
+
+    # Tier A: (route_id, last_stop_id, target_stop_id, prog_decile, hour_ct, day_type) median
     agg_a = train.groupby(
-        ["route_id", "last_stop_id", "stops_away", "hour_ct", "day_type"]
+        ["route_id", "last_stop_id", "target_stop_id", "prog_decile", "hour_ct", "day_type"]
     ).agg(
         baseline_seg_sum=("time_to_arrival_seconds", "median"),
         _count=("time_to_arrival_seconds", "count"),
     ).reset_index()
     tier_a = agg_a[agg_a["_count"] >= MIN_OBS].drop(columns=["_count"])
-    print(f"  Tier A (route, last_stop, stops_away, hour, day): {len(tier_a):,} combos")
+    print(f"  Tier A (route, last, target, decile, hour, day): {len(tier_a):,} combos")
 
-    # Tier B: (route_id, last_stop_id, stops_away, day_type) median
+    # Tier B: (route_id, last_stop_id, target_stop_id, prog_decile, day_type) median (drop hour)
     agg_b = train.groupby(
-        ["route_id", "last_stop_id", "stops_away", "day_type"]
+        ["route_id", "last_stop_id", "target_stop_id", "prog_decile", "day_type"]
     ).agg(
         _seg_b=("time_to_arrival_seconds", "median"),
         _count=("time_to_arrival_seconds", "count"),
     ).reset_index()
     tier_b = agg_b[agg_b["_count"] >= MIN_OBS].drop(columns=["_count"])
-    print(f"  Tier B (route, last_stop, stops_away, day):      {len(tier_b):,} combos")
+    print(f"  Tier B (route, last, target, decile, day):       {len(tier_b):,} combos")
 
-    # Tier C: (route_id, stops_away, hour_ct, day_type) median
+    # Tier C: (route_id, last_stop_id, target_stop_id, hour_ct, day_type) median (drop prog)
     agg_c = train.groupby(
-        ["route_id", "stops_away", "hour_ct", "day_type"]
+        ["route_id", "last_stop_id", "target_stop_id", "hour_ct", "day_type"]
     ).agg(
         _seg_c=("time_to_arrival_seconds", "median"),
         _count=("time_to_arrival_seconds", "count"),
     ).reset_index()
     tier_c = agg_c[agg_c["_count"] >= MIN_OBS].drop(columns=["_count"])
-    print(f"  Tier C (route, stops_away, hour, day):           {len(tier_c):,} combos")
+    print(f"  Tier C (route, last, target, hour, day):         {len(tier_c):,} combos")
 
-    return tier_a, tier_b, tier_c
+    # Tier D: (route_id, last_stop_id, target_stop_id, day_type) median (broadest)
+    agg_d = train.groupby(
+        ["route_id", "last_stop_id", "target_stop_id", "day_type"]
+    ).agg(
+        _seg_d=("time_to_arrival_seconds", "median"),
+        _count=("time_to_arrival_seconds", "count"),
+    ).reset_index()
+    tier_d = agg_d[agg_d["_count"] >= MIN_OBS].drop(columns=["_count"])
+    print(f"  Tier D (route, last, target, day):               {len(tier_d):,} combos")
+
+    return tier_a, tier_b, tier_c, tier_d
 
 
 def apply_seg_sum_fallback(df: pd.DataFrame, tier_a: pd.DataFrame,
                            tier_b: pd.DataFrame, tier_c: pd.DataFrame,
+                           tier_d: pd.DataFrame,
                            split_name: str) -> pd.DataFrame:
-    """Apply segment-sum tiered fallback to produce baseline_seg_sum column."""
+    """Apply progress-decile tiered fallback to produce baseline_seg_sum column."""
     n_before = len(df)
+
+    # Add prog_decile
+    df = _add_prog_decile(df)
 
     # --- Tier A merge ---
     df = df.merge(
         tier_a,
-        on=["route_id", "last_stop_id", "stops_away", "hour_ct", "day_type"],
+        on=["route_id", "last_stop_id", "target_stop_id", "prog_decile", "hour_ct", "day_type"],
         how="left",
     )
     assert len(df) == n_before, f"Seg Tier A merge explosion: {n_before} -> {len(df)}"
     ta_filled = df["baseline_seg_sum"].notna().sum()
 
-    # --- Tier B fill ---
+    # --- Tier B fill (drop hour) ---
     mask_b = df["baseline_seg_sum"].isna()
     if mask_b.any():
-        b_merge = df.loc[mask_b, ["route_id", "last_stop_id", "stops_away", "day_type"]].merge(
-            tier_b, on=["route_id", "last_stop_id", "stops_away", "day_type"], how="left"
+        b_merge = df.loc[mask_b, ["route_id", "last_stop_id", "target_stop_id", "prog_decile", "day_type"]].merge(
+            tier_b, on=["route_id", "last_stop_id", "target_stop_id", "prog_decile", "day_type"], how="left"
         )
         df.loc[mask_b, "baseline_seg_sum"] = b_merge["_seg_b"].values
     tb_filled = df["baseline_seg_sum"].notna().sum() - ta_filled
 
-    # --- Tier C fill ---
+    # --- Tier C fill (drop prog_decile) ---
     mask_c = df["baseline_seg_sum"].isna()
     if mask_c.any():
-        c_merge = df.loc[mask_c, ["route_id", "stops_away", "hour_ct", "day_type"]].merge(
-            tier_c, on=["route_id", "stops_away", "hour_ct", "day_type"], how="left"
+        c_merge = df.loc[mask_c, ["route_id", "last_stop_id", "target_stop_id", "hour_ct", "day_type"]].merge(
+            tier_c, on=["route_id", "last_stop_id", "target_stop_id", "hour_ct", "day_type"], how="left"
         )
         df.loc[mask_c, "baseline_seg_sum"] = c_merge["_seg_c"].values
     tc_filled = df["baseline_seg_sum"].notna().sum() - ta_filled - tb_filled
+
+    # --- Tier D fill (broadest: route + last + target + day_type) ---
+    mask_d = df["baseline_seg_sum"].isna()
+    if mask_d.any():
+        d_merge = df.loc[mask_d, ["route_id", "last_stop_id", "target_stop_id", "day_type"]].merge(
+            tier_d, on=["route_id", "last_stop_id", "target_stop_id", "day_type"], how="left"
+        )
+        df.loc[mask_d, "baseline_seg_sum"] = d_merge["_seg_d"].values
+    td_filled = df["baseline_seg_sum"].notna().sum() - ta_filled - tb_filled - tc_filled
+
+    # --- Final fallback: fill from baseline_s2s ---
+    mask_final = df["baseline_seg_sum"].isna()
+    if mask_final.any() and "baseline_s2s" in df.columns:
+        df.loc[mask_final, "baseline_seg_sum"] = df.loc[mask_final, "baseline_s2s"]
+    tf_filled = df["baseline_seg_sum"].notna().sum() - ta_filled - tb_filled - tc_filled - td_filled
 
     still_nan = df["baseline_seg_sum"].isna().sum()
     total = len(df)
@@ -344,7 +385,12 @@ def apply_seg_sum_fallback(df: pd.DataFrame, tier_a: pd.DataFrame,
     print(f"    Tier A: {ta_filled:,} ({ta_filled/total*100:.1f}%)")
     print(f"    Tier B: {tb_filled:,} ({tb_filled/total*100:.1f}%)")
     print(f"    Tier C: {tc_filled:,} ({tc_filled/total*100:.1f}%)")
+    print(f"    Tier D: {td_filled:,} ({td_filled/total*100:.1f}%)")
+    print(f"    S2S fallback: {tf_filled:,} ({tf_filled/total*100:.2f}%)")
     print(f"    Still NaN: {still_nan:,} ({still_nan/total*100:.2f}%)")
+
+    # Drop temp column
+    df.drop(columns=["prog_decile"], inplace=True)
 
     return df
 
@@ -355,9 +401,10 @@ def apply_seg_sum_fallback(df: pd.DataFrame, tier_a: pd.DataFrame,
 
 
 def blend_baselines(df: pd.DataFrame) -> pd.DataFrame:
-    """50/50 blend of s2s and segment-sum baselines.
+    """70/30 blend of segment-sum and s2s baselines.
 
-    Where one is NaN and other is not: use the non-NaN one.
+    Weights: 0.7 * seg_sum + 0.3 * s2s (seg_sum is more accurate after
+    progress-decile upgrade). Where one is NaN: use the non-NaN one.
     """
     s2s = df["baseline_s2s"].values
     seg = df["baseline_seg_sum"].values
@@ -367,7 +414,7 @@ def blend_baselines(df: pd.DataFrame) -> pd.DataFrame:
     seg_only = ~np.isfinite(s2s) & np.isfinite(seg)
 
     blend = np.full(len(df), np.nan)
-    blend[both_valid] = (s2s[both_valid] + seg[both_valid]) / 2.0
+    blend[both_valid] = 0.7 * seg[both_valid] + 0.3 * s2s[both_valid]
     blend[s2s_only] = s2s[s2s_only]
     blend[seg_only] = seg[seg_only]
 
@@ -403,8 +450,8 @@ def print_diagnostics(splits_data: dict, ss: pd.DataFrame):
     # a. Overall MAE for all three methods
     print("\n--- Overall MAE on Test Set ---")
     for method, col in [("S2S-only", "baseline_s2s"),
-                        ("Segment-sum", "baseline_seg_sum"),
-                        ("Blended (50/50)", "baseline_eta")]:
+                        ("Seg-sum (prog-decile)", "baseline_seg_sum"),
+                        ("Blended (70/30)", "baseline_eta")]:
         valid = test[col].notna() & test["time_to_arrival_seconds"].notna()
         if valid.sum() > 0:
             mae = (test.loc[valid, "time_to_arrival_seconds"] - test.loc[valid, col]).abs().mean()
@@ -561,9 +608,9 @@ def main():
     tier3 = build_tier3_lookup(train, ss)
     print(f"  Tier 3 combos (>=5 obs): {len(tier3):,}")
 
-    # --- BASE-02: Segment-Sum Lookup Tables ---
-    print("\n--- BASE-02: Building Segment-Sum Lookups ---")
-    seg_a, seg_b, seg_c = build_seg_sum_lookups(train)
+    # --- BASE-02: Progress-Decile Destination-Specific Lookup Tables ---
+    print("\n--- BASE-02: Building Progress-Decile Lookups ---")
+    seg_a, seg_b, seg_c, seg_d = build_seg_sum_lookups(train)
 
     # --- Process all splits ---
     print("\n" + "=" * 60)
@@ -582,6 +629,13 @@ def main():
         n_original = len(df)
         print(f"  Loaded {n_original:,} rows")
 
+        # Drop old baseline columns from previous runs (if present)
+        old_cols = ["baseline_s2s", "baseline_seg_sum", "baseline_eta", "residual"]
+        existing_old = [c for c in old_cols if c in df.columns]
+        if existing_old:
+            df.drop(columns=existing_old, inplace=True)
+            print(f"  Dropped old columns: {existing_old}")
+
         # Add derived columns
         df = add_ct_hour(df)
         df["day_type"] = df["is_weekday"].astype(int)
@@ -593,15 +647,15 @@ def main():
             f"Row count changed after S2S: {n_original} -> {len(df)}"
         )
 
-        # Apply segment-sum fallback
-        print("\n  Applying segment-sum fallback hierarchy...")
-        df = apply_seg_sum_fallback(df, seg_a, seg_b, seg_c, split_name)
+        # Apply segment-sum fallback (progress-decile, 4-tier)
+        print("\n  Applying progress-decile fallback hierarchy...")
+        df = apply_seg_sum_fallback(df, seg_a, seg_b, seg_c, seg_d, split_name)
         assert len(df) == n_original, (
             f"Row count changed after seg-sum: {n_original} -> {len(df)}"
         )
 
         # Blend
-        print("\n  Blending baselines (50/50)...")
+        print("\n  Blending baselines (70/30 seg/s2s)...")
         df = blend_baselines(df)
         be_nan = df["baseline_eta"].isna().sum()
         print(
