@@ -81,6 +81,12 @@ Quick task decisions:
 - Q001: AnimatedRegion + MarkerAnimated for smooth bus marker transitions (1000ms duration)
 - Q001: Shortest-path heading wraparound via delta normalization to [-180, 180]
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 001 | Smooth vehicle marker interpolation (AnimatedRegion) | 2026-02-18 | 8f70d87 | [001-smooth-vehicle-marker-interpolation](./quick/001-smooth-vehicle-marker-interpolation/) |
+
 ### Blockers/Concerns
 
 - Route 27 still has only 96 test samples and highest MAE (386.5s) -- sparse data issue persists
