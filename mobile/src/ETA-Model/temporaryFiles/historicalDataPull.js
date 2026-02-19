@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import fs from "fs";
 
 const BASE = "https://auburn.etaspot.com";
-const COOKIE = "express.sid=s%3AxV5gLtnnu3ItpCkCMgNz6J2dknkEXoqo.mWjc17aRJrrr8PIS%2FhDX7t7soEORx4pSfVjnrH7%2BOE0; etastat=1" // e.g. "express.sid=...; etastat=1"
+const COOKIE = "express.sid=s%3AyuzlhNle2Drle3hJWPU7KEfT3JPzyeFW.C%2F5WoNSwwl8FiNOXLPB5zWT%2BsoW2cyEMPlN8Ly3VecA; etastat=1" // e.g. "express.sid=...; etastat=1"
 
 const socket = io(BASE, {
   transports: ["websocket"],
