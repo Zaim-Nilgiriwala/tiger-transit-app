@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Accurate arrival time predictions for all remaining stops on a bus route, accounting for timepoint holds, schedule adherence, and real-world conditions.
-**Current focus:** PROJECT COMPLETE -- v1.1 evaluation delivered
+**Current focus:** Mobile app UX improvements (quick tasks)
 
 ## Current Position
 
 Phase: 9 of 9 (Evaluation and Comparison)
 Plan: 1 of 1 in current phase
 Status: Complete
-Last activity: 2026-02-17 -- Completed 09-01-PLAN.md (v1.1 evaluation report)
+Last activity: 2026-02-18 -- Completed quick-001 (smooth vehicle marker interpolation)
 
 Progress: [####################] 100% (17/18 plans complete, all phases done)
 
@@ -77,6 +77,10 @@ Phase 9 decisions:
 - Self-contained HTML report with base64 embedded charts (no external dependencies)
 - v1.0 DMatrix reconstructed with lateness_now=0.0 for feature compatibility
 
+Quick task decisions:
+- Q001: AnimatedRegion + MarkerAnimated for smooth bus marker transitions (1000ms duration)
+- Q001: Shortest-path heading wraparound via delta normalization to [-180, 180]
+
 ### Blockers/Concerns
 
 - Route 27 still has only 96 test samples and highest MAE (386.5s) -- sparse data issue persists
@@ -85,6 +89,6 @@ Phase 9 decisions:
 
 ## Session Continuity
 
-Last session: 2026-02-17
-Stopped at: Completed 09-01-PLAN.md -- Project complete
+Last session: 2026-02-18
+Stopped at: Completed quick-001 (smooth vehicle marker interpolation)
 Resume file: None
