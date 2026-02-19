@@ -8,7 +8,7 @@ import fs from "fs";
 import path from "path";
 
 const BASE = "https://auburn.etaspot.com";
-const COOKIE = "express.sid=s%3AnRTVo3BbxAnMxmPE_umYo4ngxbdP8Sym.qiKvQOExVuqhXhbp5J5EshjOko22H7EEP%2B4m2AxhvXo; etastat=1";
+const COOKIE = "express.sid=s%3AyuzlhNle2Drle3hJWPU7KEfT3JPzyeFW.C%2F5WoNSwwl8FiNOXLPB5zWT%2BsoW2cyEMPlN8Ly3VecA; etastat=1";
 
 const CONFIG = {
   outputDir: "./live_data",

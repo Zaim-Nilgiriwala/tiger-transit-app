@@ -8,7 +8,7 @@ import path from "path";
 import zlib from "zlib";
 
 const BASE = "https://auburn.etaspot.com";
-const COOKIE = "express.sid=s%3AzoLEaoFvxBy21W1cDbOkFPIq8TqPH7yP.PTwfMlsgBlVfeQbESXlyVI8bMHliN%2BaYxOOEQ016rOQ; etastat=1";
+const COOKIE = "express.sid=s%3AyuzlhNle2Drle3hJWPU7KEfT3JPzyeFW.C%2F5WoNSwwl8FiNOXLPB5zWT%2BsoW2cyEMPlN8Ly3VecA; etastat=1";
 
 // Configuration
 const CONFIG = {

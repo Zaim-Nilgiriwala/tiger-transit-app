@@ -1,6 +1,4 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { io, Socket } from 'socket.io-client';
-import { API_CONFIG } from '../config/api.config';
 
 export interface Vehicle {
   vehicleId: string;
@@ -25,97 +23,88 @@ interface UseVehiclesOptions {
   enabled?: boolean;
 }
 
+interface ETASpotVehicle {
+  equipmentID: string;
+  routeID: number;
+  lat: number;
+  lng: number;
+  h: number;
+  load: number;
+  capacity: number;
+  nextStopID: number;
+  nextStopETA: number;
+  onSchedule: number;
+  lastStopID: number;
+  inService: number;
+  receiveTime: number;
+}
+
+const ETASPOT_API = 'https://auburn.etaspot.net/service.php';
+const POLL_INTERVAL_MS = 8000;
+
+function mapVehicle(v: ETASpotVehicle): Vehicle {
+  return {
+    vehicleId: v.equipmentID,
+    routeId: String(v.routeID),
+    lat: v.lat,
+    lon: v.lng,
+    heading: v.h || 0,
+    speed: 0,
+    load: v.load || 0,
+    capacity: v.capacity || 0,
+    nextStopId: String(v.nextStopID || ''),
+    etaSeconds: v.nextStopETA || 0,
+    onTime: v.onSchedule || 0,
+    lastStopId: String(v.lastStopID || ''),
+    isDelayed: (v.onSchedule || 0) > 300,
+    timestamp: v.receiveTime || Date.now(),
+  };
+}
+
 export const useVehicles = (options: UseVehiclesOptions = {}) => {
   const { routeId, stopId, enabled = true } = options;
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const socketRef = useRef<Socket | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
+  const fetchVehicles = useCallback(async () => {
+    try {
+      const url = `${ETASPOT_API}?service=get_vehicles&includeETAData=1&inService=1&orderedETAArray=1&token=TESTING`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
 
-    const socket = io(API_CONFIG.BASE_URL, {
-      transports: ['websocket'],
-      reconnection: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-    });
+      const etaVehicles: ETASpotVehicle[] = data.get_vehicles || [];
+      const mapped = etaVehicles
+        .filter((v) => v.inService === 1)
+        .map(mapVehicle);
 
-    socketRef.current = socket;
-
-    socket.on('connect', () => {
-      console.log('WebSocket connected:', socket.id);
+      setVehicles(mapped);
       setConnected(true);
       setError(null);
-
-      // Subscribe based on options
-      if (routeId) {
-        socket.emit('subscribe:route', routeId);
-      } else if (stopId) {
-        socket.emit('subscribe:stop', stopId);
-      } else {
-        socket.emit('subscribe:all');
-      }
-    });
-
-    socket.on('disconnect', (reason) => {
-      console.log('WebSocket disconnected:', reason);
+    } catch (err) {
+      console.error('Vehicle fetch error:', (err as Error).message);
+      setError((err as Error).message);
       setConnected(false);
-    });
+    }
+  }, []);
 
-    socket.on('connect_error', (err) => {
-      console.error('WebSocket connection error:', err.message);
-      setError(err.message);
-      setConnected(false);
-    });
+  useEffect(() => {
+    if (!enabled) return;
 
-    // Receive batch of vehicles
-    socket.on('vehicles', (data: Vehicle[]) => {
-      setVehicles(data);
-    });
-
-    // Receive individual vehicle update
-    socket.on('vehicle', (vehicle: Vehicle) => {
-      setVehicles((prev) => {
-        const index = prev.findIndex((v) => v.vehicleId === vehicle.vehicleId);
-        if (index >= 0) {
-          const updated = [...prev];
-          updated[index] = vehicle;
-          return updated;
-        }
-        return [...prev, vehicle];
-      });
-    });
-
-    // Handle vehicle removal (vehicle went offline)
-    socket.on('vehicle:removed', (vehicleId: string) => {
-      setVehicles((prev) => prev.filter((v) => v.vehicleId !== vehicleId));
-    });
+    fetchVehicles();
+    timerRef.current = setInterval(fetchVehicles, POLL_INTERVAL_MS);
 
     return () => {
-      socket.disconnect();
-      socketRef.current = null;
-    };
-  }, [enabled, routeId, stopId]);
-
-  // Function to manually refresh vehicles
-  const refresh = useCallback(() => {
-    if (socketRef.current?.connected) {
-      if (routeId) {
-        socketRef.current.emit('subscribe:route', routeId);
-      } else if (stopId) {
-        socketRef.current.emit('subscribe:stop', stopId);
-      } else {
-        socketRef.current.emit('subscribe:all');
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
       }
-    }
-  }, [routeId, stopId]);
+    };
+  }, [enabled, fetchVehicles]);
 
-  // Filter vehicles by route if routeId is specified
+  // Filter vehicles by route or stop
   const filteredVehicles = routeId
     ? vehicles.filter((v) => v.routeId === routeId)
     : stopId
@@ -127,7 +116,7 @@ export const useVehicles = (options: UseVehiclesOptions = {}) => {
     allVehicles: vehicles,
     connected,
     error,
-    refresh,
+    refresh: fetchVehicles,
   };
 };
 

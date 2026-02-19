@@ -1,4 +1,4 @@
-import React, { useRef, useState, useMemo, useEffect } from 'react';
+import React, { useRef, useState, useMemo, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import MapView, { Region } from 'react-native-maps';
 import { AUBURN_COORDS } from '../../config/api.config';
@@ -31,6 +31,21 @@ const TransitMapView: React.FC = () => {
     setRegion(newRegion);
   };
 
+  // Map ETASpot numeric route IDs to GTFS compound route IDs
+  // e.g. ETASpot routeID 215 -> GTFS "215_202_201_156" (South Auburn)
+  const resolveRouteId = useCallback((etaRouteId: string) => {
+    if (!routes) return etaRouteId;
+    // Direct match first
+    const direct = routes.find(r => r.id === etaRouteId);
+    if (direct) return direct.id;
+    // Check compound IDs (e.g. "215_202_201_156" contains "215")
+    const compound = routes.find(r => {
+      const parts = r.id.split('_').filter(Boolean);
+      return parts.includes(etaRouteId);
+    });
+    return compound ? compound.id : etaRouteId;
+  }, [routes]);
+
   // Create lookup maps for route info
   const routeInfo = useMemo(() => {
     if (!routes) return {};
@@ -51,8 +66,8 @@ const TransitMapView: React.FC = () => {
 
   // Filter vehicles to only show those on visible routes
   const visibleVehicles = useMemo(() => {
-    return vehicles.filter(vehicle => isRouteVisible(vehicle.routeId));
-  }, [vehicles, isRouteVisible]);
+    return vehicles.filter(vehicle => isRouteVisible(resolveRouteId(vehicle.routeId)));
+  }, [vehicles, isRouteVisible, resolveRouteId]);
 
   // Filter stops to only show those that serve at least one visible route
   const visibleStopsWithColors = useMemo(() => {
@@ -111,14 +126,17 @@ const TransitMapView: React.FC = () => {
           <StopMarker key={stop.id} stop={stop} color={color} />
         ))}
 
-        {visibleVehicles.map((vehicle) => (
-          <VehicleMarker
-            key={vehicle.vehicleId}
-            vehicle={vehicle}
-            routeColor={routeInfo[vehicle.routeId]?.color}
-            routeName={routeInfo[vehicle.routeId]?.name}
-          />
-        ))}
+        {visibleVehicles.map((vehicle) => {
+          const gtfsRouteId = resolveRouteId(vehicle.routeId);
+          return (
+            <VehicleMarker
+              key={vehicle.vehicleId}
+              vehicle={vehicle}
+              routeColor={routeInfo[gtfsRouteId]?.color}
+              routeName={routeInfo[gtfsRouteId]?.name}
+            />
+          );
+        })}
       </MapView>
     </View>
   );
