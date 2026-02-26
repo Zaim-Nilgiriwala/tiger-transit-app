@@ -4,10 +4,10 @@ import { StyleSheet, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
 export default async function Index() {
-  /*const zip = await downloadGtfs();
+  const zip = await downloadGtfs();
   const files = unzipGtfs(zip);
   const routes = parseRoutes(files);
-  console.log(routes);*/
+  console.log(routes);
   return (
     <View style={styles.container}>
       <MapView
