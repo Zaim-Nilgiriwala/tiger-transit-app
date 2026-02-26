@@ -14,7 +14,7 @@ async function headGtfs() {
     };
 }
 
-async function downloadGtfs() {
+export async function downloadGtfs() {
     const response = await fetch(GTFS_URL);
     if (!response.ok) {
         throw new Error(`Failed to download GTFS data: ${response.statusText}`);

@@ -1,7 +1,13 @@
+import { getText, parseCsv, parseRoutes, unzipGtfs } from "@/services/gtfsParser";
+import { downloadGtfs } from "@/services/gtfsService";
 import { StyleSheet, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
-export default function Index() {
+export default async function Index() {
+  /*const zip = await downloadGtfs();
+  const files = unzipGtfs(zip);
+  const routes = parseRoutes(files);
+  console.log(routes);*/
   return (
     <View style={styles.container}>
       <MapView
