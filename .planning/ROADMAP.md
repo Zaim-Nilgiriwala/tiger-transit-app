@@ -31,11 +31,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Manrope and Inter fonts render correctly in test labels with the full type scale (Headline-LG, Title-MD, Body-MD, Label-SM)
   4. Design tokens (tonal layering colors, navy-tinted shadows, 8px grid spacing, 20px edge margins) are applied to test components and produce the Academic Navigator look
   5. Redux store initializes with all six slices (routes, vehicles, predictions, ui, preferences, alerts) and renders without errors on both platforms
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md -- Expo project init, design system tokens, fonts, Redux store scaffold
+- [ ] 01-02-PLAN.md -- Full-screen map, splash screen, glassmorphic bottom bar, floating location button
 
 ### Phase 2: Real-Time Data Pipeline
 **Goal**: Users see live bus positions on the map updating every 5 seconds with stale vehicles automatically hidden
@@ -123,7 +123,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation and Map Shell | 0/? | Not started | - |
+| 1. Foundation and Map Shell | 0/2 | Planning complete | - |
 | 2. Real-Time Data Pipeline | 0/? | Not started | - |
 | 3. Bottom Sheet and Route List | 0/? | Not started | - |
 | 4. Route Detail and ETA Predictions | 0/? | Not started | - |
