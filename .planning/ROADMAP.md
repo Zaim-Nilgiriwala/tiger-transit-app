@@ -12,7 +12,7 @@ This roadmap delivers a real-time bus tracking app for Auburn University's Tiger
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation and Map Shell** - Expo SDK 55 project with full-screen map, design token system, and Redux store scaffold
+- [x] **Phase 1: Foundation and Map Shell** - Expo SDK 55 project with full-screen map, design token system, and Redux store scaffold (completed 2026-03-25)
 - [ ] **Phase 2: Real-Time Data Pipeline** - GTFS-RT protobuf decoding, 5s polling service, live bus markers on map
 - [ ] **Phase 3: Bottom Sheet and Route List** - Glassmorphic draggable bottom sheet with sectioned route browsing
 - [ ] **Phase 4: Route Detail and ETA Predictions** - Route detail view with ordered stop list, XGBoost ETAs, polyline and stop markers on map
@@ -31,11 +31,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Manrope and Inter fonts render correctly in test labels with the full type scale (Headline-LG, Title-MD, Body-MD, Label-SM)
   4. Design tokens (tonal layering colors, navy-tinted shadows, 8px grid spacing, 20px edge margins) are applied to test components and produce the Academic Navigator look
   5. Redux store initializes with all six slices (routes, vehicles, predictions, ui, preferences, alerts) and renders without errors on both platforms
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 01-01-PLAN.md -- Expo project init, design system tokens, fonts, Redux store scaffold
-- [ ] 01-02-PLAN.md -- Full-screen map, splash screen, glassmorphic bottom bar, floating location button
+- [x] 01-02-PLAN.md -- Full-screen map, splash screen, glassmorphic bottom bar, floating location button
 
 ### Phase 2: Real-Time Data Pipeline
 **Goal**: Users see live bus positions on the map updating every 5 seconds with stale vehicles automatically hidden
@@ -123,7 +123,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation and Map Shell | 1/2 | In progress | - |
+| 1. Foundation and Map Shell | 2/2 | Complete   | 2026-03-25 |
 | 2. Real-Time Data Pipeline | 0/? | Not started | - |
 | 3. Bottom Sheet and Route List | 0/? | Not started | - |
 | 4. Route Detail and ETA Predictions | 0/? | Not started | - |

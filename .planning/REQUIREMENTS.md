@@ -9,14 +9,14 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Map & Markers
 
-- [ ] **MAP-01**: User sees a full-screen map centered on Auburn campus (~32.606, -85.487) on app launch
+- [x] **MAP-01**: User sees a full-screen map centered on Auburn campus (~32.606, -85.487) on app launch
 - [ ] **MAP-02**: User sees live bus markers on the map with positions updated every 5 seconds
 - [ ] **MAP-03**: Bus markers animate smoothly between position updates (Reanimated-based, 1000ms interpolation)
 - [ ] **MAP-04**: Bus markers display directional heading and use secondary-fixed orange color
 - [ ] **MAP-05**: Stop markers appear on the map in route color when a route is selected
 - [ ] **MAP-06**: Route polyline is drawn on the map in route color when a route is selected
 - [ ] **MAP-07**: Map auto-fits to show all stops + buses when a route is selected
-- [ ] **MAP-08**: Floating glass-panel map controls (my_location, search placeholder, settings placeholder) are visible above the map
+- [x] **MAP-08**: Floating glass-panel map controls (my_location, search placeholder, settings placeholder) are visible above the map
 - [ ] **MAP-09**: Vehicles with timestamps older than 2 minutes are hidden from the map
 
 ### Bottom Sheet
@@ -141,14 +141,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MAP-01 | Phase 1 | Pending |
+| MAP-01 | Phase 1 | Complete |
 | MAP-02 | Phase 2 | Pending |
 | MAP-03 | Phase 5 | Pending |
 | MAP-04 | Phase 2 | Pending |
 | MAP-05 | Phase 4 | Pending |
 | MAP-06 | Phase 4 | Pending |
 | MAP-07 | Phase 4 | Pending |
-| MAP-08 | Phase 1 | Pending |
+| MAP-08 | Phase 1 | Complete |
 | MAP-09 | Phase 2 | Pending |
 | SHEET-01 | Phase 3 | Pending |
 | SHEET-02 | Phase 3 | Pending |
