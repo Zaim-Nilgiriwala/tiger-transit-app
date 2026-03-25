@@ -47,11 +47,11 @@ Plans:
   3. Bus markers show directional heading and use secondary-fixed orange color
   4. Polling stops when the app is backgrounded and resumes immediately when foregrounded
   5. Vehicles with timestamps older than 2 minutes disappear from the map automatically
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md -- GTFS-RT protobuf decode service, static route data, 5s polling hook with AppState awareness
+- [ ] 02-02-PLAN.md -- BusMarker component with route-colored heading indicator, wired into MapScreen
 
 ### Phase 3: Bottom Sheet and Route List
 **Goal**: Users can browse all routes via a glassmorphic draggable bottom sheet with active bus counts and visual polish
@@ -124,7 +124,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation and Map Shell | 2/2 | Complete   | 2026-03-25 |
-| 2. Real-Time Data Pipeline | 0/? | Not started | - |
+| 2. Real-Time Data Pipeline | 0/2 | Not started | - |
 | 3. Bottom Sheet and Route List | 0/? | Not started | - |
 | 4. Route Detail and ETA Predictions | 0/? | Not started | - |
 | 5. Animated Markers and Callout Bubbles | 0/? | Not started | - |
