@@ -7,6 +7,9 @@
  * - Free rotation and 3D tilt enabled
  * - Blue dot for user location (if permission granted)
  * - FloatingLocationButton and GlassBottomBar overlaid
+ *
+ * Render order: MapView (fills screen) -> GlassBottomBar (bottom) ->
+ *   FloatingLocationButton (bottom-left above bar)
  */
 import React, { useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -14,6 +17,8 @@ import MapView from 'react-native-maps';
 
 import { colors } from '../theme';
 import { useLocation } from '../hooks/useLocation';
+import FloatingLocationButton from '../components/map/FloatingLocationButton';
+import GlassBottomBar from '../components/map/GlassBottomBar';
 
 /** Auburn University campus center */
 const AUBURN_CAMPUS = {
@@ -38,6 +43,12 @@ export default function MapScreen() {
         showsUserLocation={true}
         showsMyLocationButton={false}
         mapPadding={{ top: 0, right: 0, bottom: 80, left: 0 }}
+      />
+      <GlassBottomBar />
+      <FloatingLocationButton
+        mapRef={mapRef}
+        location={location}
+        permissionDenied={permissionDenied}
       />
     </View>
   );
