@@ -1,80 +1,214 @@
-# Requirements: Tiger Transit XGBoost ETA Model v1.1
+# Requirements: Tiger Transit Frontend
 
-**Defined:** 2026-02-11
-**Core Value:** Accurate arrival time predictions for all remaining stops on a bus route, accounting for timepoint holds, schedule adherence, and real-world conditions.
+**Defined:** 2026-03-25
+**Core Value:** When a student pulls up the app, they see exactly where their bus is and when it arrives at their stop — accurate to ~85 seconds — with zero navigation complexity.
 
-## v1.1 Requirements
+## v1 Requirements
 
-### Baseline Computation
+Requirements for initial release. Each maps to roadmap phases.
 
-- [x] **BASE-01**: Compute stop-to-stop historical average travel times from training data, aggregated by (route_id, from_stop_id, target_stop_id, hour, day_type)
-- [x] **BASE-02**: Compute segment-median-sum baseline by summing historical segment median travel times along the route path from current position to target stop
-- [x] **BASE-03**: Blend both baselines into a single baseline_eta column (average of segment-sum and stop-to-stop)
-- [x] **BASE-04**: Generate residual labels (time_to_arrival_seconds - baseline_eta) for all rows in train/val/test splits
-- [x] **BASE-05**: Measure and report baseline-only MAE on test set as fail-fast checkpoint (expected 200-400s)
+### Map & Markers
 
-### Training Pipeline
+- [ ] **MAP-01**: User sees a full-screen map centered on Auburn campus (~32.606, -85.487) on app launch
+- [ ] **MAP-02**: User sees live bus markers on the map with positions updated every 5 seconds
+- [ ] **MAP-03**: Bus markers animate smoothly between position updates (Reanimated-based, 1000ms interpolation)
+- [ ] **MAP-04**: Bus markers display directional heading and use secondary-fixed orange color
+- [ ] **MAP-05**: Stop markers appear on the map in route color when a route is selected
+- [ ] **MAP-06**: Route polyline is drawn on the map in route color when a route is selected
+- [ ] **MAP-07**: Map auto-fits to show all stops + buses when a route is selected
+- [ ] **MAP-08**: Floating glass-panel map controls (my_location, search placeholder, settings placeholder) are visible above the map
+- [ ] **MAP-09**: Vehicles with timestamps older than 2 minutes are hidden from the map
 
-- [x] **TRAIN-01**: Modify training scripts to use residual as target variable (preserve original time_to_arrival_seconds alongside)
-- [x] **TRAIN-02**: Add baseline_eta as feature #44 in the feature matrix (so model learns residuals scale with trip length)
-- [x] **TRAIN-03**: Fresh Optuna hyperparameter tuning with new study name, adjusted search space for zero-centered residual target distribution
-- [x] **TRAIN-04**: Implement outlier trimming (remove worst 1-2% training samples by Z-score or percentile before training)
-- [x] **TRAIN-05**: Test Huber loss (reg:pseudohubererror) alongside squared error, report which performs better on validation set
+### Bottom Sheet
 
-### Evaluation
+- [ ] **SHEET-01**: User can drag the bottom sheet between three snap points (collapsed ~80px, half ~45%, full ~90%)
+- [ ] **SHEET-02**: Bottom sheet uses glassmorphic styling (frosted glass with backdrop blur, 20px top radius, navy-tinted shadow)
+- [ ] **SHEET-03**: Bottom sheet grab handle is a subtle #C4C6CE pill, 32px wide
+- [ ] **SHEET-04**: Bottom sheet transitions use smooth spring animation
+- [ ] **SHEET-05**: Map remains interactive (pan/zoom) when sheet is at half position
 
-- [x] **EVAL-01**: Reconstruct final predictions (baseline_eta + predicted_residual) and compute MAE/RMSE on test set
-- [x] **EVAL-02**: Side-by-side comparison: v1.1 final MAE vs v1.0 123.1s MAE (the success metric -- must be lower)
-- [x] **EVAL-03**: SHAP feature importance analysis showing expected shift from spatial to real-time condition features
-- [x] **EVAL-04**: Per-route comparison table (v1.1 vs v1.0 MAE per route, wins/losses identified)
-- [x] **EVAL-05**: Residual distribution analysis (histogram, QQ plot, skew/kurtosis) to document target distribution and inform loss function choice
+### Route Navigation
 
-## Future Requirements
+- [ ] **ROUTE-01**: User sees a sectioned route list as the default sheet content (Active Routes, Favorites, Alerts sections)
+- [ ] **ROUTE-02**: Each route card shows route color accent, short name, long name, active bus count, and next ETA
+- [ ] **ROUTE-03**: Route cards are Level 2 surfaces on Level 1 section backgrounds (no border lines, tonal layering only)
+- [ ] **ROUTE-04**: Inactive routes (0 active buses) are dimmed and sorted to bottom
+- [ ] **ROUTE-05**: Tapping a route card transitions the sheet to Route Detail View and draws polyline + stop markers on map
+- [ ] **ROUTE-06**: Route Detail View shows route name in Headline-LG (32pt Manrope Bold) with color bar and favorite button
+- [ ] **ROUTE-07**: Route Detail View displays an ordered stop list with next 3 arrival ETAs per stop
+- [ ] **ROUTE-08**: ETAs are rounded to nearest minute ("3 min", "< 1 min", "No buses en route")
+- [ ] **ROUTE-09**: User can tap a stop in the list to center the map on that stop
+- [ ] **ROUTE-10**: Back button returns from Route Detail to Route List
 
-### Advanced Residual Modeling
+### Stop Detail
 
-- **ADV-01**: Asymmetric loss on residuals (requires careful sign convention analysis)
-- **ADV-02**: Quantile residual models for confidence intervals
-- **ADV-03**: Route-specific baseline weighting (optimize blend ratio per route)
-- **ADV-04**: Cascade imputation for high-NaN features (route-level fallback instead of NaN)
-- **ADV-05**: Feature pruning based on v1.1 SHAP analysis (remove features redundant with baseline)
+- [ ] **STOP-01**: User can access Stop Detail View via "View More" from stop callout or direct stop tap
+- [ ] **STOP-02**: Stop Detail shows stop name (Headline-LG), stop number (Label-SM), route count, and city
+- [ ] **STOP-03**: LIVE status badge pulses in secondary-fixed orange when buses are arriving
+- [ ] **STOP-04**: Each arriving bus shows route name, bus ID, delay status badge, ETA, and passenger capacity bar
+- [ ] **STOP-05**: Capacity bar visually represents passenger load (secondary-fixed orange fill on surface-container background)
+- [ ] **STOP-06**: "All Routes at this stop" footer shows color-coded pill badges for each route serving the stop
+- [ ] **STOP-07**: Tapping a route badge in the footer switches to that route's detail view
+
+### Callout Bubbles
+
+- [ ] **CALL-01**: Tapping a bus marker opens a glass-panel callout showing route, bus ID, speed, passengers, delay status, ETA to next stop
+- [ ] **CALL-02**: Tapping a stop marker opens a glass-panel callout showing stop name, stop number, ETA, route badges, "View More"
+- [ ] **CALL-03**: Callouts use glassmorphic styling (backdrop blur, surface-container-lowest at ~95% opacity)
+- [ ] **CALL-04**: Only one callout can be open at a time; tapping outside dismisses it
+- [ ] **CALL-05**: Callout data refreshes with each 5s polling cycle
+
+### Favorites & Personalization
+
+- [ ] **FAV-01**: User can favorite a route via star button in Route Detail header
+- [ ] **FAV-02**: Favorited routes are pinned to top of route list and shown in Favorites section
+- [ ] **FAV-03**: User can toggle between "All Routes" and "Favorites" via pill tab control (999px full-round)
+- [ ] **FAV-04**: Favorite selections persist across app sessions via AsyncStorage
+
+### Real-Time Data
+
+- [ ] **DATA-01**: App decodes GTFS-RT protobuf binary feeds (position updates + trip updates) client-side
+- [ ] **DATA-02**: Position and trip update feeds are polled every 5 seconds while app is in foreground
+- [ ] **DATA-03**: Polling stops when app is backgrounded and resumes immediately on foreground
+- [ ] **DATA-04**: Trip updates are processed before position updates so ETA enrichment is available
+- [ ] **DATA-05**: GTFS static data (routes, stops, shapes, trips, calendar) loads on app launch
+
+### ETA Predictions
+
+- [ ] **ETA-01**: Bus callout shows GTFS-RT feed ETA for next stop (low-latency, single stop)
+- [ ] **ETA-02**: Stop list shows XGBoost model predictions for next 3 arrivals (multi-stop, higher accuracy)
+- [ ] **ETA-03**: ETA predictions refresh every 15 seconds while viewing a route
+- [ ] **ETA-04**: If model prediction times out, app falls back to GTFS-RT trip update ETAs or shows "ETA unavailable"
+
+### Alerts & Error States
+
+- [ ] **ALERT-01**: Service alerts from GTFS-RT alerts feed are displayed in the Alerts section of the route list
+- [ ] **ALERT-02**: Alerts feed is polled every 60 seconds
+- [ ] **ERR-01**: No network connection shows last known positions dimmed to surface-dim + "No connection" glass-panel banner
+- [ ] **ERR-02**: Routes with no active buses show "No active buses" in on-surface-variant color
+- [ ] **ERR-03**: Loading states provide visual feedback during data fetch
+
+### Design System
+
+- [ ] **DS-01**: App implements the Academic Navigator design system with tonal layering (Level 0/1/2 surfaces, no border lines)
+- [ ] **DS-02**: Typography uses Manrope (headlines, bold) + Inter (body, labels) dual-font system
+- [ ] **DS-03**: Type scale follows Headline-LG (32pt), Title-MD (18pt), Body-MD (14pt), Label-SM (11pt uppercase)
+- [ ] **DS-04**: All shadows use navy-tinted color (rgba(12, 35, 64, ...)), never pure black
+- [ ] **DS-05**: Minimum 20px margins from screen edges; 8px base grid for spacing
+- [ ] **DS-06**: Status badges use pill shape: LIVE (orange pulse), DELAYED (orange), On Time (muted green)
+- [ ] **DS-07**: All interactive elements have minimum 44x44pt tap targets
+- [ ] **DS-08**: ETA text meets WCAG AA contrast ratio (4.5:1)
+
+## v2 Requirements
+
+Deferred to future release. Tracked but not in current roadmap.
+
+### Search & Discovery
+
+- **SRCH-01**: User can search for routes and stops by name
+- **SRCH-02**: "Nearest stop" feature using device GPS
+
+### Settings & Preferences
+
+- **SET-01**: Settings screen for app preferences
+- **SET-02**: Dark mode toggle and dark color scheme
+
+### Notifications
+
+- **NOTF-01**: Push notifications for delays on favorited routes
+
+### Advanced Features
+
+- **ADV-01**: Trip planner for multi-route journeys
+- **ADV-02**: Onboarding / first-launch tutorial
+- **ADV-03**: Accessibility audit and VoiceOver/TalkBack optimization
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Deployment/production API | Deferred until model accuracy validated |
-| New data collection | Using existing Nov 6 - Dec 12 dataset |
-| Per-route models | Single model approach maintained |
-| Asymmetric loss | Start symmetric; add asymmetry in future milestone if needed |
-| Feature set changes (add/remove) | Keep same 43 + baseline_eta only; prune after SHAP evidence |
-| Redundant feature cleanup | Defer until v1.1 SHAP confirms which features are truly redundant |
+| Backend / API development | Supabase + FastAPI already exist; this is frontend only |
+| Background location tracking | Battery drain; PRD explicitly prohibits |
+| Tab bar navigation | Design evolved to single-screen map + bottom sheet |
+| Full offline mode | Complex caching; show dimmed last-known state instead |
+| Authentication / user accounts | Not needed for transit tracking |
+| Dark mode | Doubles design system work; structure tokens for easy v2 addition |
+| Push notifications | Requires backend notification infrastructure |
 
 ## Traceability
 
+Which phases cover which requirements. Updated during roadmap creation.
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BASE-01 | Phase 7 | Complete |
-| BASE-02 | Phase 7 | Complete |
-| BASE-03 | Phase 7 | Complete |
-| BASE-04 | Phase 7 | Complete |
-| BASE-05 | Phase 7 | Complete |
-| TRAIN-01 | Phase 8 | Complete |
-| TRAIN-02 | Phase 8 | Complete |
-| TRAIN-03 | Phase 8 | Complete |
-| TRAIN-04 | Phase 8 | Complete |
-| TRAIN-05 | Phase 8 | Complete |
-| EVAL-01 | Phase 9 | Complete |
-| EVAL-02 | Phase 9 | Complete |
-| EVAL-03 | Phase 9 | Complete |
-| EVAL-04 | Phase 9 | Complete |
-| EVAL-05 | Phase 9 | Complete |
+| MAP-01 | — | Pending |
+| MAP-02 | — | Pending |
+| MAP-03 | — | Pending |
+| MAP-04 | — | Pending |
+| MAP-05 | — | Pending |
+| MAP-06 | — | Pending |
+| MAP-07 | — | Pending |
+| MAP-08 | — | Pending |
+| MAP-09 | — | Pending |
+| SHEET-01 | — | Pending |
+| SHEET-02 | — | Pending |
+| SHEET-03 | — | Pending |
+| SHEET-04 | — | Pending |
+| SHEET-05 | — | Pending |
+| ROUTE-01 | — | Pending |
+| ROUTE-02 | — | Pending |
+| ROUTE-03 | — | Pending |
+| ROUTE-04 | — | Pending |
+| ROUTE-05 | — | Pending |
+| ROUTE-06 | — | Pending |
+| ROUTE-07 | — | Pending |
+| ROUTE-08 | — | Pending |
+| ROUTE-09 | — | Pending |
+| ROUTE-10 | — | Pending |
+| STOP-01 | — | Pending |
+| STOP-02 | — | Pending |
+| STOP-03 | — | Pending |
+| STOP-04 | — | Pending |
+| STOP-05 | — | Pending |
+| STOP-06 | — | Pending |
+| STOP-07 | — | Pending |
+| CALL-01 | — | Pending |
+| CALL-02 | — | Pending |
+| CALL-03 | — | Pending |
+| CALL-04 | — | Pending |
+| CALL-05 | — | Pending |
+| FAV-01 | — | Pending |
+| FAV-02 | — | Pending |
+| FAV-03 | — | Pending |
+| FAV-04 | — | Pending |
+| DATA-01 | — | Pending |
+| DATA-02 | — | Pending |
+| DATA-03 | — | Pending |
+| DATA-04 | — | Pending |
+| DATA-05 | — | Pending |
+| ETA-01 | — | Pending |
+| ETA-02 | — | Pending |
+| ETA-03 | — | Pending |
+| ETA-04 | — | Pending |
+| ALERT-01 | — | Pending |
+| ALERT-02 | — | Pending |
+| ERR-01 | — | Pending |
+| ERR-02 | — | Pending |
+| ERR-03 | — | Pending |
+| DS-01 | — | Pending |
+| DS-02 | — | Pending |
+| DS-03 | — | Pending |
+| DS-04 | — | Pending |
+| DS-05 | — | Pending |
+| DS-06 | — | Pending |
+| DS-07 | — | Pending |
+| DS-08 | — | Pending |
 
 **Coverage:**
-- v1.1 requirements: 15 total
-- Mapped to phases: 15
-- Unmapped: 0
+- v1 requirements: 53 total
+- Mapped to phases: 0
+- Unmapped: 53
 
 ---
-*Requirements defined: 2026-02-11*
-*Last updated: 2026-02-17 after Phase 9 completion*
+*Requirements defined: 2026-03-25*
+*Last updated: 2026-03-25 after initial definition*
