@@ -1,239 +1,268 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-02-11
+**Analysis Date:** 2026-03-25
 
 ## Directory Layout
 
 ```
-Tiger Transit/
-├── .planning/              # GSD planning artifacts
-│   ├── codebase/           # Codebase analysis documents (ARCHITECTURE.md, STRUCTURE.md, etc.)
-│   ├── phases/             # Phase-by-phase implementation plans and summaries
-│   └── research/           # Research documents for technologies and patterns
-├── backend/                # Node.js + Express API server
-│   ├── prisma/             # Database schema and migrations
-│   ├── scripts/            # Backend utility scripts (GTFS import)
-│   └── src/                # TypeScript application code
-│       ├── middleware/     # Express middleware (error-handler)
-│       ├── routes/         # API route handlers
-│       ├── services/       # Business logic (GTFS-RT polling)
-│       ├── types/          # TypeScript type definitions
-│       └── utils/          # Shared utilities
-├── data/                   # ML pipeline data storage
-│   └── processed/          # Parquet files for ML training
-├── gtfs_data/              # GTFS static feed CSV files
-├── mobile/                 # React Native mobile app
-│   ├── assets/             # Images, fonts, icons
-│   └── src/                # TypeScript/React code
-│       ├── components/     # Reusable UI components
-│       ├── config/         # App configuration (API URLs)
-│       ├── ETA-Model/      # Legacy ETA model code and raw data
-│       ├── hooks/          # Custom React hooks
-│       ├── navigation/     # React Navigation setup
-│       ├── screens/        # Screen components (Map, Routes, Stops, Settings)
-│       ├── store/          # Redux store and RTK Query API
-│       ├── theme/          # Color palette and styling
-│       ├── types/          # TypeScript type definitions
-│       └── utils/          # Shared utilities
-├── models/                 # Trained XGBoost models and evaluation outputs
-│   ├── diagnostics/        # Feature diagnostics and data quality reports
-│   └── evaluation/         # Phase 6 evaluation outputs (SHAP, metrics, comparisons)
-├── scripts/                # Python ML pipeline scripts
-├── docker-compose.yml      # Development environment (PostgreSQL, Redis)
-└── package.json            # Root package.json (workspace marker)
+tiger-transit-app/
+├── scripts/                  # XGBoost pipeline stage scripts (primary active track)
+├── data/
+│   └── processed/            # All intermediate and final parquet files
+├── gtfs_data/                # GTFS static schedule files (routes, stops, shapes, etc.)
+├── models/                   # Trained model artifacts and evaluation outputs
+│   ├── evaluation/           # SHAP plots, comparison tables, metrics JSON
+│   └── diagnostics/          # Error distribution charts
+├── reports/                  # HTML evaluation reports
+├── ETA-Model/                # PyTorch neural network track (earlier exploratory work)
+│   ├── api/                  # FastAPI inference server
+│   ├── src/                  # Core Python ML modules (model, train, preprocess, etc.)
+│   ├── data_prep/            # Modular data pipeline package (importable)
+│   │   └── output/           # data_prep pipeline parquet outputs
+│   ├── config/               # routes.json model registry, training_config.yaml
+│   ├── gtfs_data/            # Duplicate GTFS files used by ETA-Model scripts
+│   ├── raw_data/             # Raw telemetry JSONL.GZ files (collected by batchCollector)
+│   ├── live_data/            # Live CSV data files
+│   ├── processed_data_v10/   # PyTorch .npy feature/label arrays (version 10)
+│   ├── processed_data_v10_jaunt/
+│   ├── processed_data_v11/
+│   ├── scripts/              # Standalone validation scripts
+│   ├── temporaryFiles/       # Throwaway debug/test scripts (not production)
+│   ├── batchCollector.js     # Socket.IO historical data collector
+│   ├── processTrainingData.js
+│   ├── splitData.js
+│   ├── stops.json            # All stop coordinates and metadata
+│   ├── CLAUDE.md             # Project overview and key design decisions
+│   └── package.json          # Node.js deps (socket.io-client)
+├── Code/                     # Reference files preserved from earlier backend
+│   ├── etaspot_reference.ts  # Reference implementation for GTFS-RT feed parsing
+│   ├── gtfs/                 # Extracted GTFS static files
+│   │   └── *.txt
+│   ├── gtfs.zip
+│   ├── parse_gtfs.py
+│   ├── position_update_example.json
+│   └── position_updates.jsonl
+├── supabase/                 # Supabase local dev configuration
+│   ├── migrations/           # SQL migration files (ordered by timestamp prefix)
+│   ├── seed.sql
+│   └── config.toml
+├── .planning/                # GSD planning documents
+│   ├── codebase/             # Auto-generated codebase analysis docs
+│   ├── milestones/
+│   ├── phases/               # Per-phase implementation plans
+│   │   ├── 01-data-foundation/
+│   │   ├── 02-row-explosion-labels/
+│   │   ├── 03-baseline-model/
+│   │   ├── 04-differentiator-features/
+│   │   ├── 05-advanced-training/
+│   │   ├── 06-evaluation-and-analysis/
+│   │   ├── 07-baseline-infrastructure/
+│   │   ├── 08-training-adaptation/
+│   │   └── 09-evaluation-and-comparison/
+│   ├── quick/
+│   └── research/
+├── .claude/                  # Claude project memory
+├── analyze_gtfs_fields.py    # Root-level utility script
+├── pb file test.py           # Root-level protobuf test script
+├── stitch-prompts.md         # Prompt engineering notes
+└── assignment2.md            # Assignment notes
 ```
 
 ## Directory Purposes
 
-**`.planning/`:**
-- Purpose: GSD workflow artifacts - plans, research, summaries, codebase analysis
-- Contains: codebase/ (ARCHITECTURE.md, STRUCTURE.md, STACK.md, etc.), phases/ (01-06 subdirs with PLAN.md, SUMMARY.md), research/ (technology domain research)
-- Key files: `.planning/phases/*/PLAN.md` - phase implementation plans, `.planning/codebase/*.md` - codebase reference docs
-
-**`backend/`:**
-- Purpose: RESTful API server for GTFS data and real-time vehicle tracking
-- Contains: Express application, Prisma ORM, Socket.IO WebSocket server, GTFS-Realtime feed consumer
-- Key files: `src/index.ts` - main entry point, `prisma/schema.prisma` - database schema, `src/services/etaspot.service.ts` - GTFS-RT polling service
-
-**`backend/prisma/`:**
-- Purpose: Database schema definition and migration history
-- Contains: schema.prisma with GTFS models (Route, Stop, Trip, StopTime, Shape, Calendar, VehiclePosition, ServiceAlert)
-- Key files: `schema.prisma` - Prisma schema with PostGIS extension
-
-**`backend/src/routes/`:**
-- Purpose: Express route handlers for REST API endpoints
-- Contains: routes.routes.ts (GET /routes, GET /routes/:id, GET /routes/:id/shape), stops.routes.ts (GET /stops, GET /stops/nearby, GET /stops/:id), vehicles.routes.ts, health.routes.ts
-- Key files: All *`.routes.ts` files export Express Router instances
-
-**`backend/src/services/`:**
-- Purpose: Business logic layer separated from HTTP handlers
-- Contains: etaspot.service.ts - EventEmitter-based GTFS-Realtime feed poller with vehicle position tracking
-- Key files: `etaspot.service.ts` - singleton service instance exported
+**`scripts/`:**
+- Purpose: All XGBoost pipeline stages run sequentially as standalone scripts
+- Contains: One Python script per pipeline step; scripts import shared constants from one another (`from build_features import FEATURE_COLS`)
+- Key files:
+  - `scripts/parse_telemetry.py` — raw JSONL → `telemetry.parquet`
+  - `scripts/parse_arrivals.py` — arrivals CSVs → `arrivals.parquet`
+  - `scripts/build_stop_sequences.py` — GTFS stop order per route
+  - `scripts/explode_rows.py` — one row per vehicle × upcoming stop
+  - `scripts/label_join.py` — `merge_asof` join to produce ground truth
+  - `scripts/temporal_split.py` — temporal train/val/test splits
+  - `scripts/build_baselines.py` — historical baseline ETAs + residual labels
+  - `scripts/build_features.py` — v1 feature set (15 features)
+  - `scripts/build_differentiator_features.py` — v2 feature set (43 features)
+  - `scripts/train_baseline.py` — XGBoost baseline model
+  - `scripts/train_differentiator.py` — XGBoost with v2 features
+  - `scripts/train_advanced.py` — residual XGBoost with Optuna tuning
+  - `scripts/evaluate.py` — comprehensive evaluation with SHAP
 
 **`data/processed/`:**
-- Purpose: Intermediate and final Parquet datasets for ML training
-- Contains: telemetry.parquet (filtered vehicle GPS), arrivals.parquet (ground truth stop arrivals), exploded.parquet (per-stop prediction rows), labeled.parquet (rows with time_to_arrival labels), train/val/test splits, featured datasets with 15-27 engineered features
-- Key files: `train_featured_v2.parquet`, `val_featured_v2.parquet`, `test_featured_v2.parquet` - final feature sets for Phase 4+ models
+- Purpose: All intermediate parquet files between pipeline stages
+- Contains: Parquet files produced and consumed by `scripts/` in strict dependency order
+- Key files: `telemetry.parquet`, `arrivals.parquet`, `stop_sequences.parquet`, `exploded.parquet`, `labeled.parquet`, `train.parquet`, `val.parquet`, `test.parquet`, `train_featured.parquet`, `train_featured_v2.parquet`, `timepoints.parquet`, `weather.parquet`, `historical_segments.parquet`, `historical_dwells.parquet`
 
 **`gtfs_data/`:**
-- Purpose: Static GTFS feed CSV files (routes.txt, stops.txt, trips.txt, stop_times.txt, shapes.txt, calendar.txt)
-- Contains: Auburn University transit GTFS feed (40+ routes, 178 stops, 1041+ trips)
-- Key files: All `.txt` files follow GTFS specification
-
-**`mobile/src/components/`:**
-- Purpose: Reusable React components organized by feature area
-- Contains: Common/ (Badge, Card, LoadBar, ScreenContainer, SectionHeader), Map/ (MapView, RoutePolyline, StopMarker, VehicleMarker)
-- Key files: `Map/MapView.tsx` - main transit map component, `Map/VehicleMarker.tsx` - real-time vehicle position marker
-
-**`mobile/src/screens/`:**
-- Purpose: Top-level screen components rendered by React Navigation
-- Contains: MapScreen.tsx, RoutesScreen.tsx, RouteDetailScreen.tsx, StopDetailScreen.tsx, SettingsScreen.tsx
-- Key files: `MapScreen.tsx` - renders TransitMapView, entry point for map tab
-
-**`mobile/src/store/api/`:**
-- Purpose: RTK Query API slice for backend data fetching
-- Contains: transitApi.ts with endpoints for routes, stops, shapes, nearby stops
-- Key files: `transitApi.ts` - exports API slice and React hooks (useGetRoutesQuery, useGetStopsQuery, etc.)
-
-**`mobile/src/ETA-Model/`:**
-- Purpose: Legacy data collection code and raw historical data
-- Contains: batchCollector.js, getWeatherData.ts, processTrainingData.js, raw_data/ subdirectory with arrivals CSVs and telemetry JSONL
-- Key files: Historical reference only - not used in current ML pipeline
+- Purpose: GTFS static schedule files for the primary `scripts/` pipeline
+- Contains: Standard GTFS CSV files: `routes.txt`, `stops.txt`, `trips.txt`, `stop_times.txt`, `shapes.txt`, `calendar.txt`, `calendar_dates.txt`, `agency.txt`, etc.
 
 **`models/`:**
-- Purpose: Trained XGBoost model artifacts and evaluation outputs
-- Contains: baseline_v1.ubj, differentiator_v1.ubj, tuned_v1.ubj, asymmetric_v1.ubj, quantile_p{20,50,75}_v1.ubj, *_metrics.json, evaluation/ subdirectory
-- Key files: `tuned_v1.ubj` - Phase 5 Optuna-tuned model, `evaluation/eval_report.md` - Phase 6 comprehensive evaluation
+- Purpose: All trained model artifacts and evaluation outputs
+- Contains: XGBoost `.ubj` model files, `*_metrics.json` reports, SHAP `.png` charts
+- Key files: `baseline_v1.ubj`, `differentiator_v1.ubj`, `tuned_v1.ubj`, `v1_1_residual.ubj`, `models/evaluation/eval_report.md`, `models/diagnostics/baseline_error_dist.png`
+- Generated: Yes (not committed)
 
-**`models/evaluation/`:**
-- Purpose: Phase 6 evaluation outputs (EVAL-01 through EVAL-04)
-- Contains: eval_metrics_sliced.json, eval_shap_global.png, eval_shap_waterfall_*.png, eval_comparison.json, eval_residuals*.png, eval_report.md
-- Key files: `eval_report.md` - master evaluation report
+**`ETA-Model/src/`:**
+- Purpose: Core Python modules for the PyTorch track
+- Contains: One module per concern; all importable by `api/server.py` and `train.py`
+- Key files:
+  - `ETA-Model/src/model.py` — `ETAPredictor`, `ETAPredictorWithUncertainty`, `ETAPredictorQuantile`, `LightweightETAPredictor`; `create_model()`, `save_model()`, `load_model()` factory/IO functions
+  - `ETA-Model/src/train.py` — `Trainer` class, `EarlyStopping` class, CLI
+  - `ETA-Model/src/preprocess.py` — `NormalizationParams` dataclass, `extract_features_for_prediction()`
+  - `ETA-Model/src/features.py` — feature group extraction
+  - `ETA-Model/src/loss.py` — `AsymmetricETALoss`
+  - `ETA-Model/src/dataset.py` — PyTorch `Dataset`, `create_data_loaders()`
+  - `ETA-Model/src/evaluate.py` — metrics computation
+  - `ETA-Model/src/distance.py` — GTFS route distance + Haversine fallback
+  - `ETA-Model/src/inference.py` — batch inference utilities
 
-**`scripts/`:**
-- Purpose: Python ML pipeline for ETA model training
-- Contains: Data parsers (parse_gtfs.py, parse_arrivals.py, parse_telemetry.py, parse_weather.py), row processing (explode_rows.py, label_join.py, temporal_split.py), feature engineering (build_features.py, build_differentiator_features.py), training (train_baseline.py, train_differentiator.py, train_advanced.py, train_asymmetric_quantile.py), evaluation (evaluate.py)
-- Key files: Pipeline executed sequentially: parse_* → explode_rows → label_join → temporal_split → build_features → train_* → evaluate
+**`ETA-Model/data_prep/`:**
+- Purpose: Modular, importable data pipeline package for the older GBDT-focused ETA-Model track
+- Contains: Python package with `__init__.py`; each module has a single public compute function
+- Key files: `pipeline.py` (orchestrator), `config.py` (all constants), `filters.py`, `rolling_features.py`, `distance_features.py`, `temporal_features.py`, `weather_features.py`, `historical_stats.py`, `label_creator.py`, `data_quality.py`
+
+**`ETA-Model/api/`:**
+- Purpose: FastAPI prediction server
+- Contains: `server.py` only — all logic in one file; CORS enabled for `*`
+- Endpoints: `GET /api/health`, `GET /api/routes`, `POST /api/eta/predict`, `POST /api/models/reload`, `GET /api/stops/{stop_id}`
+
+**`ETA-Model/config/`:**
+- Purpose: Model registry and training configuration
+- Contains: `routes.json` (array of `{id, name, modelFile, lastTrained}`), `training_config.yaml`, `vehicle_mapping.json`, per-route normalization params (`norm_route_{id}.json`)
+
+**`ETA-Model/raw_data/`:**
+- Purpose: Raw historical telemetry storage from batchCollector
+- Contains: `raw_data_YYYY-MM-DD.jsonl.gz` files, one per collection day; also arrivals CSVs
+- Generated: Yes (not committed)
+
+**`supabase/migrations/`:**
+- Purpose: Database schema versioning via timestamped SQL files
+- Contains:
+  - `20260319024944_create_schema.sql` — creates `gtfs`, `position_updates`, `trip_updates` schemas
+  - `20260319025850_position_updates_table.sql` — `position_updates.position_updates` table
+  - `20260323023315_create_gtfs_calendar.sql` — `gtfs.calendar` table
+- Naming: `{YYYYMMDDHHMMSS}_{description}.sql`
+
+**`Code/`:**
+- Purpose: Reference artifacts preserved from an earlier backend implementation before it was deleted
+- Contains: `etaspot_reference.ts` (working GTFS-RT protobuf parsing logic), raw GTFS zip + extracted files, test scripts for protobuf parsing and database pushing
+- Note: Not active code; serves as reference when rebuilding the Supabase ingestion service
 
 ## Key File Locations
 
 **Entry Points:**
-- `backend/src/index.ts`: Express server entry point, Socket.IO initialization, ETASpotService startup
-- `mobile/App.tsx`: React Native root component with Redux Provider
-- `mobile/index.ts`: Expo entry point, imports App.tsx
-- `scripts/train_baseline.py`: Phase 3 baseline XGBoost training
-- `scripts/train_advanced.py`: Phase 5 Optuna hyperparameter tuning
-- `scripts/evaluate.py`: Phase 6 comprehensive model evaluation
+- `ETA-Model/batchCollector.js`: Data collection (Socket.IO to ETA SPOT IRM)
+- `ETA-Model/api/server.py`: Inference API server
+- `scripts/parse_telemetry.py`: First stage of XGBoost pipeline
+- `ETA-Model/src/train.py`: PyTorch model training
 
 **Configuration:**
-- `backend/prisma/schema.prisma`: Database schema for GTFS and real-time data
-- `backend/package.json`: Backend dependencies (express, prisma, socket.io, gtfs-realtime-bindings, ioredis)
-- `mobile/package.json`: Mobile dependencies (expo, react-native, redux, react-navigation, react-native-maps)
-- `docker-compose.yml`: PostgreSQL (PostGIS), Redis, and backend service definitions
-- `mobile/src/config/api.config.ts`: API base URL and endpoint definitions
-- `.gitignore`: Excludes node_modules, data/processed (large parquet files), models/*.ubj (binary models)
+- `ETA-Model/config/routes.json`: Model registry
+- `ETA-Model/data_prep/config.py`: All pipeline constants (feature lists, quality thresholds, split ratios)
+- `supabase/config.toml`: Supabase local dev config (project: `Senior_Design`, schemas exposed via API)
+- `ETA-Model/CLAUDE.md`: Authoritative architecture and command reference
 
-**Core Logic:**
-- `backend/src/services/etaspot.service.ts`: GTFS-Realtime feed polling, vehicle position tracking, ETA computation
-- `backend/src/routes/routes.routes.ts`: Route queries, stop sequences, polyline shape decoding
-- `backend/src/routes/stops.routes.ts`: Stop queries, nearby search with Haversine distance, route-stop mappings
-- `mobile/src/store/api/transitApi.ts`: RTK Query API slice with typed endpoints
-- `scripts/build_features.py`: Feature engineering (distance, scheduled time, lateness, temporal, weather)
-- `scripts/build_differentiator_features.py`: Phase 4 differentiator features (historical dwell/segment times)
-- `scripts/label_join.py`: merge_asof join to create ground truth labels
+**Core ML Logic:**
+- `ETA-Model/src/model.py`: All PyTorch model classes and factory functions
+- `ETA-Model/src/loss.py`: Asymmetric loss function
+- `scripts/build_differentiator_features.py`: Feature set v2 constants (`FEATURE_COLS_V2`, `CATEGORICAL_COLS_V2`)
+- `scripts/build_features.py`: Feature set v1 constants (`FEATURE_COLS`, `CATEGORICAL_COLS`, `TARGET_COL`)
+- `scripts/train_advanced.py`: Current best model training pipeline
+
+**Reference/Documentation:**
+- `ETA-Model/CLAUDE.md`: Project overview, data pipeline diagram, key design decisions
+- `Code/etaspot_reference.ts`: GTFS-RT feed URLs, data model interface definitions, parsing logic
+- `ETA-Model/stops.json`: All stop IDs, names, and coordinates
 
 **Testing:**
-- Not present - no test files or test framework configuration detected
+- `reports/v1_1_evaluation.html`: Generated evaluation report for current best model
 
 ## Naming Conventions
 
 **Files:**
-- Backend routes: `<entity>.routes.ts` (routes.routes.ts, stops.routes.ts)
-- Backend services: `<service>.service.ts` (etaspot.service.ts)
-- Python scripts: `<verb>_<noun>.py` (parse_gtfs.py, build_features.py, train_baseline.py)
-- React components: PascalCase.tsx (MapScreen.tsx, VehicleMarker.tsx)
-- Parquet datasets: `<stage>.parquet` or `<split>_featured.parquet` (telemetry.parquet, train_featured_v2.parquet)
-- Model artifacts: `<variant>_v<version>.ubj` (baseline_v1.ubj, tuned_v1.ubj, quantile_p20_v1.ubj)
+- Pipeline scripts: `verb_noun.py` style (e.g., `parse_telemetry.py`, `build_features.py`, `train_baseline.py`, `label_join.py`)
+- Parquet intermediates: `{noun}.parquet` for raw stages, `{split}_featured.parquet` / `{split}_featured_v2.parquet` for feature-enriched splits
+- XGBoost models: `{name}_v{N}.ubj`
+- PyTorch models: `route_{id}/best_model.pt`
+- Supabase migrations: `{timestamp}_{description}.sql`
+- JSONL raw data: `raw_data_YYYY-MM-DD.jsonl.gz`
+
+**Python Modules:**
+- snake_case for all module names and function names
+- Module-level constants in SCREAMING_SNAKE_CASE
+- Classes in PascalCase (e.g., `ETAPredictor`, `NormalizationParams`, `EarlyStopping`)
 
 **Directories:**
-- Backend: lowercase (routes, services, middleware, types, utils)
-- Mobile: lowercase (components, screens, hooks, store, navigation)
-- React component subdirs: PascalCase (Map/, Common/)
-- Data processing: lowercase (data/processed/, gtfs_data/, models/)
+- Versioned processed data: `processed_data_v{N}/` in `ETA-Model/`
+- Evaluation outputs: `models/evaluation/`
+- Diagnostic outputs: `models/diagnostics/`
 
 ## Where to Add New Code
 
-**New Backend API Endpoint:**
-- Primary code: `backend/src/routes/<entity>.routes.ts` - create new Router, define GET/POST handlers
-- Mount route: `backend/src/index.ts` - add `app.use('/<path>', <entity>Router)`
-- Business logic: `backend/src/services/<entity>.service.ts` if logic is complex
-- Types: `backend/src/types/<entity>.types.ts` for request/response interfaces
+**New XGBoost pipeline stage:**
+- Script: `scripts/{verb}_{noun}.py`
+- Reads from: `data/processed/` parquets
+- Writes to: `data/processed/` parquets
+- Import shared feature constants from: `scripts/build_differentiator_features.py` (v2) or `scripts/build_features.py` (v1)
+- Follow existing docstring format: module-level docstring with Input/Output/Usage sections
 
-**New Mobile Screen:**
-- Implementation: `mobile/src/screens/<ScreenName>Screen.tsx` - create React.FC component
-- Navigation: `mobile/src/navigation/TabNavigator.tsx` or `RootNavigator.tsx` - add Screen to navigator
-- API data: `mobile/src/store/api/transitApi.ts` - add RTK Query endpoint if needed
-- Components: `mobile/src/components/<Feature>/` - extract reusable components
+**New feature column:**
+- Add to `FEATURE_COLS_V2` / `CATEGORICAL_COLS_V2` in `scripts/build_differentiator_features.py`
+- Compute the column in `build_differentiator_features.py` before the output write
+- Update `FEATURE_COLUMNS` in `ETA-Model/data_prep/config.py` if also using the data_prep pipeline
 
-**New ML Training Variant:**
-- Implementation: `scripts/train_<variant>.py` - follow pattern from train_baseline.py or train_advanced.py
-- Feature engineering: `scripts/build_<variant>_features.py` if new features needed
-- Input: Load from `data/processed/train_featured*.parquet`, `val_featured*.parquet`, `test_featured*.parquet`
-- Output: Save model to `models/<variant>_v1.ubj`, metrics to `models/<variant>_metrics.json`
+**New Supabase table:**
+- Migration file: `supabase/migrations/{timestamp}_{description}.sql`
+- Add schema to `schemas` list in `supabase/config.toml` if in a new schema
 
-**New Data Processing Step:**
-- Implementation: `scripts/<verb>_<noun>.py` - add to pipeline between existing steps
-- Input: Read from `data/processed/<previous_step>.parquet`
-- Output: Write to `data/processed/<new_step>.parquet`
-- Update README: Document new step in pipeline execution order
+**New PyTorch model variant:**
+- Class: add to `ETA-Model/src/model.py`, subclass `ETAPredictor`
+- Register in `create_model()` factory and `load_model()` dispatch in same file
+- Add model type string to `ETA-Model/config/routes.json` route entry
 
-**Utilities:**
-- Backend shared helpers: `backend/src/utils/` - create new .ts files, export functions
-- Mobile shared helpers: `mobile/src/utils/` - create new .ts files
-- Python ML helpers: Define in existing scripts or create `scripts/<helper>.py` and import in other scripts
+**New inference endpoint:**
+- Add to `ETA-Model/api/server.py`
+- Define Pydantic request/response models at top of file
+- Load any new data requirements in `startup_event()`
+
+**Utility / analysis scripts:**
+- Exploratory or one-off: place at repo root (e.g., `analyze_gtfs_fields.py`)
+- Reusable pipeline utilities: place in `scripts/`
+- Debugging / throwaway: place in `ETA-Model/temporaryFiles/` (not production)
 
 ## Special Directories
 
-**`.planning/`:**
-- Purpose: GSD workflow artifacts for project planning and codebase documentation
-- Generated: No - manually created via GSD commands
-- Committed: Yes
+**`ETA-Model/raw_data/`:**
+- Purpose: Historical GPS telemetry collected by batchCollector, one file per day
+- Generated: Yes
+- Committed: No (large binary files, listed in `.gitignore`)
+
+**`ETA-Model/processed_data_v{N}/`:**
+- Purpose: Versioned numpy arrays for PyTorch training (`features.npy`, `labels.npy`, `vehicle_ids.npy`, `normalization_stats.json`)
+- Generated: Yes (by PyTorch preprocessing pipeline)
+- Committed: No
 
 **`data/processed/`:**
-- Purpose: Intermediate ML pipeline datasets (parquet files)
-- Generated: Yes - by Python scripts in scripts/
-- Committed: No - .gitignore excludes data/processed/ (files are large, 100MB+)
+- Purpose: All intermediate and final parquet files for XGBoost pipeline
+- Generated: Yes (by `scripts/` pipeline)
+- Committed: No
 
 **`models/`:**
-- Purpose: Trained XGBoost model binaries and evaluation outputs
-- Generated: Yes - by training and evaluation scripts
-- Committed: Partial - .ubj model files excluded (large binaries), JSON metrics and PNG plots committed
+- Purpose: Trained model artifacts
+- Generated: Yes
+- Committed: No
 
-**`mobile/src/ETA-Model/raw_data/`:**
-- Purpose: Historical raw telemetry JSONL and arrivals CSV files
-- Generated: No - collected from live ETA SPOT system
-- Committed: No - .gitignore excludes raw_data/ (large files)
+**`ETA-Model/temporaryFiles/`:**
+- Purpose: Debug, test, and throwaway scripts used during development
+- Generated: No (manually created)
+- Committed: Historically yes, but considered non-production code
 
-**`backend/node_modules/`, `mobile/node_modules/`:**
-- Purpose: Installed npm dependencies
-- Generated: Yes - by npm install
-- Committed: No - .gitignore excludes node_modules/
-
-**`mobile/.expo/`:**
-- Purpose: Expo build cache and metadata
-- Generated: Yes - by Expo CLI during development
-- Committed: No - .gitignore excludes .expo/
-
-**`models/diagnostics/`:**
-- Purpose: Feature diagnostics and data quality analysis from Phase 4
-- Generated: Yes - by scripts/diagnose_features.py
-- Committed: Yes - diagnostic outputs are analysis artifacts
-
-**`models/evaluation/`:**
-- Purpose: Phase 6 comprehensive evaluation outputs (EVAL-01 through EVAL-04)
-- Generated: Yes - by scripts/evaluate.py
-- Committed: Yes - evaluation reports and visualizations are deliverables
+**`.planning/`:**
+- Purpose: GSD planning system — phase plans, milestones, codebase analysis docs
+- Generated: Partially (by GSD commands)
+- Committed: Yes
 
 ---
 
-*Structure analysis: 2026-02-11*
+*Structure analysis: 2026-03-25*
