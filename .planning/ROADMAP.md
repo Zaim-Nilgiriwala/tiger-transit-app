@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Expo project init, design system tokens, fonts, Redux store scaffold
+- [x] 01-01-PLAN.md -- Expo project init, design system tokens, fonts, Redux store scaffold
 - [ ] 01-02-PLAN.md -- Full-screen map, splash screen, glassmorphic bottom bar, floating location button
 
 ### Phase 2: Real-Time Data Pipeline
@@ -123,7 +123,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation and Map Shell | 0/2 | Planning complete | - |
+| 1. Foundation and Map Shell | 1/2 | In progress | - |
 | 2. Real-Time Data Pipeline | 0/? | Not started | - |
 | 3. Bottom Sheet and Route List | 0/? | Not started | - |
 | 4. Route Detail and ETA Predictions | 0/? | Not started | - |
