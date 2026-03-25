@@ -1,12 +1,12 @@
-import { useCallback, useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useCallback } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { Provider } from 'react-redux';
 
 import { store } from './src/store';
 import { useCustomFonts } from './src/hooks/useFonts';
-import { colors, typography } from './src/theme';
+import MapScreen from './src/screens/MapScreen';
 
 // Keep the splash screen visible while fonts load
 SplashScreen.preventAutoHideAsync();
@@ -20,13 +20,15 @@ function AppContent() {
     }
   }, [fontsLoaded, fontError]);
 
+  // Do NOT render MapScreen until fonts are loaded.
+  // User sees: splash -> fonts load -> splash hides -> map appears.
   if (!fontsLoaded && !fontError) {
     return null;
   }
 
   return (
     <View style={styles.container} onLayout={onLayoutRootView}>
-      <Text style={styles.title}>Tiger Transit</Text>
+      <MapScreen />
       <StatusBar style="dark" />
     </View>
   );
@@ -43,12 +45,5 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    ...typography.headlineLG,
-    color: colors.primary,
   },
 });
