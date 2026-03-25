@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-03-25T22:03:44Z"
-last_activity: 2026-03-25 -- Completed Plan 01-01 (Expo project init, design system, Redux store)
+status: completed
+stopped_at: Completed 01-02-PLAN.md (Phase 1 complete)
+last_updated: "2026-03-25T22:12:16.008Z"
+last_activity: 2026-03-25 -- Completed Plan 01-02 (Full-screen map, bottom bar, location button)
 progress:
   total_phases: 6
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
-  percent: 8
+  completed_plans: 2
+  percent: 100
 ---
 
 # Project State
@@ -25,29 +25,29 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 
 ## Current Position
 
-Phase: 1 of 6 (Foundation and Map Shell)
-Plan: 1 of 2 in current phase
-Status: Executing
-Last activity: 2026-03-25 -- Completed Plan 01-01 (Expo project init, design system, Redux store)
+Phase: 1 of 6 (Foundation and Map Shell) -- COMPLETE
+Plan: 2 of 2 in current phase (phase complete)
+Status: Phase 1 Complete
+Last activity: 2026-03-25 -- Completed Plan 01-02 (Full-screen map, bottom bar, location button)
 
-Progress: [█░░░░░░░░░] 8%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 9 min
-- Total execution time: 0.15 hours
+- Total plans completed: 2
+- Average duration: 6 min
+- Total execution time: 0.20 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1. Foundation and Map Shell | 1/2 | 9 min | 9 min |
+| 1. Foundation and Map Shell | 2/2 | 12 min | 6 min |
 
 **Recent Trend:**
-- Last 5 plans: 9m
-- Trend: Starting
+- Last 5 plans: 9m, 3m
+- Trend: Accelerating
 
 *Updated after each plan completion*
 
@@ -65,6 +65,10 @@ Recent decisions affecting current work:
 - [01-01]: Excluded pre-existing Code/, ETA-Model/, scripts/ directories from tsconfig to isolate RN project
 - [01-01]: Font family keys use expo-google-fonts naming convention (Manrope_700Bold) for direct compatibility
 - [01-01]: Shadow shadowColor uses rgba(12, 35, 64, 1) with separate shadowOpacity for cross-platform behavior
+- [Phase 01-02]: MapView uses default provider (Apple Maps iOS, Google Maps Android) -- no explicit provider prop
+- [Phase 01-02]: GlassBottomBar built as self-contained component for Phase 3 drag/snap wrapping
+- [Phase 01-02]: BlurView with rgba background fallback for glassmorphism on both platforms
+- [Phase 01-02]: Location button is no-op when permission denied, matching silent-denial UX pattern
 
 ### Pending Todos
 
@@ -78,6 +82,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-25T22:03:44Z
-Stopped at: Completed 01-01-PLAN.md
-Resume file: .planning/phases/01-foundation-and-map-shell/01-02-PLAN.md
+Last session: 2026-03-25T22:12:09.836Z
+Stopped at: Completed 01-02-PLAN.md (Phase 1 complete)
+Resume file: None
