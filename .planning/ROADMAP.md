@@ -1,84 +1,131 @@
-# Roadmap: Tiger Transit XGBoost ETA Model
+# Roadmap: Tiger Transit Frontend
 
-## Milestones
+## Overview
 
-- v1.0 XGBoost ETA Model - Phases 1-6 (shipped 2026-02-11)
-- v1.1 Model Reapproach - Phases 7-9 (complete)
+This roadmap delivers a real-time bus tracking app for Auburn University's Tiger Transit system. The build progresses from proving the hardest integration risk (maps on Expo SDK 55) through establishing the real-time data pipeline, then layering the glassmorphic bottom sheet UI, route detail with ML-powered ETAs, animated markers with callouts, and finally completing the feature set with stop detail, favorites, alerts, and error handling. Each phase delivers a coherent, testable capability that the next phase builds on.
 
 ## Phases
 
-<details>
-<summary>v1.0 XGBoost ETA Model (Phases 1-6) - SHIPPED 2026-02-11</summary>
+**Phase Numbering:**
+- Integer phases (1, 2, 3): Planned milestone work
+- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
-Phases 1-6 delivered the initial XGBoost ETA model: 123.1s MAE across 23 routes, 82.6% improvement over naive schedule. 13 plans completed across 6 phases. See MILESTONES.md for full details.
+Decimal phases appear between their surrounding integers in numeric order.
 
-</details>
-
-### v1.1 Model Reapproach (Complete)
-
-**Milestone Goal:** Rearchitect the XGBoost model to predict residuals (actual - baseline_ETA) instead of raw seconds, beating v1.0's 123.1s MAE on the same test set.
-
-- [x] **Phase 7: Baseline Infrastructure** - Compute historical baselines and residual labels for all data splits ✓
-- [x] **Phase 8: Training Adaptation** - Retrain XGBoost on residual targets with fresh hyperparameter tuning ✓
-- [x] **Phase 9: Evaluation and Comparison** - Prove v1.1 beats v1.0 with reconstructed prediction metrics ✓
+- [ ] **Phase 1: Foundation and Map Shell** - Expo SDK 55 project with full-screen map, design token system, and Redux store scaffold
+- [ ] **Phase 2: Real-Time Data Pipeline** - GTFS-RT protobuf decoding, 5s polling service, live bus markers on map
+- [ ] **Phase 3: Bottom Sheet and Route List** - Glassmorphic draggable bottom sheet with sectioned route browsing
+- [ ] **Phase 4: Route Detail and ETA Predictions** - Route detail view with ordered stop list, XGBoost ETAs, polyline and stop markers on map
+- [ ] **Phase 5: Animated Markers and Callout Bubbles** - Smooth marker animation and interactive glass-panel callouts
+- [ ] **Phase 6: Stop Detail, Favorites, Alerts, and Polish** - Remaining features to complete the MVP
 
 ## Phase Details
 
-### Phase 7: Baseline Infrastructure
-**Goal**: Historical baseline ETAs exist for every row in every split, and residual labels are computed, enabling all downstream training and evaluation
-**Depends on**: v1.0 pipeline (existing parquet splits, historical_segments.parquet, stop_sequences.parquet)
-**Requirements**: BASE-01, BASE-02, BASE-03, BASE-04, BASE-05
+### Phase 1: Foundation and Map Shell
+**Goal**: User opens the app and sees a full-screen map of Auburn campus with the Academic Navigator design system fully established
+**Depends on**: Nothing (first phase)
+**Requirements**: MAP-01, MAP-08, DS-01, DS-02, DS-03, DS-04, DS-05, DS-06, DS-07, DS-08
 **Success Criteria** (what must be TRUE):
-  1. Stop-to-stop historical average lookup table exists, built exclusively from training data (no val/test leakage)
-  2. Every row in train/val/test parquets has a non-NaN baseline_eta value (after fallback hierarchy), with fewer than 5% of rows requiring tier-3+ fallback
-  3. Residual column (time_to_arrival_seconds - baseline_eta) exists in all splits, with training-set mean within +/-30s of zero
-  4. Baseline-only MAE on test set is reported and falls between 150s and 500s (sanity check -- better than naive 708.9s, worse than v1.0 123.1s)
-**Plans**: 1 plan
+  1. App launches on both iOS and Android and displays a full-screen map centered on Auburn campus (~32.606, -85.487) within 2 seconds
+  2. Floating glass-panel map controls (my_location, search placeholder, settings placeholder) are visible and tappable above the map
+  3. Manrope and Inter fonts render correctly in test labels with the full type scale (Headline-LG, Title-MD, Body-MD, Label-SM)
+  4. Design tokens (tonal layering colors, navy-tinted shadows, 8px grid spacing, 20px edge margins) are applied to test components and produce the Academic Navigator look
+  5. Redux store initializes with all six slices (routes, vehicles, predictions, ui, preferences, alerts) and renders without errors on both platforms
+**Plans**: TBD
 
 Plans:
-- [x] 07-01-PLAN.md -- Build baseline computation pipeline (s2s lookups, segment-median-sum, 50/50 blend, residual labels, diagnostic report)
+- [ ] 01-01: TBD
+- [ ] 01-02: TBD
 
-### Phase 8: Training Adaptation
-**Goal**: A trained v1.1 XGBoost model that predicts residuals, with optimized hyperparameters for the zero-centered residual target distribution
-**Depends on**: Phase 7 (baseline_eta and residual columns must exist in augmented parquets)
-**Requirements**: TRAIN-01, TRAIN-02, TRAIN-03, TRAIN-04, TRAIN-05
+### Phase 2: Real-Time Data Pipeline
+**Goal**: Users see live bus positions on the map updating every 5 seconds with stale vehicles automatically hidden
+**Depends on**: Phase 1
+**Requirements**: DATA-01, DATA-02, DATA-03, DATA-04, DATA-05, MAP-02, MAP-04, MAP-09
 **Success Criteria** (what must be TRUE):
-  1. Training pipeline uses residual as target variable while preserving time_to_arrival_seconds for reconstruction
-  2. baseline_eta is included as feature #44 in the feature matrix
-  3. Optuna completes a fresh study with best parameters that differ from v1.0 (confirming the different target distribution was accounted for)
-  4. Both squared error and Huber loss are tested, with the better-performing objective selected based on validation MAE
-  5. Outlier trimming removes the worst 1-2% of training samples, and training converges without loss oscillation
-**Plans**: 2 plans
+  1. GTFS-RT protobuf feeds (position updates + trip updates) decode correctly on both iOS and Android, with trip updates processed before position updates
+  2. Bus markers appear on the map at correct positions and update every 5 seconds while the app is in the foreground
+  3. Bus markers show directional heading and use secondary-fixed orange color
+  4. Polling stops when the app is backgrounded and resumes immediately when foregrounded
+  5. Vehicles with timestamps older than 2 minutes disappear from the map automatically
+**Plans**: TBD
 
 Plans:
-- [x] 08-01-PLAN.md -- Update feature pipeline for v1.1 (drop lateness_now, add 3 baselines, residual target, rebuild parquets)
-- [x] 08-02-PLAN.md -- Optuna tuning with GPU, outlier trimming, Huber comparison, deterministic final model
+- [ ] 02-01: TBD
+- [ ] 02-02: TBD
 
-### Phase 9: Evaluation and Comparison
-**Goal**: Definitive proof that v1.1 beats v1.0, with reconstructed predictions evaluated apples-to-apples on the same test set
-**Depends on**: Phase 8 (trained v1.1 model must exist)
-**Requirements**: EVAL-01, EVAL-02, EVAL-03, EVAL-04, EVAL-05
+### Phase 3: Bottom Sheet and Route List
+**Goal**: Users can browse all routes via a glassmorphic draggable bottom sheet with active bus counts and visual polish
+**Depends on**: Phase 2
+**Requirements**: SHEET-01, SHEET-02, SHEET-03, SHEET-04, SHEET-05, ROUTE-01, ROUTE-02, ROUTE-03, ROUTE-04, ERR-02, ERR-03
 **Success Criteria** (what must be TRUE):
-  1. Reconstructed final predictions (baseline_eta + predicted_residual) produce MAE lower than v1.0's 123.1s on the test set
-  2. Side-by-side report shows three MAEs: baseline-only, v1.0 raw (123.1s), and v1.1 final -- with v1.1 the lowest
-  3. Per-route comparison table identifies which routes improved and which regressed, with majority of routes showing improvement
-  4. SHAP analysis shows real-time condition features (speed_mean_*, speed_ratio) gaining importance relative to spatial features (stop_index, distance_to_target) compared to v1.0
-  5. Residual distribution analysis (histogram, skew, kurtosis) documents the target distribution characteristics for informing future loss function decisions
-**Plans**: 1 plan
+  1. Bottom sheet drags smoothly between three snap points (collapsed ~80px, half ~45%, full ~90%) with spring animation and a visible grab handle pill
+  2. Bottom sheet uses frosted-glass glassmorphic styling with backdrop blur and the map remains fully interactive (pan/zoom) when the sheet is at half position
+  3. Route list displays sectioned layout (Active Routes, Favorites placeholder, Alerts placeholder) with each card showing route color accent, short name, long name, active bus count, and next ETA
+  4. Route cards use Level 2 surfaces on Level 1 section backgrounds with no border lines (tonal layering only)
+  5. Inactive routes (0 active buses) appear dimmed, sorted to bottom, and show "No active buses" message
+**Plans**: TBD
 
 Plans:
-- [x] 09-01-PLAN.md -- Build v1.1 evaluation script with self-contained HTML report (headline comparison, per-route table, SHAP analysis, residual diagnostics)
+- [ ] 03-01: TBD
+- [ ] 03-02: TBD
+
+### Phase 4: Route Detail and ETA Predictions
+**Goal**: Users can tap a route to see its full stop list with ML-powered arrival predictions and the route drawn on the map
+**Depends on**: Phase 3
+**Requirements**: ROUTE-05, ROUTE-06, ROUTE-07, ROUTE-08, ROUTE-09, ROUTE-10, MAP-05, MAP-06, MAP-07, ETA-02, ETA-03, ETA-04
+**Success Criteria** (what must be TRUE):
+  1. Tapping a route card transitions the sheet to Route Detail View showing route name in Headline-LG (32pt Manrope Bold) with color bar, and draws the route polyline plus stop markers on the map in route color
+  2. Map auto-fits to show all stops and active buses for the selected route
+  3. Ordered stop list displays next 3 arrival ETAs per stop from XGBoost model predictions, formatted as "3 min", "< 1 min", or "No buses en route"
+  4. Tapping a stop in the list centers the map on that stop, and a back button returns to the route list
+  5. If model prediction times out, ETAs fall back to GTFS-RT trip update data or show "ETA unavailable"
+**Plans**: TBD
+
+Plans:
+- [ ] 04-01: TBD
+- [ ] 04-02: TBD
+
+### Phase 5: Animated Markers and Callout Bubbles
+**Goal**: Bus markers animate smoothly between positions and tapping markers opens informative glass-panel callouts
+**Depends on**: Phase 4
+**Requirements**: MAP-03, CALL-01, CALL-02, CALL-03, CALL-04, CALL-05, ETA-01
+**Success Criteria** (what must be TRUE):
+  1. Bus markers animate smoothly between position updates with 1000ms Reanimated-based interpolation (no visible jumps) on both iOS and Android
+  2. Tapping a bus marker opens a glass-panel callout showing route, bus ID, speed, passengers, delay status, and GTFS-RT feed ETA to next stop
+  3. Tapping a stop marker opens a glass-panel callout showing stop name, stop number, ETA, route badges, and a "View More" link
+  4. Only one callout can be open at a time, tapping outside dismisses it, and callout data refreshes with each 5-second polling cycle
+**Plans**: TBD
+
+Plans:
+- [ ] 05-01: TBD
+- [ ] 05-02: TBD
+
+### Phase 6: Stop Detail, Favorites, Alerts, and Polish
+**Goal**: All remaining MVP features are complete -- users can inspect stop details, manage favorite routes, view service alerts, and encounter graceful error handling
+**Depends on**: Phase 5
+**Requirements**: STOP-01, STOP-02, STOP-03, STOP-04, STOP-05, STOP-06, STOP-07, FAV-01, FAV-02, FAV-03, FAV-04, ALERT-01, ALERT-02, ERR-01
+**Success Criteria** (what must be TRUE):
+  1. Stop Detail View shows stop name, stop number, route count, city, a pulsing LIVE badge when buses are arriving, arriving bus cards with delay status and ETA, passenger capacity bars, and color-coded route pill badges in the footer
+  2. User can favorite a route via star button in Route Detail, see favorites pinned to top of route list in a Favorites section, toggle between "All Routes" and "Favorites" via pill tab, and favorites persist across app sessions
+  3. Service alerts from the GTFS-RT alerts feed appear in the Alerts section of the route list, polled every 60 seconds
+  4. When network is lost, the app shows last known positions dimmed with a "No connection" glass-panel banner
+  5. Tapping a route badge in the Stop Detail footer switches to that route's detail view
+**Plans**: TBD
+
+Plans:
+- [ ] 06-01: TBD
+- [ ] 06-02: TBD
 
 ## Progress
 
-**Execution Order:** Phase 7 -> Phase 8 -> Phase 9 (strict linear dependency)
+**Execution Order:**
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
-| Phase | Milestone | Plans Complete | Status | Completed |
-|-------|-----------|----------------|--------|-----------|
-| 7. Baseline Infrastructure | v1.1 | 1/1 | Complete | 2026-02-11 |
-| 8. Training Adaptation | v1.1 | 2/2 | Complete | 2026-02-17 |
-| 9. Evaluation and Comparison | v1.1 | 1/1 | Complete | 2026-02-17 |
-
----
-*Roadmap created: 2026-02-11*
-*Last updated: 2026-02-17 (Phase 9 complete, v1.1 milestone complete)*
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 1. Foundation and Map Shell | 0/? | Not started | - |
+| 2. Real-Time Data Pipeline | 0/? | Not started | - |
+| 3. Bottom Sheet and Route List | 0/? | Not started | - |
+| 4. Route Detail and ETA Predictions | 0/? | Not started | - |
+| 5. Animated Markers and Callout Bubbles | 0/? | Not started | - |
+| 6. Stop Detail, Favorites, Alerts, and Polish | 0/? | Not started | - |
