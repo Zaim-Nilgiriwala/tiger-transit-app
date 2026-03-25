@@ -1,221 +1,225 @@
 # Codebase Concerns
 
-**Analysis Date:** 2026-02-11
-
-## Tech Debt
-
-**ETA Model: Limited Training Data**
-- Issue: Only 5 weeks of telemetry data (Nov 8 - Dec 13, 2025) available for training
-- Files: `scripts/temporal_split.py`, `data/processed/labeled.parquet`
-- Impact: Weak generalization to seasonal patterns, special events, weather variations. Model cannot learn semester transitions, exam periods, or holiday traffic patterns.
-- Fix approach: Collect 3+ months of continuous data across academic year. Retrain models quarterly to capture seasonal shifts. Currently mitigated with aggressive regularization (reg_alpha=0.97, reg_lambda=0.42).
-
-**ETA Model: Quantile Model Monotonicity Violations**
-- Issue: 32.3% of independently-trained quantile predictions violate P20 < P50 < P75 ordering constraint
-- Files: `scripts/train_asymmetric_quantile.py` (lines 200-250), `models/quantile_metrics.json`
-- Impact: Non-monotonic predictions undermine user trust in uncertainty intervals. Post-hoc sorting fixes ordering but distorts calibration.
-- Fix approach: Replace independent quantile models with joint quantile regression (multi-output XGBoost with quantile loss). Alternatively, retrain on full dataset (currently using 25% subsample for speed).
-
-**ETA Model: Route-Level Prediction Bias**
-- Issue: 8 routes show systematic bias beyond 15s threshold. Overprediction on routes 5, 7, 24, 31, 33, 96. Underprediction on routes 1, 99.
-- Files: `models/evaluation/eval_residuals.json`, `models/evaluation/eval_residuals_by_route.png`
-- Impact: Route 24 (MAE=147.2s) consistently predicts ~30s late arrivals. Users may lose trust when predictions are reliably wrong for specific routes.
-- Fix approach: Train route-specific calibration layers (post-processing bias correction per route). Alternative: Separate model per route group (high-bias vs low-bias).
-
-**ETA Model: Time-of-Day Overprediction Bias**
-- Issue: Midday period (11:00-14:00 CT) shows systematic overprediction bias (+24.93s mean residual)
-- Files: `models/evaluation/eval_residuals.json`, `scripts/evaluate.py` (lines 102-110)
-- Impact: Predictions during midday suggest later arrivals than reality. Buses arrive earlier than predicted, risking missed buses for waiting riders.
-- Fix approach: Add temporal calibration factors per time-of-day bucket. Investigate midday-specific patterns (reduced traffic, faster speeds not captured by features).
-
-**Data Pipeline: Distance Feature Resolution Limit**
-- Issue: All distance_to_target values < 7 km due to short route segments. Original <1km, 1-3km, 3-5km, 5km+ buckets collapse into single "<1km" bucket with 100% of samples.
-- Files: `scripts/build_differentiator_features.py` (lines 128-137), `scripts/evaluate.py` (lines 278-293)
-- Impact: Distance bucketing for sliced metrics is meaningless. Had to switch to quantile-based bucketing (Q25/Q50/Q75) as workaround. Distance may have low discriminative power for ETA.
-- Fix approach: Use percentile-based distance features instead of absolute distance. Consider ratio features (distance_to_target / total_route_distance) for normalization.
-
-**Data Pipeline: High NaN Rate in Short-Window Rolling Features**
-- Issue: speed_std_30s has 99.9% NaN rate due to 60s ping interval. Cannot compute 30s rolling window with only one ping per minute.
-- Files: `scripts/build_differentiator_features.py` (lines 142-166), `.planning/STATE.md` (line 74)
-- Impact: Short-window features provide no signal. Model relies on 60s, 120s, 180s windows only. Rapid acceleration/deceleration events are invisible.
-- Fix approach: Remove 30s window (dead feature). If higher temporal resolution needed, advocate for 15-30s ping intervals in data collection contract.
-
-**Data Pipeline: Timepoint Coverage Gaps**
-- Issue: Routes 27 and 235 have no timepoint data. is_timepoint feature set to NaN for all observations on these routes.
-- Files: `scripts/build_differentiator_features.py` (lines 400-450), `.planning/STATE.md` (line 78)
-- Impact: Timepoint-related features (time_until_next_timepoint_departure is #2 SHAP feature) unavailable for 2 routes. Model may perform worse on these routes.
-- Fix approach: Manual data collection from transit operations team for missing route schedules. Alternatively, exclude timepoint features from route 27/235 predictions.
-
-**Feature Engineering: Zero Variance in lateness_now**
-- Issue: scheduled_eta_seconds == eta_seconds in ETA SPOT telemetry data. lateness_now feature always zero.
-- Files: `scripts/build_features.py` (line 150), `.planning/STATE.md` (lines 67, 72)
-- Impact: Wasted feature column (confirmed zero SHAP importance). Indicates ETA SPOT scheduled field may not reflect real schedules, or schedule adherence not tracked.
-- Fix approach: Remove lateness_now from feature set. Investigate scheduled_time_to_target validity as schedule proxy.
-
-## Known Bugs
-
-**Date Boundary Issue in temporal_split.py**
-- Symptoms: temporal_split.py uses year 2025 for Nov/Dec dates (lines 27-34), but data is from 2024 according to git history
-- Files: `scripts/temporal_split.py` (lines 27-34)
-- Trigger: Running temporal split on newly collected 2026 data will fail due to hardcoded 2025 dates
-- Workaround: Manually update TRAIN_START, VAL_START, TEST_START dates before each run
-- Fix: Replace hardcoded dates with auto-detection from data min/max timestamps or command-line args
-
-**Evaluation Script: All Distances Fall in Single Bucket**
-- Symptoms: evaluate.py distance bucketing shows 100% of test samples in "<1km" bucket
-- Files: `scripts/evaluate.py` (lines 278-293), `scripts/train_advanced.py` (lines 128-137)
-- Trigger: Running sliced evaluation on per_distance metrics
-- Workaround: Switched to quantile-based bucketing in evaluate.py (lines 281-313)
-- Fix: Remove absolute distance buckets entirely. Use only quantile-based or ratio-based distance slicing.
-
-## Security Considerations
-
-**API Server: No Authentication**
-- Risk: `api/server.py` prediction endpoint exposed without auth. Anyone with network access can query predictions.
-- Files: `mobile/src/ETA-Model/api/server.py`
-- Current mitigation: Server not deployed publicly (localhost only in development)
-- Recommendations: Add API key authentication before production deployment. Use HTTPS with certificate pinning for mobile app.
-
-**Optuna Database: SQLite File Permissions**
-- Risk: `models/optuna_study.db` stores hyperparameter tuning trials. No encryption at rest.
-- Files: `models/optuna_study.db`, `scripts/train_advanced.py` (line 156)
-- Current mitigation: Database file in gitignored models/ directory
-- Recommendations: Set restrictive file permissions (600) on SQLite database. Not a high-risk concern (no PII/credentials).
-
-**Environment Variables: No .env File**
-- Risk: No evidence of .env file for secrets management. API keys, database credentials may be hardcoded or missing.
-- Files: N/A (missing .env file is the concern)
-- Current mitigation: Project appears to use only local files, no external API keys detected
-- Recommendations: Create .env.example template if any secrets added (weather API keys, database URLs, etc.).
-
-## Performance Bottlenecks
-
-**SHAP Computation: 100s per 1000 rows on 2158-iteration model**
-- Problem: pred_contribs on tuned model (2158 iterations) takes ~100s per 1000 rows. Full test set (296K rows) would take 8+ hours.
-- Files: `scripts/evaluate.py` (lines 341-403)
-- Cause: Tree SHAP complexity is O(TLD^2) where T=trees, L=leaves, D=depth. Model has 2158 trees, max_depth=8.
-- Improvement path: Subsample to 2000 rows for SHAP (current approach). Consider approximate SHAP methods (TreeExplainer with feature perturbation) or model distillation to fewer trees.
-
-**Label Join: merge_asof on 2.34M rows**
-- Problem: merge_asof with 2-hour tolerance on 2.34M telemetry rows takes ~90s
-- Files: `scripts/label_join.py`, Phase 2 execution logs
-- Cause: Temporal join requires sorting both DataFrames and scanning forward within tolerance window
-- Improvement path: Pre-filter arrivals to ±3 hour window around telemetry date range. Index both DataFrames on timestamp before merge_asof. Consider Polars for faster temporal joins.
-
-**Row Explosion: 2.34M output rows from 730K input**
-- Problem: Exploding telemetry (avg 3.2 stops ahead per observation) produces 3.2x data expansion
-- Files: `scripts/explode_rows.py`, `.planning/STATE.md` (line 62)
-- Cause: Each observation generates one row per remaining stop on route
-- Improvement path: Acceptable for current dataset size. If data grows 10x, consider chunked processing or sparse storage (only explode for training, not for inference).
-
-## Fragile Areas
-
-**Feature Engineering Pipeline: Implicit Dependency Chain**
-- Files: `scripts/build_differentiator_features.py` (requires `data/processed/{train,val,test}.parquet`), `scripts/build_features.py` (Phase 3 baseline features)
-- Why fragile: No dependency tracking. Running build_differentiator_features.py before label_join.py fails silently. Must run in specific order: parse → explode → label → split → features_v1 → features_v2 → train.
-- Safe modification: Always check for required input files at script start. Add --force flag to allow reruns. Document execution order in README or Makefile.
-- Test coverage: No unit tests for feature computation. Integration test would validate end-to-end pipeline.
-
-**Categorical Dtype Handling in Parquet I/O**
-- Files: `scripts/build_differentiator_features.py` (lines 58-62 CATEGORICAL_COLS_V2), `scripts/train_advanced.py` (load_featured_v2 function)
-- Why fragile: Pandas 2.3.3 loses categorical dtype when saving/loading Parquet with PyArrow engine. Must manually restore dtype after read.
-- Safe modification: Always use load_featured_v2() helper instead of raw pd.read_parquet(). If adding new categorical columns, update CATEGORICAL_COLS_V2 constant.
-- Test coverage: None. Failure mode is silent (XGBoost interprets as string, creates many one-hot columns, OOMs).
-
-**Optuna Study Resume Logic**
-- Files: `scripts/train_advanced.py` (lines 156-293)
-- Why fragile: SQLite storage for persistent study. If database file corrupted or deleted mid-run, study loses all trials. --batch mode assumes study exists for resume.
-- Safe modification: Always check study.trials length before batch operations. Back up optuna_study.db before major reruns. Use --skip-tuning to bypass corrupted study.
-- Test coverage: None. Manual validation only.
-
-**Model File Format: UBJSON**
-- Files: `models/tuned_v1.ubj`, `models/asymmetric_v1.ubj`, `models/quantile_p*.ubj`
-- Why fragile: UBJSON format is binary, not human-readable. XGBoost version compatibility required for load. No schema validation.
-- Safe modification: Always save model alongside metrics JSON (model_name_metrics.json). Store XGBoost version in metrics. Test load immediately after save.
-- Test coverage: None. Failure mode is corrupted model file unusable for inference.
-
-## Scaling Limits
-
-**Current Data Size: 296K test samples, 43 features**
-- Current capacity: Fits in memory (under 1GB). Training takes ~10 min for 2000 rounds.
-- Limit: 10x data growth (3M rows) will exceed typical laptop RAM during DMatrix creation.
-- Scaling path: Switch to XGBoost external memory mode (set max_bin, use DMatrix with cache). Use Dask-XGBoost for distributed training. Subsample training data (weighted by route priority).
-
-**Optuna Trials: 150 trials, 41 complete, 109 pruned**
-- Current capacity: 150 trials completes in ~90 minutes with 10% subsample
-- Limit: Full-data tuning (100% of train) would take 15+ hours for 150 trials
-- Scaling path: Increase subsample to 25% (4x slower but acceptable for final tuning). Use parallel Optuna with n_jobs=4 on multi-core machine. Reduce n_trials to 50 for faster iteration.
-
-**SHAP Explainability: 2000-row subsample**
-- Current capacity: 2000 rows for SHAP global importance completes in ~3 minutes
-- Limit: Full test set (296K rows) would take 8+ hours
-- Scaling path: Current subsample approach is sufficient. For per-prediction SHAP (inference time), use approximate TreeExplainer or precompute SHAP values for top-10 features only.
-
-## Dependencies at Risk
-
-**XGBoost 2.1.3: GPU Support Requirement**
-- Risk: Project uses device="cuda" for GPU acceleration. If deployed on CPU-only server, training fails.
-- Impact: train_advanced.py, train_asymmetric_quantile.py crash with "CUDA device not available"
-- Migration plan: Add device detection (check torch.cuda.is_available() or xgboost GPU support). Fall back to device="cpu" with warning. Document GPU requirement in README.
-
-**Optuna-Integration Package: Separate Install**
-- Risk: optuna_integration.XGBoostPruningCallback used in train_advanced.py (line 219). Not in standard Optuna package.
-- Impact: ImportError if optuna-integration not installed alongside optuna
-- Migration plan: Add to requirements.txt explicitly. Graceful fallback to Optuna without pruning if import fails.
-
-**Pandas 2.3.3: Categorical Dtype Limitations**
-- Risk: Pandas loses categorical dtype on Parquet save/load (known issue in 2.x series)
-- Impact: Silent failure (XGBoost creates many one-hot columns, potential OOM)
-- Migration plan: Monitor Pandas 3.0 release for categorical dtype fixes. Use Polars as alternative (better categorical handling).
-
-## Missing Critical Features
-
-**No Real-Time Inference Pipeline**
-- Problem: Trained models exist but no production inference endpoint consuming live telemetry
-- Blocks: Cannot deploy model to mobile app or web dashboard
-- Fix: Implement FastAPI endpoint in `api/server.py` that accepts telemetry ping and returns ETA predictions for all remaining stops. Add model versioning and A/B testing capability.
-
-**No Model Monitoring/Drift Detection**
-- Problem: Once deployed, no automated checks for prediction accuracy degradation over time
-- Blocks: Cannot detect when model becomes stale due to route changes, construction, new traffic patterns
-- Fix: Log predictions and actuals to timeseries database. Compute rolling 7-day MAE. Alert if MAE increases >20% from baseline. Retrigger automated retraining pipeline.
-
-**No Confidence Intervals in Production**
-- Problem: Quantile models trained (P20/P50/P75) but not integrated into inference API
-- Blocks: Cannot show users "arrives between X and Y minutes" uncertainty ranges
-- Fix: Update `api/server.py` to load quantile models alongside primary model. Return both point prediction (P50) and interval (P20, P75) in API response.
-
-**No Explainability for User-Facing Predictions**
-- Problem: SHAP analysis performed offline but not available per-prediction
-- Blocks: Cannot explain to users why "Bus 5 is predicted late" (e.g., "heavy rain, rush hour traffic")
-- Fix: Precompute SHAP values for top-5 features per route. Return feature contributions alongside predictions (e.g., "Rain: +30s, Traffic: +45s").
-
-## Test Coverage Gaps
-
-**No Unit Tests for Feature Engineering**
-- What's not tested: Rolling speed computation, distance calculation, timepoint feature logic
-- Files: `scripts/build_differentiator_features.py`, `scripts/build_features.py`
-- Risk: Silent bugs in feature calculation propagate to model. Example: haversine_meters() returns NaN for invalid lat/lon, but no validation.
-- Priority: High. Features are foundation of model quality.
-
-**No Integration Tests for Pipeline**
-- What's not tested: End-to-end run from raw data → trained model → predictions
-- Files: All scripts in `scripts/`
-- Risk: Breaking changes in intermediate outputs go undetected. Example: changing column names in explode_rows.py breaks label_join.py downstream.
-- Priority: Medium. Manual smoke testing currently sufficient for research phase.
-
-**No Validation Tests for Model Loading**
-- What's not tested: XGBoost model load from .ubj file, DMatrix category dtype handling
-- Files: `scripts/train_advanced.py`, `scripts/evaluate.py`
-- Risk: Model corruption or version incompatibility causes silent failures at inference time
-- Priority: Medium. Add test that loads each saved model, runs predict on sample data, validates output shape.
-
-**No Tests for Data Quality Checks**
-- What's not tested: verify_filters() in data_quality.py, missing value thresholds
-- Files: `mobile/src/ETA-Model/data_prep/data_quality.py`
-- Risk: Quality checks have bugs or are not enforced. Example: excluded vehicles (jAUnt) slip through filter.
-- Priority: Low. Quality report generation confirms most checks, but no automated assertions.
+**Analysis Date:** 2026-03-25
 
 ---
 
-*Concerns audit: 2026-02-11*
+## Tech Debt
+
+**Hardcoded session cookie in data collector:**
+- Issue: `ETA-Model/batchCollector.js` (line 11) contains a hardcoded `express.sid` session cookie directly in source code. This is a real authentication token that authenticates against `auburn.etaspot.com`.
+- Files: `ETA-Model/batchCollector.js`
+- Impact: Credential is exposed in version history and accessible to anyone with repo access. Cookie will expire and break collection silently.
+- Fix approach: Move to environment variable (`process.env.ETASPOT_COOKIE`), remove from git history if ever pushed to a remote.
+
+**Hardcoded S3 feed URLs in reference service:**
+- Issue: `Code/etaspot_reference.ts` lines 90-91 hardcode the full S3 GTFS-RT URLs including bucket names. The `vehicles` Map in `ETASpotService` never evicts stale entries — only `getVehicles()` filters them, so memory grows unbounded if vehicles are removed from the feed without restarting.
+- Files: `Code/etaspot_reference.ts`
+- Impact: Map grows over a season as vehicles enter and leave service; minor memory leak for long-running processes.
+- Fix approach: Periodically clear `this.vehicles` entries that are older than a reasonable threshold (e.g., 24 hours) in a scheduled cleanup.
+
+**Duplicate data preparation codebases:**
+- Issue: Two parallel, largely redundant data prep pipelines exist: `ETA-Model/src/data_prep.py` (1237 lines, PyTorch-focused) and `ETA-Model/src/data_prep_optimized.py` (1459 lines). The `scripts/` directory also has its own independent pipeline (`parse_telemetry.py`, `build_features.py`, etc.) for the XGBoost model. The PyTorch pipeline under `ETA-Model/src/` is described as an "existing system" that was never replaced or officially deprecated.
+- Files: `ETA-Model/src/data_prep.py`, `ETA-Model/src/data_prep_optimized.py`, `scripts/parse_telemetry.py`
+- Impact: Confusion about which pipeline produces training data for which model. `ETA-Model/src/data_prep.py` has a `# TODO: Extend to multiple stops` (line 669) left unresolved.
+- Fix approach: Officially deprecate and remove `ETA-Model/src/data_prep.py` and the legacy PyTorch pipeline once the XGBoost model is deployed.
+
+**`scripts/parse_telemetry.py` raw data path hardcoded to deleted directory:**
+- Issue: The script hard-codes `RAW_DATA_DIR = PROJECT_ROOT / "mobile" / "src" / "ETA-Model" / "raw_data"` (line 16-17), but this entire `mobile/` directory has been deleted from the `rycode` branch (all files show `D` in git status). The script cannot run without editing this constant.
+- Files: `scripts/parse_telemetry.py`
+- Impact: Running the data pipeline from scratch on this branch will fail immediately.
+- Fix approach: Update `RAW_DATA_DIR` to point to the actual `ETA-Model/raw_data/` directory at the project root.
+
+**`scripts/build_baselines.py` uses relative paths requiring specific working directory:**
+- Issue: `DATA_DIR = Path("data/processed")` (line 44) and `DIAG_DIR = Path("models/diagnostics")` (line 45) are relative paths. All scripts in `scripts/` use similar relative paths; they must be run from the project root. If run from within `scripts/`, they silently fail to find data.
+- Files: `scripts/build_baselines.py`, `scripts/build_features.py`, `scripts/train_advanced.py`, `scripts/evaluate.py`
+- Impact: Scripts fail with cryptic `FileNotFoundError` if CWD is wrong.
+- Fix approach: Change all relative paths to `Path(__file__).resolve().parent.parent / "data/processed"` pattern (as `scripts/parse_telemetry.py` already does correctly).
+
+**ETA-Model PyTorch API server has empty model registry:**
+- Issue: `ETA-Model/config/routes.json` has an empty `"routes": []` array. The `ETA-Model/` directory has no `models/` directory. The FastAPI server at `ETA-Model/api/server.py` will start but respond to every `/api/eta/predict` call with a 404 because no models are loaded.
+- Files: `ETA-Model/config/routes.json`, `ETA-Model/api/server.py`
+- Impact: The PyTorch inference API is non-functional without trained model files.
+- Fix approach: Either train per-route models and update `routes.json`, or document that this API is prototype-only and the XGBoost model is the production path.
+
+**`lateness_now` feature has zero variance (known, accepted):**
+- Issue: `STATE.md` documents that `lateness_now` was removed from `PHASE3_FEATURE_COLS` because `scheduled_eta == eta` in EtaSpot data, giving it zero variance. However, the v1.0 `build_features.py` still computes it as `FEAT-04` (line 147) and includes it in `FEATURE_COLS`.
+- Files: `scripts/build_features.py`, `ETA-Model/data_prep/data_quality.py`
+- Impact: 1 wasted feature column with no predictive value in the v1.0 pipeline.
+- Fix approach: Remove `lateness_now` from `FEATURE_COLS` in `build_features.py` to match the v1.1 decision already documented in `STATE.md`.
+
+---
+
+## Known Bugs
+
+**Feature count mismatch between `preprocess.py` (17 features) and API server:**
+- Symptoms: `ETA-Model/src/preprocess.py` defines `NUM_FEATURES = 17` (len of `FEATURE_NAMES`), but `ETA-Model/api/server.py` calls `load_model(str(model_path), NUM_FEATURES)` importing this value. The actual trained models (if they exist) were trained on 44+ features (per `PROJECT.md` and `evaluate.py`). Loading a 44-feature model with `num_features=17` will either crash or silently produce wrong predictions.
+- Files: `ETA-Model/src/preprocess.py`, `ETA-Model/api/server.py`
+- Trigger: Starting the FastAPI server and sending a prediction request.
+- Workaround: No model files exist, so this cannot be triggered at runtime currently.
+
+**`ETA-Model/src/data_prep.py` builds training samples with only 1 label (not 3):**
+- Symptoms: `_process_trajectory` in `ETA-Model/src/data_prep.py` has `# TODO: Extend to multiple stops` at line 669 and returns `labels = [actual_eta]` (single stop). The model architecture (`ETAPredictor`) expects 3-stop labels. Training with this file would produce shape errors at the loss function.
+- Files: `ETA-Model/src/data_prep.py` lines 668-670
+- Trigger: Running `python ETA-Model/src/train.py --generate-data`.
+- Workaround: Use `ETA-Model/src/data_prep_optimized.py` which handles 3-stop labels.
+
+**`build_baselines.py` Central Time offset is fixed at UTC-6, ignoring DST:**
+- Symptoms: `add_ct_hour()` in `scripts/build_baselines.py` line 65 applies a fixed `-6 hour` offset for Central Time. Alabama observes CST (UTC-6) in winter and CDT (UTC-5) in summer. The training data spans November–December, which is CST, so this is correct for the training set. But re-running with spring/summer data will mislabel time-of-day buckets by 1 hour.
+- Files: `scripts/build_baselines.py`
+- Trigger: Re-running the pipeline with spring 2026 data collected after March DST transition.
+- Workaround: Use `pd.Timestamp.tz_convert('America/Chicago')` instead of manual offset.
+
+---
+
+## Security Considerations
+
+**Wildcard CORS on the prediction API:**
+- Risk: `ETA-Model/api/server.py` lines 51-56 configures CORS with `allow_origins=["*"]`, `allow_credentials=True`, `allow_methods=["*"]`, `allow_headers=["*"]`. Combining `allow_origins=["*"]` with `allow_credentials=True` is explicitly unsupported by the CORS standard (browsers block it) and misconfigured: credentials won't actually be forwarded, but the intent suggests the author expected them to be.
+- Files: `ETA-Model/api/server.py`
+- Current mitigation: Server is not deployed; only runs locally.
+- Recommendations: For deployment, replace `allow_origins=["*"]` with explicit origin allowlist; set `allow_credentials=False` unless cookies/auth headers are actually needed.
+
+**Supabase `anon` role granted `ALL` on `position_updates` tables:**
+- Risk: Migration `20260319024944_create_schema.sql` grants `GRANT ALL ON TABLES TO anon` via `ALTER DEFAULT PRIVILEGES` in the `position_updates` schema. The `anon` role in Supabase is the unauthenticated public role. This gives unauthenticated users full read/write/delete access to all position update data.
+- Files: `supabase/migrations/20260319024944_create_schema.sql`
+- Current mitigation: Local development only; Row Level Security (RLS) not yet enabled.
+- Recommendations: Before deploying to production: enable RLS on all tables, restrict `anon` to `SELECT` only (or nothing), require authenticated role for writes.
+
+**No authentication on model reload endpoint:**
+- Risk: `ETA-Model/api/server.py` `POST /api/models/reload` (line 255) has no authentication. Anyone who can reach the API can trigger a hot-reload of all models from disk. An attacker who can write model files to disk could load a malicious model.
+- Files: `ETA-Model/api/server.py`
+- Current mitigation: Server is not deployed.
+- Recommendations: Add API key authentication or restrict endpoint to localhost before deployment.
+
+**Session cookie in data collector committed to git:**
+- Risk: `ETA-Model/batchCollector.js` line 11 contains an `express.sid` session cookie in plaintext. This was likely used for a personal account on `auburn.etaspot.com`. If this branch is ever pushed to a public remote, the credential is exposed.
+- Files: `ETA-Model/batchCollector.js`
+- Current mitigation: Branch `rycode` appears private; `.gitignore` does not exclude this file.
+- Recommendations: Rotate the session cookie immediately, replace with `process.env.ETASPOT_COOKIE`, consider `git filter-branch` or `git-filter-repo` to scrub the credential from history.
+
+---
+
+## Performance Bottlenecks
+
+**`compute_normalization_params` iterates row-by-row with `.iterrows()`:**
+- Problem: `ETA-Model/src/preprocess.py` line 266 uses `for _, row in df.iterrows()` to compute distances for all training records. This is O(n) with high constant overhead — `iterrows()` is 10-100x slower than vectorized pandas operations.
+- Files: `ETA-Model/src/preprocess.py`
+- Cause: Scalar `haversine_distance` function is called once per row.
+- Improvement path: Vectorize using the existing `haversine_meters` function from `scripts/build_differentiator_features.py` which accepts numpy arrays.
+
+**`ETA-Model/src/data_prep.py` builds stop distance index with `iterrows()` on `stop_times.txt`:**
+- Problem: `GTFSRouteData.__init__` (line 68) iterates `stop_times_df.iterrows()` to build the `stop_distances` dict. The GTFS `stop_times.txt` is large (tens of thousands of rows). This also builds a Python dict instead of an indexed DataFrame, making lookups O(1) but construction slow.
+- Files: `ETA-Model/src/data_prep.py`
+- Cause: Legacy implementation; `data_prep_optimized.py` exists to address this.
+- Improvement path: Use `data_prep_optimized.py` exclusively; retire `data_prep.py`.
+
+**`scripts/build_baselines.py` holds all split data in memory simultaneously:**
+- Problem: The baselines script loads all three splits (train/val/test) and computes lookups in one session. The training parquet alone can be hundreds of MB. Combined peak memory may exceed 4GB on machines with limited RAM.
+- Files: `scripts/build_baselines.py`
+- Cause: Design choice for simplicity — lookups must be computed from train before applying to val/test.
+- Improvement path: Stream processing is complex here; alternatively, document minimum RAM requirement (8GB+).
+
+---
+
+## Fragile Areas
+
+**`scripts/train_advanced.py` deterministic round count depends on Optuna results file:**
+- Files: `scripts/train_advanced.py`
+- Why fragile: The final model is trained with a fixed `num_boost_round = best_iteration + 1` derived from Optuna. This value is stored in `models/v1_1_metrics.json`. If that file is deleted or Optuna is re-run, the deterministic round count is lost and retraining will not reproduce the exact model.
+- Safe modification: Always re-run `--skip-tuning` variant after Optuna to regenerate the metrics file with round count.
+- Test coverage: No tests; manually verified by developers.
+
+**`ETA-Model/src/model.py` `load_model()` silently falls back to `ETAPredictor` for unknown `model_class`:**
+- Files: `ETA-Model/src/model.py` lines 504-520
+- Why fragile: If a checkpoint was saved with `ETAPredictorQuantile` (which exists in the same file), `load_model()` will silently instantiate the wrong architecture (`ETAPredictor`) rather than raising an error. The model will load without error but produce wrong output shapes.
+- Safe modification: Add `ETAPredictorQuantile` to the `load_model` dispatch. Raise `ValueError` for truly unknown class names instead of silently defaulting.
+- Test coverage: `if __name__ == '__main__'` block tests `ETAPredictor` save/load only.
+
+**`ETA-Model/src/inference.py` smoothing state is unbounded:**
+- Files: `ETA-Model/src/inference.py`
+- Why fragile: `ETAInference._last_predictions` (line 53) stores state per `vehicle_id` string but never evicts entries. In a long-running deployment, every unique vehicle ID ever seen (including IDs from data quality issues or one-off test vehicles) accumulates in memory. `reset_vehicle_state()` must be called externally; there is no automatic eviction.
+- Safe modification: Add an LRU cache or time-based eviction keyed on last-seen timestamp.
+- Test coverage: None beyond the `if __name__ == '__main__'` smoke test.
+
+**`supabase/migrations/` are incomplete — most GTFS tables missing:**
+- Files: `supabase/migrations/`
+- Why fragile: Only three migrations exist: the schema creation, the `position_updates` table, and `gtfs.calendar`. All other GTFS tables referenced in `PROJECT.md` (routes, stops, shapes, trips, stop_times, etc.) and the `trip_updates` schema have no migrations. The database cannot be reproduced from migrations alone.
+- Safe modification: Only add new migrations; never edit existing ones.
+- Test coverage: `supabase/seed.sql` is effectively empty (all INSERT statements are commented out).
+
+**Feature column index 27 as magic number for route filtering:**
+- Files: `ETA-Model/src/train.py` lines 361-363
+- Why fragile: Route filtering uses `ROUTE_FEATURE_IDX = 27` with the comment "Route ID is stored in feature column 27, normalized as routeId/300". If the feature vector order in `data_prep_optimized.py` changes (features are added/removed at positions 0-26), this index silently filters on the wrong column with no error.
+- Safe modification: Replace with a named lookup against `FEATURE_NAMES` array. Assert that `FEATURE_NAMES[27]` is `'route_id'` at startup.
+- Test coverage: None.
+
+---
+
+## Scaling Limits
+
+**XGBoost model trained on ~5 weeks of data from one semester:**
+- Current capacity: 2.08M labeled rows from November 6 – December 12, 2025.
+- Limit: Route 27 has only 96 test samples (documented in `STATE.md`). Sparse routes will show degraded accuracy as new routes or schedule changes occur.
+- Scaling path: Re-run the full pipeline (`parse_telemetry.py` through `train_advanced.py`) on accumulated raw data from `ETA-Model/raw_data/`. Data collection scripts (`batchCollector.js`) are ready for this.
+
+**`position_updates` table has no retention policy:**
+- Current capacity: Local Supabase instance with no row limits configured.
+- Limit: At 5-second poll intervals, a single active vehicle generates ~720 rows/hour. With ~20 simultaneous buses, this is ~14,400 rows/hour or ~345,000 rows/day. Without a retention policy, the table grows indefinitely.
+- Scaling path: Add a Postgres `pg_cron` job or Supabase Edge Function to delete rows older than N days.
+
+---
+
+## Dependencies at Risk
+
+**`ETA-Model/batchCollector.js` depends on undocumented EtaSpot IRM WebSocket API:**
+- Risk: The data collection mechanism (`socket.io` events like `IRM_request_auburn.etaspot.com`, `IRM_rptPkt`) is a proprietary, undocumented internal API of the EtaSpot system. There is no SLA or versioning guarantee.
+- Impact: If EtaSpot changes their WebSocket protocol or session authentication scheme, historical data collection breaks silently (collector connects but receives no packets).
+- Migration plan: Archive the existing raw data in `ETA-Model/raw_data/`. The pipeline does not strictly need new data for the current model version.
+
+**`ETA-Model/api/server.py` uses `@app.on_event("startup")` (deprecated in FastAPI):**
+- Risk: `@app.on_event("startup")` was deprecated in FastAPI 0.93.0 in favor of `lifespan` context managers.
+- Impact: Deprecation warning on startup; will be removed in a future FastAPI major version.
+- Migration plan: Replace with `@asynccontextmanager` lifespan pattern.
+
+---
+
+## Missing Critical Features
+
+**No Supabase ingestion pipeline for live GTFS-RT data:**
+- Problem: The reference service in `Code/etaspot_reference.ts` parses live GTFS-RT feeds (position updates and trip updates) into `VehiclePosition` objects in memory. There is no code that writes these to Supabase. The `position_updates.position_updates` table schema exists but is never populated.
+- Blocks: Any mobile app feature that reads real-time bus positions from the database.
+
+**No connection between the XGBoost model and the mobile app or API:**
+- Problem: The trained XGBoost model (`models/v1_1_residual.ubj`, excluded from git) has no serving layer. `PROJECT.md` explicitly marks deployment as "deferred to v2". The FastAPI server in `ETA-Model/api/server.py` serves only the PyTorch model (which has no trained weights).
+- Blocks: End-to-end ETA prediction for riders.
+
+**No Row Level Security on Supabase tables:**
+- Problem: None of the three migrations enable RLS. The `position_updates` table grants `ALL` to `anon`. This is incompatible with a production deployment.
+- Blocks: Deploying Supabase to production without creating a public data exposure risk.
+
+---
+
+## Test Coverage Gaps
+
+**Zero automated tests anywhere in the codebase:**
+- What's not tested: All Python scripts (data parsing, feature engineering, training, evaluation), the FastAPI prediction server, the GTFS-RT feed parser, database migrations.
+- Files: Entire `scripts/`, `ETA-Model/src/`, `ETA-Model/api/`
+- Risk: Silent regressions when modifying data pipeline scripts. Feature column reordering, filter changes, or schema changes can silently corrupt training data with no test to catch it.
+- Priority: High — the `scripts/` pipeline has multiple fragile index-based assumptions that are high-risk without test coverage.
+
+**Data pipeline has assertion-based validation but no regression test harness:**
+- What's not tested: The assertions in `scripts/parse_telemetry.py` (lines 212-220) and `scripts/build_features.py` (line 188) verify correctness at runtime but are not run in any CI pipeline. Removing a filter or changing a threshold can silently pass.
+- Files: `scripts/parse_telemetry.py`, `scripts/build_features.py`, `scripts/label_join.py`
+- Risk: Data quality regressions go undetected until model accuracy degrades.
+- Priority: Medium — assertions exist which is good, but they need a CI harness to run them automatically.
+
+**`ETA-Model/src/model.py` `load_model` dispatch untested for non-standard architectures:**
+- What's not tested: `ETAPredictorQuantile` is defined in `ETA-Model/src/model.py` but not in the save/load test block (lines 529-567). Loading a quantile model checkpoint would silently instantiate the wrong class.
+- Files: `ETA-Model/src/model.py`
+- Risk: Silent model class mismatch if quantile models are ever trained and loaded.
+- Priority: Low — quantile model is not currently the active training target.
+
+---
+
+*Concerns audit: 2026-03-25*

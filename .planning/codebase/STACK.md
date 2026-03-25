@@ -1,127 +1,105 @@
 # Technology Stack
 
-**Analysis Date:** 2026-02-11
+**Analysis Date:** 2026-03-25
 
 ## Languages
 
 **Primary:**
-- TypeScript 5.7.2 - Backend API (`backend/`)
-- TypeScript 5.9.2 - Mobile app (`mobile/`)
-- Python 3.10.2 - ML/data pipeline (`scripts/`)
+- Python 3.10+ - ML pipeline, data processing scripts, API server
+- TypeScript - GTFS-RT protobuf ingestion service reference (`Code/etaspot_reference.ts`), weather data fetcher (`ETA-Model/getWeatherData.ts`)
+- JavaScript (ESM) - Historical data collection scripts (`ETA-Model/batchCollector.js`, `ETA-Model/processTrainingData.js`, `ETA-Model/splitData.js`)
+- SQL - Supabase database schema and migrations (`supabase/migrations/`)
 
 **Secondary:**
-- JavaScript - Data collection scripts (`batchCollector.js`)
+- YAML - Model training configuration (`ETA-Model/config/training_config.yaml`)
 
 ## Runtime
 
 **Environment:**
-- Node.js v24.12.0 (Backend and mobile)
-- Python 3.10.2 (ML pipeline)
+- Node.js (ESM modules) - for data collection scripts; `"type": "module"` in `ETA-Model/package.json`
+- Python 3.10 (confirmed by `__pycache__` filenames using cpython-310)
+- Deno 2 - Supabase Edge Runtime (`supabase/config.toml` sets `deno_version = 2`)
 
 **Package Manager:**
-- npm - Backend and mobile dependencies
-- Lockfiles: `package-lock.json` present in root, `backend/`, and `mobile/`
-- pip - Python ML dependencies (no formal requirements.txt in project root; reference requirements in `mobile/src/ETA-Model/temporaryFiles/requirements.txt`)
+- npm - for Node.js dependencies; lockfile present at `ETA-Model/package-lock.json`
+- pip - for Python dependencies; requirements at `ETA-Model/temporaryFiles/requirements.txt`
 
 ## Frameworks
 
-**Core:**
-- Express.js 4.21.1 - Backend REST API (`backend/src/index.ts`)
-- React Native 0.81.5 - Mobile app framework
-- Expo ~54.0.31 - React Native development platform
-- Prisma ORM 5.20.0 - Database ORM with PostgreSQL
+**API Server (ETA Model):**
+- FastAPI - REST prediction endpoints; `ETA-Model/api/server.py`
+- Uvicorn - ASGI server; `uvicorn api.server:app --host 0.0.0.0 --port 8000`
 
-**ML/Data Science:**
-- XGBoost 3.1.3 - Gradient boosting ETA prediction model
-- Optuna 4.7.0 - Hyperparameter optimization
-- scikit-learn (sklearn 0.0, pandas 2.3.3, numpy 2.2.6) - Data preprocessing and time series splitting
-- SHAP 0.46.0 - Model explainability
-- pandas 2.3.3 - Data processing pipeline
-- PyArrow 23.0.0 - Parquet file I/O
+**ML Training:**
+- PyTorch `>=2.0.0` - Neural network ETA model (`ETA-Model/src/model.py`, `ETA-Model/src/train.py`)
+- XGBoost - Gradient boosting baseline and residual models (`scripts/train_baseline.py`, `scripts/train_advanced.py`)
+- Optuna - Hyperparameter tuning with SQLite persistence (`scripts/train_advanced.py`, `scripts/run_optuna_batches.py`)
+- scikit-learn - TimeSeriesSplit CV, preprocessing (`scripts/train_advanced.py`)
 
-**State Management:**
-- Redux Toolkit 2.11.2 - Mobile app state management
-- React Redux 9.2.0 - React bindings for Redux
-
-**Navigation:**
-- React Navigation 7.x - Mobile navigation (`@react-navigation/native`, `@react-navigation/bottom-tabs`, `@react-navigation/native-stack`)
-
-**Testing:**
-- Jest (configured but not actively used; `backend/package.json` scripts)
+**Database:**
+- Supabase (PostgreSQL 17) - Transit data storage; local dev at port 54321
 
 **Build/Dev:**
-- ts-node 10.9.2 - TypeScript execution for scripts
-- ts-node-dev 2.0.0 - Development server with hot reload
-- ESLint 9.17.0 - TypeScript linting (`backend/`)
-- TypeScript compiler (tsc) - Build process
+- None detected - no Webpack, Vite, or similar bundler
 
 ## Key Dependencies
 
-**Critical:**
-- `@prisma/client` 5.20.0 - Type-safe database client (backend)
-- `gtfs-realtime-bindings` 1.1.1 - GTFS-RT protobuf parser for live vehicle positions
-- `socket.io` 4.8.3 - WebSocket server for real-time updates (backend)
-- `socket.io-client` 4.8.3 - WebSocket client (mobile, backend, root)
-- `xgboost` 3.1.3 - ML model core (Python)
-- `optuna` 4.7.0 - Hyperparameter tuning (Python)
+**Critical (Python ML):**
+- `torch>=2.0.0` - Neural network training; GPU support via CUDA 11.8 or 12.1
+- `xgboost` - Primary production model for ETA prediction
+- `optuna` - Hyperparameter search using SQLite storage at `models/optuna_study.db`
+- `numpy>=1.24.0` - Feature vectors; `.npy` binary arrays for training data
+- `pandas>=2.0.0` - Data pipeline throughout; parquet I/O
+- `scikit-learn>=1.3.0` - Cross-validation
+- `scipy` - Statistical analysis in evaluation scripts (`scripts/evaluate_v1_1.py`)
+- `matplotlib` - Training plots, SHAP summary charts
+- `pyyaml>=6.0` - Training config parsing
+- `tqdm>=4.65.0` - Training progress bars
+- `pyarrow` - Parquet read/write (`scripts/explode_rows.py` uses `pyarrow.parquet`)
+- `supabase` (Python client) - Database writes in `Code/pushing_data_to_db_test.py`
+- `google-transit` / `gtfs-realtime-pb2` - Protobuf parsing in `Code/simplepbtest.py`
+- `fastapi`, `uvicorn`, `pydantic` - API server in `ETA-Model/api/server.py`
 
-**Infrastructure:**
-- `ioredis` 5.4.1 - Redis client for caching
-- `helmet` 8.0.0 - Security middleware
-- `cors` 2.8.5 - CORS handling
-- `compression` 1.7.4 - Response compression
-- `dotenv` 16.4.5 - Environment variable management
-- `zod` 3.23.8 - Runtime type validation
+**Critical (Node.js):**
+- `socket.io-client ^4.8.3` - Connects to ETA SPOT IRM (Instant Replay Manager) websocket for historical data collection; `ETA-Model/package.json`
+- `gtfs-realtime-bindings` - Protobuf decoding in `Code/etaspot_reference.ts`
 
-**Mobile:**
-- `axios` 1.13.2 - HTTP client
-- `react-native-maps` 1.20.1 - Map display
-- `expo-location` 19.0.8 - Location services
-- `@react-native-async-storage/async-storage` 2.2.0 - Persistent storage
-- `openmeteo` 1.2.3 - Weather API client
-
-**Data Processing:**
-- `csv-parse` 5.5.6 - GTFS CSV parsing (backend)
-- `polyline` 0.2.0 - Polyline encoding/decoding
-
-**Python ML:**
-- `matplotlib` - Plotting (Agg backend for headless)
-- `scipy` - Statistical functions
-- `openpyxl` - Excel parsing for timepoint data
+**TypeScript (weather fetcher):**
+- `openmeteo` (via `fetchWeatherApi`) - Fetches historical weather from Open-Meteo API; `ETA-Model/getWeatherData.ts`
 
 ## Configuration
 
 **Environment:**
-- Backend: `.env` file with `DATABASE_URL`, `REDIS_URL`, `PORT`, `NODE_ENV`, `GPS_ENABLED`, `CORS_ORIGIN`
-- Example: `backend/.env.example`
-- Mobile: API base URL in `mobile/src/config/api.config.ts` (hardcoded to `http://10.2.1.96:3001`)
+- Supabase local dev configured in `supabase/config.toml`; project_id = `Senior_Design`
+- Supabase API at `http://127.0.0.1:54321`, DB at port 54322, Studio at 54323
+- Auth JWT expiry: 3600s; email signup enabled; anonymous sign-ins disabled
+- ML training configured in `ETA-Model/config/training_config.yaml`
 
 **Build:**
-- TypeScript configs: `backend/tsconfig.json` (strict mode, ES2022 target, CommonJS modules)
-- Mobile TypeScript: `mobile/tsconfig.json` (minimal config, Expo defaults)
-- Expo config: `mobile/app.json` (permissions for location, bundler config)
-- Prisma schema: `backend/prisma/schema.prisma` (PostgreSQL with PostGIS extension)
+- No build step for Python scripts - run directly with `python scripts/<name>.py`
+- Node.js scripts run as ESM: `node ETA-Model/batchCollector.js`
+- FastAPI server: `uvicorn api.server:app --host 0.0.0.0 --port 8000`
+- Supabase local dev: `supabase start` (uses Docker internally)
 
-**ML Pipeline:**
-- No centralized config file; hyperparameters hardcoded in training scripts
-- Model artifacts: `.ubj` (XGBoost binary) and `.json` (metrics)
-- Data format: Parquet files in `data/processed/`
+**Key env vars (from supabase config.toml - names only):**
+- `OPENAI_API_KEY` - Supabase Studio AI features
+- `SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN` - SMS OTP (disabled)
+- `SUPABASE_AUTH_EXTERNAL_APPLE_SECRET` - Apple OAuth (disabled)
+- `S3_HOST`, `S3_REGION`, `S3_ACCESS_KEY`, `S3_SECRET_KEY` - Experimental S3/OrioleDB (disabled)
 
 ## Platform Requirements
 
 **Development:**
-- Node.js 20+ (currently using 24.12.0)
+- Windows (confirmed: `venv\Scripts\activate` in requirements comments, `monitor_collector.ps1` PowerShell script, `num_workers: 0` for Windows in training config)
+- Docker Desktop required for Supabase local development
 - Python 3.10+
-- Docker and Docker Compose (for Postgres + Redis)
-- Expo CLI (for mobile development)
+- Node.js with ESM support
 
 **Production:**
-- PostgreSQL 15+ with PostGIS 3.3 extension (geospatial support)
-- Redis 7 (caching and real-time features)
-- Node.js runtime (backend API)
-- Python environment with GPU support for ML training (CUDA preferred; XGBoost configured with `device: "cuda"` in `scripts/train_advanced.py`)
-- S3-compatible storage (AWS S3 for GTFS-RT feeds: `auburn.etaspot.net/position_updates.pb`, `trip_updates.pb`)
+- PostgreSQL 17 (Supabase hosted or self-hosted)
+- Python runtime for FastAPI prediction server
+- CUDA-capable GPU recommended for PyTorch model training (optional)
 
 ---
 
-*Stack analysis: 2026-02-11*
+*Stack analysis: 2026-03-25*
