@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-stopped_at: Phase 1 context gathered
-last_updated: "2026-03-25T21:43:15.814Z"
-last_activity: 2026-03-25 -- Roadmap created with 6 phases covering 62 requirements
+status: executing
+stopped_at: Completed 01-01-PLAN.md
+last_updated: "2026-03-25T22:03:44Z"
+last_activity: 2026-03-25 -- Completed Plan 01-01 (Expo project init, design system, Redux store)
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 2
+  completed_plans: 1
+  percent: 8
 ---
 
 # Project State
@@ -26,28 +26,28 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 ## Current Position
 
 Phase: 1 of 6 (Foundation and Map Shell)
-Plan: 0 of ? in current phase
-Status: Ready to plan
-Last activity: 2026-03-25 -- Roadmap created with 6 phases covering 62 requirements
+Plan: 1 of 2 in current phase
+Status: Executing
+Last activity: 2026-03-25 -- Completed Plan 01-01 (Expo project init, design system, Redux store)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 8%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: -
-- Total execution time: 0 hours
+- Total plans completed: 1
+- Average duration: 9 min
+- Total execution time: 0.15 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 1. Foundation and Map Shell | 1/2 | 9 min | 9 min |
 
 **Recent Trend:**
-- Last 5 plans: -
-- Trend: -
+- Last 5 plans: 9m
+- Trend: Starting
 
 *Updated after each plan completion*
 
@@ -61,6 +61,10 @@ Recent decisions affecting current work:
 - [Roadmap]: 6-phase structure derived from 62 requirements; risk-first ordering (maps, then protobuf, then UI layers)
 - [Roadmap]: Animated markers isolated to Phase 5 to contain Android bitmap rendering risk
 - [Roadmap]: Design system tokens built in Phase 1 so all subsequent phases inherit the Academic Navigator look
+- [01-01]: Used @expo-google-fonts packages instead of manual TTF downloads for reliable font loading
+- [01-01]: Excluded pre-existing Code/, ETA-Model/, scripts/ directories from tsconfig to isolate RN project
+- [01-01]: Font family keys use expo-google-fonts naming convention (Manrope_700Bold) for direct compatibility
+- [01-01]: Shadow shadowColor uses rgba(12, 35, 64, 1) with separate shadowOpacity for cross-platform behavior
 
 ### Pending Todos
 
@@ -74,6 +78,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-25T21:43:15.806Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-foundation-and-map-shell/01-CONTEXT.md
+Last session: 2026-03-25T22:03:44Z
+Stopped at: Completed 01-01-PLAN.md
+Resume file: .planning/phases/01-foundation-and-map-shell/01-02-PLAN.md

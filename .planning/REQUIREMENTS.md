@@ -90,14 +90,14 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Design System
 
-- [ ] **DS-01**: App implements the Academic Navigator design system with tonal layering (Level 0/1/2 surfaces, no border lines)
-- [ ] **DS-02**: Typography uses Manrope (headlines, bold) + Inter (body, labels) dual-font system
-- [ ] **DS-03**: Type scale follows Headline-LG (32pt), Title-MD (18pt), Body-MD (14pt), Label-SM (11pt uppercase)
-- [ ] **DS-04**: All shadows use navy-tinted color (rgba(12, 35, 64, ...)), never pure black
-- [ ] **DS-05**: Minimum 20px margins from screen edges; 8px base grid for spacing
-- [ ] **DS-06**: Status badges use pill shape: LIVE (orange pulse), DELAYED (orange), On Time (muted green)
-- [ ] **DS-07**: All interactive elements have minimum 44x44pt tap targets
-- [ ] **DS-08**: ETA text meets WCAG AA contrast ratio (4.5:1)
+- [x] **DS-01**: App implements the Academic Navigator design system with tonal layering (Level 0/1/2 surfaces, no border lines)
+- [x] **DS-02**: Typography uses Manrope (headlines, bold) + Inter (body, labels) dual-font system
+- [x] **DS-03**: Type scale follows Headline-LG (32pt), Title-MD (18pt), Body-MD (14pt), Label-SM (11pt uppercase)
+- [x] **DS-04**: All shadows use navy-tinted color (rgba(12, 35, 64, ...)), never pure black
+- [x] **DS-05**: Minimum 20px margins from screen edges; 8px base grid for spacing
+- [x] **DS-06**: Status badges use pill shape: LIVE (orange pulse), DELAYED (orange), On Time (muted green)
+- [x] **DS-07**: All interactive elements have minimum 44x44pt tap targets
+- [x] **DS-08**: ETA text meets WCAG AA contrast ratio (4.5:1)
 
 ## v2 Requirements
 
@@ -195,14 +195,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ERR-01 | Phase 6 | Pending |
 | ERR-02 | Phase 3 | Pending |
 | ERR-03 | Phase 3 | Pending |
-| DS-01 | Phase 1 | Pending |
-| DS-02 | Phase 1 | Pending |
-| DS-03 | Phase 1 | Pending |
-| DS-04 | Phase 1 | Pending |
-| DS-05 | Phase 1 | Pending |
-| DS-06 | Phase 1 | Pending |
-| DS-07 | Phase 1 | Pending |
-| DS-08 | Phase 1 | Pending |
+| DS-01 | Phase 1 | Complete |
+| DS-02 | Phase 1 | Complete |
+| DS-03 | Phase 1 | Complete |
+| DS-04 | Phase 1 | Complete |
+| DS-05 | Phase 1 | Complete |
+| DS-06 | Phase 1 | Complete |
+| DS-07 | Phase 1 | Complete |
+| DS-08 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 62 total
