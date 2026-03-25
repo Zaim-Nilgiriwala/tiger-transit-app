@@ -141,74 +141,74 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MAP-01 | — | Pending |
-| MAP-02 | — | Pending |
-| MAP-03 | — | Pending |
-| MAP-04 | — | Pending |
-| MAP-05 | — | Pending |
-| MAP-06 | — | Pending |
-| MAP-07 | — | Pending |
-| MAP-08 | — | Pending |
-| MAP-09 | — | Pending |
-| SHEET-01 | — | Pending |
-| SHEET-02 | — | Pending |
-| SHEET-03 | — | Pending |
-| SHEET-04 | — | Pending |
-| SHEET-05 | — | Pending |
-| ROUTE-01 | — | Pending |
-| ROUTE-02 | — | Pending |
-| ROUTE-03 | — | Pending |
-| ROUTE-04 | — | Pending |
-| ROUTE-05 | — | Pending |
-| ROUTE-06 | — | Pending |
-| ROUTE-07 | — | Pending |
-| ROUTE-08 | — | Pending |
-| ROUTE-09 | — | Pending |
-| ROUTE-10 | — | Pending |
-| STOP-01 | — | Pending |
-| STOP-02 | — | Pending |
-| STOP-03 | — | Pending |
-| STOP-04 | — | Pending |
-| STOP-05 | — | Pending |
-| STOP-06 | — | Pending |
-| STOP-07 | — | Pending |
-| CALL-01 | — | Pending |
-| CALL-02 | — | Pending |
-| CALL-03 | — | Pending |
-| CALL-04 | — | Pending |
-| CALL-05 | — | Pending |
-| FAV-01 | — | Pending |
-| FAV-02 | — | Pending |
-| FAV-03 | — | Pending |
-| FAV-04 | — | Pending |
-| DATA-01 | — | Pending |
-| DATA-02 | — | Pending |
-| DATA-03 | — | Pending |
-| DATA-04 | — | Pending |
-| DATA-05 | — | Pending |
-| ETA-01 | — | Pending |
-| ETA-02 | — | Pending |
-| ETA-03 | — | Pending |
-| ETA-04 | — | Pending |
-| ALERT-01 | — | Pending |
-| ALERT-02 | — | Pending |
-| ERR-01 | — | Pending |
-| ERR-02 | — | Pending |
-| ERR-03 | — | Pending |
-| DS-01 | — | Pending |
-| DS-02 | — | Pending |
-| DS-03 | — | Pending |
-| DS-04 | — | Pending |
-| DS-05 | — | Pending |
-| DS-06 | — | Pending |
-| DS-07 | — | Pending |
-| DS-08 | — | Pending |
+| MAP-01 | Phase 1 | Pending |
+| MAP-02 | Phase 2 | Pending |
+| MAP-03 | Phase 5 | Pending |
+| MAP-04 | Phase 2 | Pending |
+| MAP-05 | Phase 4 | Pending |
+| MAP-06 | Phase 4 | Pending |
+| MAP-07 | Phase 4 | Pending |
+| MAP-08 | Phase 1 | Pending |
+| MAP-09 | Phase 2 | Pending |
+| SHEET-01 | Phase 3 | Pending |
+| SHEET-02 | Phase 3 | Pending |
+| SHEET-03 | Phase 3 | Pending |
+| SHEET-04 | Phase 3 | Pending |
+| SHEET-05 | Phase 3 | Pending |
+| ROUTE-01 | Phase 3 | Pending |
+| ROUTE-02 | Phase 3 | Pending |
+| ROUTE-03 | Phase 3 | Pending |
+| ROUTE-04 | Phase 3 | Pending |
+| ROUTE-05 | Phase 4 | Pending |
+| ROUTE-06 | Phase 4 | Pending |
+| ROUTE-07 | Phase 4 | Pending |
+| ROUTE-08 | Phase 4 | Pending |
+| ROUTE-09 | Phase 4 | Pending |
+| ROUTE-10 | Phase 4 | Pending |
+| STOP-01 | Phase 6 | Pending |
+| STOP-02 | Phase 6 | Pending |
+| STOP-03 | Phase 6 | Pending |
+| STOP-04 | Phase 6 | Pending |
+| STOP-05 | Phase 6 | Pending |
+| STOP-06 | Phase 6 | Pending |
+| STOP-07 | Phase 6 | Pending |
+| CALL-01 | Phase 5 | Pending |
+| CALL-02 | Phase 5 | Pending |
+| CALL-03 | Phase 5 | Pending |
+| CALL-04 | Phase 5 | Pending |
+| CALL-05 | Phase 5 | Pending |
+| FAV-01 | Phase 6 | Pending |
+| FAV-02 | Phase 6 | Pending |
+| FAV-03 | Phase 6 | Pending |
+| FAV-04 | Phase 6 | Pending |
+| DATA-01 | Phase 2 | Pending |
+| DATA-02 | Phase 2 | Pending |
+| DATA-03 | Phase 2 | Pending |
+| DATA-04 | Phase 2 | Pending |
+| DATA-05 | Phase 2 | Pending |
+| ETA-01 | Phase 5 | Pending |
+| ETA-02 | Phase 4 | Pending |
+| ETA-03 | Phase 4 | Pending |
+| ETA-04 | Phase 4 | Pending |
+| ALERT-01 | Phase 6 | Pending |
+| ALERT-02 | Phase 6 | Pending |
+| ERR-01 | Phase 6 | Pending |
+| ERR-02 | Phase 3 | Pending |
+| ERR-03 | Phase 3 | Pending |
+| DS-01 | Phase 1 | Pending |
+| DS-02 | Phase 1 | Pending |
+| DS-03 | Phase 1 | Pending |
+| DS-04 | Phase 1 | Pending |
+| DS-05 | Phase 1 | Pending |
+| DS-06 | Phase 1 | Pending |
+| DS-07 | Phase 1 | Pending |
+| DS-08 | Phase 1 | Pending |
 
 **Coverage:**
-- v1 requirements: 53 total
-- Mapped to phases: 0
-- Unmapped: 53
+- v1 requirements: 62 total
+- Mapped to phases: 62
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-25*
-*Last updated: 2026-03-25 after initial definition*
+*Last updated: 2026-03-25 after roadmap creation*
