@@ -1,0 +1,21 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "Code",
+    "ETA-Model",
+    "scripts",
+    "data",
+    "gtfs_data",
+    "reports",
+    "supabase",
+    ".planning"
+  ]
+}

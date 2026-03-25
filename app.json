@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "Tiger Transit",
+    "slug": "tiger-transit",
+    "scheme": "tigertransit",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0C2340"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "edu.auburn.tigertransit",
+      "newArchEnabled": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0C2340",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "edu.auburn.tigertransit",
+      "newArchEnabled": true,
+      "config": {
+        "googleMaps": {
+          "apiKey": ""
+        }
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      ["expo-font"],
+      [
+        "expo-location",
+        {
+          "isAndroidBackgroundLocationEnabled": false,
+          "isAndroidForegroundServiceEnabled": false
+        }
+      ],
+      ["expo-splash-screen"]
+    ]
+  }
+}
