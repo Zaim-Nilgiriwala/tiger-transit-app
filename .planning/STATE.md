@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** When a student pulls up the app, they see exactly where their bus is and when it arrives at their stop -- accurate to ~85 seconds -- with zero navigation complexity.
-**Current focus:** Phase 4: Route Detail and ETA Predictions -- Plan 02 complete, Plan 03 next
+**Current focus:** Phase 4 complete. Ready for Phase 5: Animated Markers and Callout Bubbles
 
 ## Current Position
 
-Phase: 4 of 6 (Route Detail and ETA Predictions)
-Plan: 2 of 3 in current phase
-Status: Plan 04-02 complete, ready for Plan 04-03
-Last activity: 2026-03-26 -- Completed Plan 04-02 (Route Detail View and ETA Display)
+Phase: 4 of 6 (Route Detail and ETA Predictions) -- COMPLETE
+Plan: 3 of 3 in current phase (all complete)
+Status: Phase 4 complete, ready for Phase 5
+Last activity: 2026-03-26 -- Completed Plan 04-03 (Map overlays: polyline, stop markers, auto-fit, bus dimming)
 
-Progress: [████████░░] 80%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
-- Average duration: 4 min
-- Total execution time: 0.48 hours
+- Total plans completed: 9
+- Average duration: 3 min
+- Total execution time: 0.52 hours
 
 **By Phase:**
 
@@ -46,10 +46,10 @@ Progress: [████████░░] 80%
 | 1. Foundation and Map Shell | 2/2 | 12 min | 6 min |
 | 2. Real-Time Data Pipeline | 1/2 | 4 min | 4 min |
 | 3. Bottom Sheet and Route List | 3/3 | 8 min | 3 min |
-| 4. Route Detail and ETA Predictions | 2/3 | 5 min | 3 min |
+| 4. Route Detail and ETA Predictions | 3/3 | 7 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 4m, 2m, 2m, 3m, 2m
+- Last 5 plans: 2m, 2m, 3m, 2m, 2m
 - Trend: Stable (fast)
 
 *Updated after each plan completion*
@@ -90,6 +90,10 @@ Recent decisions affecting current work:
 - [04-02]: ETA derived from vehiclePosition.nextStopId matching, reactive with 5s polling
 - [04-02]: Instant content swap in bottom sheet (no animation) -- map polyline provides visual feedback
 - [04-02]: hexToRgba exported from RouteCard for shared use in StopRow and RouteDetailView
+- [04-03]: Marker with child View for stop dots (Circle uses meters, not pixels -- cannot produce fixed-pixel-size)
+- [04-03]: Shadow polyline (9px navy-tinted) underneath main polyline (5px route color) for depth effect
+- [04-03]: Auto-fit skips on deselect (selectedRouteId null) -- camera stays in place per user decision
+- [04-03]: Stop centering uses animateToRegion with 0.008 delta for close zoom, 500ms animation
 
 ### Pending Todos
 
@@ -103,6 +107,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-26T17:46:48Z
-Stopped at: Completed 04-02-PLAN.md
-Resume file: .planning/phases/04-route-detail-and-eta-predictions/04-02-SUMMARY.md
+Last session: 2026-03-26T17:46:36Z
+Stopped at: Completed 04-03-PLAN.md
+Resume file: .planning/phases/04-route-detail-and-eta-predictions/04-03-SUMMARY.md
