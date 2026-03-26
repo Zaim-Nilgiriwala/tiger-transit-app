@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation and Map Shell** - Expo SDK 55 project with full-screen map, design token system, and Redux store scaffold (completed 2026-03-25)
 - [ ] **Phase 2: Real-Time Data Pipeline** - GTFS-RT protobuf decoding, 5s polling service, live bus markers on map
 - [x] **Phase 3: Bottom Sheet and Route List** - Glassmorphic draggable bottom sheet with sectioned route browsing (completed 2026-03-26)
-- [ ] **Phase 4: Route Detail and ETA Predictions** - Route detail view with ordered stop list, XGBoost ETAs, polyline and stop markers on map
+- [x] **Phase 4: Route Detail and ETA Predictions** - Route detail view with ordered stop list, XGBoost ETAs, polyline and stop markers on map (completed 2026-03-26)
 - [ ] **Phase 5: Animated Markers and Callout Bubbles** - Smooth marker animation and interactive glass-panel callouts
 - [ ] **Phase 6: Stop Detail, Favorites, Alerts, and Polish** - Remaining features to complete the MVP
 
@@ -80,12 +80,12 @@ Plans:
   3. Ordered stop list displays next 3 arrival ETAs per stop from XGBoost model predictions, formatted as "3 min", "< 1 min", or "No buses en route"
   4. Tapping a stop in the list centers the map on that stop, and a back button returns to the route list
   5. If model prediction times out, ETAs fall back to GTFS-RT trip update data or show "ETA unavailable"
-**Plans:** 1/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
-- [ ] 04-01-PLAN.md -- GTFS static data bundling (stops, shapes, routeStops as TypeScript constants), useStaticRouteData hook, FastAPI batch ETA endpoint stub
-- [ ] 04-02-PLAN.md -- Route Detail View with sticky header, transit-diagram stop list, GTFS-RT ETAs, RouteCard onPress wiring
-- [ ] 04-03-PLAN.md -- Route polyline, stop markers, map auto-fit, stop-tap-to-center, bus dimming on route select
+- [x] 04-01-PLAN.md -- GTFS static data bundling (stops, shapes, routeStops as TypeScript constants), useStaticRouteData hook, FastAPI batch ETA endpoint stub
+- [x] 04-02-PLAN.md -- Route Detail View with sticky header, transit-diagram stop list, GTFS-RT ETAs, RouteCard onPress wiring
+- [x] 04-03-PLAN.md -- Route polyline, stop markers, map auto-fit, stop-tap-to-center, bus dimming on route select
 
 ### Phase 5: Animated Markers and Callout Bubbles
 **Goal**: Bus markers animate smoothly between positions and tapping markers opens informative glass-panel callouts
@@ -128,6 +128,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Foundation and Map Shell | 2/2 | Complete   | 2026-03-25 |
 | 2. Real-Time Data Pipeline | 1/2 | In progress | - |
 | 3. Bottom Sheet and Route List | 3/3 | Complete | 2026-03-26 |
-| 4. Route Detail and ETA Predictions | 1/3 | In Progress|  |
+| 4. Route Detail and ETA Predictions | 3/3 | Complete | 2026-03-26 |
 | 5. Animated Markers and Callout Bubbles | 0/? | Not started | - |
 | 6. Stop Detail, Favorites, Alerts, and Polish | 0/? | Not started | - |

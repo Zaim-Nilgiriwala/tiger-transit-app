@@ -13,9 +13,9 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **MAP-02**: User sees live bus markers on the map with positions updated every 5 seconds
 - [ ] **MAP-03**: Bus markers animate smoothly between position updates (Reanimated-based, 1000ms interpolation)
 - [ ] **MAP-04**: Bus markers display directional heading and use secondary-fixed orange color
-- [ ] **MAP-05**: Stop markers appear on the map in route color when a route is selected
-- [ ] **MAP-06**: Route polyline is drawn on the map in route color when a route is selected
-- [ ] **MAP-07**: Map auto-fits to show all stops + buses when a route is selected
+- [x] **MAP-05**: Stop markers appear on the map in route color when a route is selected
+- [x] **MAP-06**: Route polyline is drawn on the map in route color when a route is selected
+- [x] **MAP-07**: Map auto-fits to show all stops + buses when a route is selected
 - [x] **MAP-08**: Floating glass-panel map controls (my_location, search placeholder, settings placeholder) are visible above the map
 - [x] **MAP-09**: Vehicles with timestamps older than 2 minutes are hidden from the map
 
@@ -37,7 +37,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **ROUTE-06**: Route Detail View shows route name in Headline-LG (32pt Manrope Bold) with color bar and favorite button
 - [x] **ROUTE-07**: Route Detail View displays an ordered stop list with next 3 arrival ETAs per stop
 - [x] **ROUTE-08**: ETAs are rounded to nearest minute ("3 min", "< 1 min", "No buses en route")
-- [ ] **ROUTE-09**: User can tap a stop in the list to center the map on that stop
+- [x] **ROUTE-09**: User can tap a stop in the list to center the map on that stop
 - [x] **ROUTE-10**: Back button returns from Route Detail to Route List
 
 ### Stop Detail
@@ -145,9 +145,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MAP-02 | Phase 2 | Pending |
 | MAP-03 | Phase 5 | Pending |
 | MAP-04 | Phase 2 | Pending |
-| MAP-05 | Phase 4 | Pending |
-| MAP-06 | Phase 4 | Pending |
-| MAP-07 | Phase 4 | Pending |
+| MAP-05 | Phase 4 | Complete |
+| MAP-06 | Phase 4 | Complete |
+| MAP-07 | Phase 4 | Complete |
 | MAP-08 | Phase 1 | Complete |
 | MAP-09 | Phase 2 | Complete |
 | SHEET-01 | Phase 3 | Complete |
@@ -163,7 +163,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ROUTE-06 | Phase 4 | Complete |
 | ROUTE-07 | Phase 4 | Complete |
 | ROUTE-08 | Phase 4 | Complete |
-| ROUTE-09 | Phase 4 | Pending |
+| ROUTE-09 | Phase 4 | Complete |
 | ROUTE-10 | Phase 4 | Complete |
 | STOP-01 | Phase 6 | Pending |
 | STOP-02 | Phase 6 | Pending |
