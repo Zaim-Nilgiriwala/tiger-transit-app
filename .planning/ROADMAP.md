@@ -50,7 +50,7 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md -- GTFS-RT protobuf decode service, static route data, 5s polling hook with AppState awareness
+- [x] 02-01-PLAN.md -- GTFS-RT protobuf decode service, static route data, 5s polling hook with AppState awareness
 - [ ] 02-02-PLAN.md -- BusMarker component with route-colored heading indicator, wired into MapScreen
 
 ### Phase 3: Bottom Sheet and Route List
@@ -124,7 +124,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation and Map Shell | 2/2 | Complete   | 2026-03-25 |
-| 2. Real-Time Data Pipeline | 0/2 | Not started | - |
+| 2. Real-Time Data Pipeline | 1/2 | In progress | - |
 | 3. Bottom Sheet and Route List | 0/? | Not started | - |
 | 4. Route Detail and ETA Predictions | 0/? | Not started | - |
 | 5. Animated Markers and Callout Bubbles | 0/? | Not started | - |

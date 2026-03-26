@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Phase 2 context gathered
-last_updated: "2026-03-25T23:44:54.628Z"
-last_activity: 2026-03-25 -- Completed Plan 01-02 (Full-screen map, bottom bar, location button)
+status: in_progress
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-03-26T00:07:42.000Z"
+last_activity: 2026-03-26 -- Completed Plan 02-01 (GTFS-RT protobuf decode, polling hook, static routes)
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
-  percent: 100
+  total_plans: 4
+  completed_plans: 3
+  percent: 75
 ---
 
 # Project State
@@ -21,32 +21,33 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** When a student pulls up the app, they see exactly where their bus is and when it arrives at their stop -- accurate to ~85 seconds -- with zero navigation complexity.
-**Current focus:** Phase 1: Foundation and Map Shell
+**Current focus:** Phase 2: Real-Time Data Pipeline
 
 ## Current Position
 
-Phase: 1 of 6 (Foundation and Map Shell) -- COMPLETE
-Plan: 2 of 2 in current phase (phase complete)
-Status: Phase 1 Complete
-Last activity: 2026-03-25 -- Completed Plan 01-02 (Full-screen map, bottom bar, location button)
+Phase: 2 of 6 (Real-Time Data Pipeline)
+Plan: 1 of 2 in current phase
+Status: In Progress
+Last activity: 2026-03-26 -- Completed Plan 02-01 (GTFS-RT protobuf decode, polling hook, static routes)
 
-Progress: [██████████] 100%
+Progress: [███████░░░] 75%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 6 min
-- Total execution time: 0.20 hours
+- Total plans completed: 3
+- Average duration: 5 min
+- Total execution time: 0.27 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Foundation and Map Shell | 2/2 | 12 min | 6 min |
+| 2. Real-Time Data Pipeline | 1/2 | 4 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 9m, 3m
+- Last 5 plans: 9m, 3m, 4m
 - Trend: Accelerating
 
 *Updated after each plan completion*
@@ -69,6 +70,9 @@ Recent decisions affecting current work:
 - [Phase 01-02]: GlassBottomBar built as self-contained component for Phase 3 drag/snap wrapping
 - [Phase 01-02]: BlurView with rgba background fallback for glassmorphism on both platforms
 - [Phase 01-02]: Location button is no-op when permission denied, matching silent-denial UX pattern
+- [02-01]: Used protobufjs with Root.fromJSON() embedded descriptor instead of gtfs-realtime-bindings (Hermes-safe, no eval/require)
+- [02-01]: Embedded minimal GTFS-RT proto definition as JSON INamespace rather than loading .proto file at runtime
+- [02-01]: Store access via store.getState() in AppState resume handler to avoid stale closure over positions
 
 ### Pending Todos
 
@@ -82,6 +86,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-25T23:44:54.620Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-real-time-data-pipeline/02-CONTEXT.md
+Last session: 2026-03-26T00:07:42.000Z
+Stopped at: Completed 02-01-PLAN.md
+Resume file: .planning/phases/02-real-time-data-pipeline/02-01-SUMMARY.md
