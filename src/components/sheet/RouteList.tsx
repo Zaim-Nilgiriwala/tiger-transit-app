@@ -2,17 +2,21 @@
  * RouteList - Sectioned route list for the bottom sheet
  *
  * Reads routes and vehicle positions from Redux, computes per-route
- * bus counts, sorts alphabetically by long name, and renders
- * RouteCard items under an "ACTIVE ROUTES" section header.
+ * bus counts, sorts active-first then alphabetical within each group,
+ * and renders RouteCard items under three section headers:
+ * ACTIVE ROUTES, FAVORITES, and ALERTS.
+ *
+ * Favorites and Alerts sections are placeholder stubs for Phase 6,
+ * which will implement FAV-01 through FAV-04 and ALERT-01/ALERT-02.
  *
  * Design system compliance:
- * - ROUTE-01: "Active Routes" section header in labelSM uppercase
+ * - ROUTE-01: Three section headers (Active Routes, Favorites, Alerts) in labelSM uppercase
  * - ROUTE-03: Level 1 section background with Level 2 card surfaces
- * - ROUTE-04: Inactive routes stay in alphabetical position, dimmed
+ * - ROUTE-04: Inactive routes (0 active buses) dimmed and sorted to bottom
  *
  * Data flow:
- * - state.routes.list -> sorted route array
- * - state.vehicles.positions -> busCountMap per routeId
+ * - state.routes.list -> sorted route array (active-first, then alphabetical)
+ * - state.vehicles.positions -> busCountMap per routeId (used in sort + card display)
  */
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -52,11 +56,15 @@ export default function RouteList() {
     return map;
   }, [positions]);
 
-  /** Routes sorted alphabetically by long name */
-  const sortedRoutes = useMemo(
-    () => [...routes].sort((a, b) => a.longName.localeCompare(b.longName)),
-    [routes],
-  );
+  /** Routes sorted active-first, then alphabetical within each group */
+  const sortedRoutes = useMemo(() => {
+    return [...routes].sort((a, b) => {
+      const aActive = (busCountMap.get(a.routeId) || 0) > 0 ? 0 : 1;
+      const bActive = (busCountMap.get(b.routeId) || 0) > 0 ? 0 : 1;
+      if (aActive !== bActive) return aActive - bActive;
+      return a.longName.localeCompare(b.longName);
+    });
+  }, [routes, busCountMap]);
 
   // -------------------------------------------------------------------------
   // Render
@@ -76,6 +84,16 @@ export default function RouteList() {
           />
         ))}
       </View>
+
+      {/* Favorites section (placeholder - Phase 6: FAV-01 through FAV-04) */}
+      <Text style={[styles.sectionHeader, styles.sectionDivider]}>
+        FAVORITES
+      </Text>
+      <Text style={styles.placeholderText}>No favorites yet</Text>
+
+      {/* Alerts section (placeholder - Phase 6: ALERT-01, ALERT-02) */}
+      <Text style={[styles.sectionHeader, styles.sectionDivider]}>ALERTS</Text>
+      <Text style={styles.placeholderText}>No active alerts</Text>
     </View>
   );
 }
@@ -98,5 +116,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: EDGE_MARGIN,
     gap: listItemGap,
     paddingBottom: spacing.s2,
+  },
+  sectionDivider: {
+    marginTop: spacing.s2,
+  },
+  placeholderText: {
+    ...typography.bodyMD,
+    color: textColors.onSurfaceVariant,
+    textAlign: 'center' as const,
+    paddingVertical: spacing.s2,
+    paddingHorizontal: EDGE_MARGIN,
   },
 });
