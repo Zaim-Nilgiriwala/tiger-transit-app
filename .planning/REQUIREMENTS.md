@@ -76,9 +76,9 @@ Requirements for initial release. Each maps to roadmap phases.
 ### ETA Predictions
 
 - [ ] **ETA-01**: Bus callout shows GTFS-RT feed ETA for next stop (low-latency, single stop)
-- [ ] **ETA-02**: Stop list shows XGBoost model predictions for next 3 arrivals (multi-stop, higher accuracy)
+- [x] **ETA-02**: Stop list shows XGBoost model predictions for next 3 arrivals (multi-stop, higher accuracy)
 - [ ] **ETA-03**: ETA predictions refresh every 15 seconds while viewing a route
-- [ ] **ETA-04**: If model prediction times out, app falls back to GTFS-RT trip update ETAs or shows "ETA unavailable"
+- [x] **ETA-04**: If model prediction times out, app falls back to GTFS-RT trip update ETAs or shows "ETA unavailable"
 
 ### Alerts & Error States
 
@@ -187,9 +187,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-04 | Phase 2 | Complete |
 | DATA-05 | Phase 2 | Complete |
 | ETA-01 | Phase 5 | Pending |
-| ETA-02 | Phase 4 | Pending |
+| ETA-02 | Phase 4 | Complete |
 | ETA-03 | Phase 4 | Pending |
-| ETA-04 | Phase 4 | Pending |
+| ETA-04 | Phase 4 | Complete |
 | ALERT-01 | Phase 6 | Pending |
 | ALERT-02 | Phase 6 | Pending |
 | ERR-01 | Phase 6 | Pending |

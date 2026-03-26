@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Phase 4 context gathered
-last_updated: "2026-03-26T05:47:17.646Z"
-last_activity: "2026-03-26 -- Completed Plan 03-03 (Gap closure: inactive sort, Favorites/Alerts placeholders, ROUTE-02 correction)"
+status: in-progress
+stopped_at: Completed 04-01 GTFS static data foundation
+last_updated: "2026-03-26T17:40:41Z"
+last_activity: "2026-03-26 -- Completed Plan 04-01 (GTFS stops, shapes, route-stop-sequences as TS constants + useStaticRouteData hook + batch ETA endpoint stub)"
 progress:
   total_phases: 6
-  completed_phases: 2
-  total_plans: 7
-  completed_plans: 6
-  percent: 100
+  completed_phases: 3
+  total_plans: 10
+  completed_plans: 7
+  percent: 70
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** When a student pulls up the app, they see exactly where their bus is and when it arrives at their stop -- accurate to ~85 seconds -- with zero navigation complexity.
-**Current focus:** Phase 3 gap closure complete; ready for Phase 4: Route Detail and ETA Predictions
+**Current focus:** Phase 4: Route Detail and ETA Predictions -- Plan 01 complete, Plan 02 next
 
 ## Current Position
 
-Phase: 3 of 6 (Bottom Sheet and Route List) -- COMPLETE
-Plan: 3 of 3 in current phase
-Status: Phase 3 fully complete (including gap closure)
-Last activity: 2026-03-26 -- Completed Plan 03-03 (Gap closure: inactive sort, Favorites/Alerts placeholders, ROUTE-02 correction)
+Phase: 4 of 6 (Route Detail and ETA Predictions)
+Plan: 1 of 2 in current phase
+Status: Plan 04-01 complete, ready for Plan 04-02
+Last activity: 2026-03-26 -- Completed Plan 04-01 (GTFS static data foundation)
 
-Progress: [██████████] 100%
+Progress: [███████░░░] 70%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: 4 min
-- Total execution time: 0.40 hours
+- Total execution time: 0.45 hours
 
 **By Phase:**
 
@@ -46,9 +46,10 @@ Progress: [██████████] 100%
 | 1. Foundation and Map Shell | 2/2 | 12 min | 6 min |
 | 2. Real-Time Data Pipeline | 1/2 | 4 min | 4 min |
 | 3. Bottom Sheet and Route List | 3/3 | 8 min | 3 min |
+| 4. Route Detail and ETA Predictions | 1/2 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 4m, 4m, 2m, 2m
+- Last 5 plans: 4m, 4m, 2m, 2m, 3m
 - Trend: Stable (fast)
 
 *Updated after each plan completion*
@@ -81,6 +82,10 @@ Recent decisions affecting current work:
 - [03-02]: hexToRgba helper converts route color to 6% opacity tint for card background
 - [03-02]: React.memo on RouteCard to prevent re-renders during 5s polling updates
 - [03-02]: gap property on cardList container for spacing instead of marginBottom on each card
+- [04-01]: Generator script approach for GTFS CSV-to-TS conversion (Node.js parses CSVs, produces hardcoded constants)
+- [04-01]: STOPS_BY_ID as Record<string, Stop> for O(1) stop lookup by ID
+- [04-01]: First-encountered trip used as canonical stop sequence per route
+- [04-01]: Batch ETA endpoint returns source="stub" for clear model/stub distinction
 
 ### Pending Todos
 
@@ -94,6 +99,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-26T05:47:17.639Z
-Stopped at: Phase 4 context gathered
-Resume file: .planning/phases/04-route-detail-and-eta-predictions/04-CONTEXT.md
+Last session: 2026-03-26T17:40:41Z
+Stopped at: Completed 04-01-PLAN.md
+Resume file: .planning/phases/04-route-detail-and-eta-predictions/04-01-SUMMARY.md
