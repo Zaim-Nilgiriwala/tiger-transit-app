@@ -1,19 +1,11 @@
 /**
- * GTFS-RT Feed Configuration
+ * Feed Configuration
  *
- * Feed URLs and polling constants for Tiger Transit's ETASpot GTFS-RT feeds.
- * Position and trip update feeds are hosted on S3 as protobuf binary files.
+ * Polling and staleness constants for Tiger Transit vehicle data.
+ * Feed URLs removed -- data now sourced from Supabase via useVehicleSubscription.
  */
 
-/** Vehicle position updates feed (protobuf binary) */
-export const POSITION_FEED_URL =
-  'https://s3.amazonaws.com/etatransit.gtfs/auburn.etaspot.net/position_updates.pb';
-
-/** Trip updates feed with ETAs and delays (protobuf binary) */
-export const TRIP_UPDATES_FEED_URL =
-  'https://s3.amazonaws.com/etatransit.gtfs/auburn.etaspot.net/trip_updates.pb';
-
-/** Polling interval in milliseconds (5 seconds) */
+/** Polling interval in milliseconds (5 seconds) -- used by Edge Function poll cadence */
 export const POLL_INTERVAL_MS = 5_000;
 
 /** Vehicles older than this are considered stale and filtered out (2 minutes) */
