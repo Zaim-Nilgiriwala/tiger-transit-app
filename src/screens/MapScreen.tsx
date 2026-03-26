@@ -1,23 +1,25 @@
 /**
- * MapScreen - Full-screen map with live bus markers
+ * MapScreen - Full-screen map with live bus markers and draggable bottom sheet
  *
  * The primary map screen for Tiger Transit. Renders:
  * - Auburn campus center (~32.606, -85.487)
  * - Live bus markers (route-colored, directional heading) updated every 5s
  * - Blue dot for user location (if permission granted)
- * - FloatingLocationButton and GlassBottomBar overlaid
+ * - BottomSheet with three snap points (collapsed, half, full)
+ * - FloatingLocationButton above the collapsed sheet
  *
  * Data flow:
  * - useStaticData() loads ROUTES into Redux on mount
  * - useGtfsPolling() starts 5s polling lifecycle, dispatches positions to Redux
- * - useAppSelector reads vehicle positions and route list from Redux
+ * - useAppSelector reads vehicle positions, route list, and sheet position
  * - BusMarker rendered per vehicle as a child of MapView
+ * - mapPadding adjusts dynamically based on sheet snap position
  *
  * Render order: MapView (fills screen) -> BusMarkers (map children) ->
- *   GlassBottomBar (bottom) -> FloatingLocationButton (bottom-left above bar)
+ *   BottomSheet (draggable) -> FloatingLocationButton (above sheet)
  */
 import React, { useMemo, useRef } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import MapView from 'react-native-maps';
 
 import { colors } from '../theme';
@@ -26,7 +28,7 @@ import { useLocation } from '../hooks/useLocation';
 import { useStaticData } from '../hooks/useStaticData';
 import { useGtfsPolling } from '../hooks/useGtfsPolling';
 import FloatingLocationButton from '../components/map/FloatingLocationButton';
-import GlassBottomBar from '../components/map/GlassBottomBar';
+import BottomSheet from '../components/sheet/BottomSheet';
 import BusMarker from '../components/map/BusMarker';
 
 /** Fallback marker color when routeId is not found in ROUTES */
@@ -42,6 +44,7 @@ const AUBURN_CAMPUS = {
 
 export default function MapScreen() {
   const mapRef = useRef<MapView>(null);
+  const { height: screenHeight } = useWindowDimensions();
   const { location, permissionDenied } = useLocation();
 
   // -----------------------------------------------------------------------
@@ -51,10 +54,12 @@ export default function MapScreen() {
   useGtfsPolling();
 
   // -----------------------------------------------------------------------
-  // Read vehicle positions and route list from Redux
+  // Read vehicle positions, route list, and UI state from Redux
   // -----------------------------------------------------------------------
   const positions = useAppSelector((state) => state.vehicles.positions);
   const routes = useAppSelector((state) => state.routes.list);
+  const routesLoading = useAppSelector((state) => state.routes.loading);
+  const sheetPosition = useAppSelector((state) => state.ui.sheetPosition);
 
   // Memoized route color lookup: routeId -> '#RRGGBB'
   const routeColorMap = useMemo(() => {
@@ -62,6 +67,26 @@ export default function MapScreen() {
     routes.forEach((r) => map.set(r.routeId, r.routeColor));
     return map;
   }, [routes]);
+
+  // -----------------------------------------------------------------------
+  // Dynamic map padding based on sheet position
+  // -----------------------------------------------------------------------
+  const mapPadding = useMemo(() => {
+    let bottom: number;
+    switch (sheetPosition) {
+      case 'half':
+        bottom = Math.round(screenHeight * 0.45);
+        break;
+      case 'full':
+        bottom = Math.round(screenHeight * 0.90);
+        break;
+      case 'collapsed':
+      default:
+        bottom = 80;
+        break;
+    }
+    return { top: 0, right: 0, bottom, left: 0 };
+  }, [sheetPosition, screenHeight]);
 
   return (
     <View style={styles.container}>
@@ -73,7 +98,7 @@ export default function MapScreen() {
         pitchEnabled={true}
         showsUserLocation={true}
         showsMyLocationButton={false}
-        mapPadding={{ top: 0, right: 0, bottom: 80, left: 0 }}
+        mapPadding={mapPadding}
       >
         {positions.map((vehicle) => (
           <BusMarker
@@ -84,7 +109,9 @@ export default function MapScreen() {
           />
         ))}
       </MapView>
-      <GlassBottomBar />
+      <BottomSheet loading={routesLoading}>
+        {/* Route list content will be added in Plan 03-02 */}
+      </BottomSheet>
       <FloatingLocationButton
         mapRef={mapRef}
         location={location}
