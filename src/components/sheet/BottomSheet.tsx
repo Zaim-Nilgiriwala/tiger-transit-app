@@ -83,7 +83,7 @@ const SPRING_CONFIG = {
 // ---------------------------------------------------------------------------
 
 interface BottomSheetProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   loading?: boolean;
 }
 
