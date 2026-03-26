@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation and Map Shell** - Expo SDK 55 project with full-screen map, design token system, and Redux store scaffold (completed 2026-03-25)
 - [ ] **Phase 2: Real-Time Data Pipeline** - GTFS-RT protobuf decoding, 5s polling service, live bus markers on map
-- [x] **Phase 3: Bottom Sheet and Route List** - Glassmorphic draggable bottom sheet with sectioned route browsing (completed 2026-03-26)
+- [ ] **Phase 3: Bottom Sheet and Route List** - Glassmorphic draggable bottom sheet with sectioned route browsing (gap closure in progress)
 - [ ] **Phase 4: Route Detail and ETA Predictions** - Route detail view with ordered stop list, XGBoost ETAs, polyline and stop markers on map
 - [ ] **Phase 5: Animated Markers and Callout Bubbles** - Smooth marker animation and interactive glass-panel callouts
 - [ ] **Phase 6: Stop Detail, Favorites, Alerts, and Polish** - Remaining features to complete the MVP
@@ -63,11 +63,12 @@ Plans:
   3. Route list displays sectioned layout (Active Routes, Favorites placeholder, Alerts placeholder) with each card showing route color accent, short name, long name, active bus count, and next ETA
   4. Route cards use Level 2 surfaces on Level 1 section backgrounds with no border lines (tonal layering only)
   5. Inactive routes (0 active buses) appear dimmed, sorted to bottom, and show "No active buses" message
-**Plans:** 2/2 plans complete
+**Plans:** 3 plans (2 complete, 1 gap closure)
 
 Plans:
 - [x] 03-01-PLAN.md -- Draggable glassmorphic bottom sheet with three snap points, spring animation, and map interaction
 - [x] 03-02-PLAN.md -- Route list with color-accented cards, active bus counts, and alphabetical sorting
+- [ ] 03-03-PLAN.md -- Gap closure: inactive sort-to-bottom, Favorites/Alerts section placeholders, ROUTE-02 requirement correction
 
 ### Phase 4: Route Detail and ETA Predictions
 **Goal**: Users can tap a route to see its full stop list with ML-powered arrival predictions and the route drawn on the map
@@ -125,7 +126,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|----------------|--------|-----------|
 | 1. Foundation and Map Shell | 2/2 | Complete   | 2026-03-25 |
 | 2. Real-Time Data Pipeline | 1/2 | In progress | - |
-| 3. Bottom Sheet and Route List | 2/2 | Complete | 2026-03-26 |
+| 3. Bottom Sheet and Route List | 2/3 | Gap closure | - |
 | 4. Route Detail and ETA Predictions | 0/? | Not started | - |
 | 5. Animated Markers and Callout Bubbles | 0/? | Not started | - |
 | 6. Stop Detail, Favorites, Alerts, and Polish | 0/? | Not started | - |
