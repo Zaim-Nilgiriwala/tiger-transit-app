@@ -29,10 +29,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Route Navigation
 
-- [ ] **ROUTE-01**: User sees a sectioned route list as the default sheet content (Active Routes, Favorites, Alerts sections)
-- [ ] **ROUTE-02**: Each route card shows route color accent, short name, long name, active bus count, and next ETA
-- [ ] **ROUTE-03**: Route cards are Level 2 surfaces on Level 1 section backgrounds (no border lines, tonal layering only)
-- [ ] **ROUTE-04**: Inactive routes (0 active buses) are dimmed and sorted to bottom
+- [x] **ROUTE-01**: User sees a sectioned route list as the default sheet content (Active Routes, Favorites, Alerts sections)
+- [x] **ROUTE-02**: Each route card shows route color accent, short name, long name, active bus count, and next ETA
+- [x] **ROUTE-03**: Route cards are Level 2 surfaces on Level 1 section backgrounds (no border lines, tonal layering only)
+- [x] **ROUTE-04**: Inactive routes (0 active buses) are dimmed and sorted to bottom
 - [ ] **ROUTE-05**: Tapping a route card transitions the sheet to Route Detail View and draws polyline + stop markers on map
 - [ ] **ROUTE-06**: Route Detail View shows route name in Headline-LG (32pt Manrope Bold) with color bar and favorite button
 - [ ] **ROUTE-07**: Route Detail View displays an ordered stop list with next 3 arrival ETAs per stop
@@ -85,7 +85,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **ALERT-01**: Service alerts from GTFS-RT alerts feed are displayed in the Alerts section of the route list
 - [ ] **ALERT-02**: Alerts feed is polled every 60 seconds
 - [ ] **ERR-01**: No network connection shows last known positions dimmed to surface-dim + "No connection" glass-panel banner
-- [ ] **ERR-02**: Routes with no active buses show "No active buses" in on-surface-variant color
+- [x] **ERR-02**: Routes with no active buses show "No active buses" in on-surface-variant color
 - [x] **ERR-03**: Loading states provide visual feedback during data fetch
 
 ### Design System
@@ -155,10 +155,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SHEET-03 | Phase 3 | Complete |
 | SHEET-04 | Phase 3 | Complete |
 | SHEET-05 | Phase 3 | Complete |
-| ROUTE-01 | Phase 3 | Pending |
-| ROUTE-02 | Phase 3 | Pending |
-| ROUTE-03 | Phase 3 | Pending |
-| ROUTE-04 | Phase 3 | Pending |
+| ROUTE-01 | Phase 3 | Complete |
+| ROUTE-02 | Phase 3 | Complete |
+| ROUTE-03 | Phase 3 | Complete |
+| ROUTE-04 | Phase 3 | Complete |
 | ROUTE-05 | Phase 4 | Pending |
 | ROUTE-06 | Phase 4 | Pending |
 | ROUTE-07 | Phase 4 | Pending |
@@ -193,7 +193,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ALERT-01 | Phase 6 | Pending |
 | ALERT-02 | Phase 6 | Pending |
 | ERR-01 | Phase 6 | Pending |
-| ERR-02 | Phase 3 | Pending |
+| ERR-02 | Phase 3 | Complete |
 | ERR-03 | Phase 3 | Complete |
 | DS-01 | Phase 1 | Complete |
 | DS-02 | Phase 1 | Complete |

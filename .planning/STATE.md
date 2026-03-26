@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-03-26T03:12:22.000Z"
-last_activity: 2026-03-26 -- Completed Plan 03-01 (Draggable bottom sheet with snap points and glassmorphism)
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-03-26T03:17:51Z"
+last_activity: 2026-03-26 -- Completed Plan 03-02 (Route list with color-accented cards and live bus counts)
 progress:
   total_phases: 6
-  completed_phases: 2
-  total_plans: 5
-  completed_plans: 4
-  percent: 80
+  completed_phases: 3
+  total_plans: 6
+  completed_plans: 5
+  percent: 83
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** When a student pulls up the app, they see exactly where their bus is and when it arrives at their stop -- accurate to ~85 seconds -- with zero navigation complexity.
-**Current focus:** Phase 3: Bottom Sheet and Route List
+**Current focus:** Phase 4: Route Detail and ETA Predictions
 
 ## Current Position
 
-Phase: 3 of 6 (Bottom Sheet and Route List)
-Plan: 1 of 2 in current phase
-Status: In Progress
-Last activity: 2026-03-26 -- Completed Plan 03-01 (Draggable bottom sheet with snap points and glassmorphism)
+Phase: 4 of 6 (Route Detail and ETA Predictions)
+Plan: 0 of ? in current phase
+Status: Phase 3 Complete
+Last activity: 2026-03-26 -- Completed Plan 03-02 (Route list with color-accented cards and live bus counts)
 
-Progress: [████████░░] 80%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 5 min
-- Total execution time: 0.33 hours
+- Total execution time: 0.37 hours
 
 **By Phase:**
 
@@ -45,10 +45,10 @@ Progress: [████████░░] 80%
 |-------|-------|-------|----------|
 | 1. Foundation and Map Shell | 2/2 | 12 min | 6 min |
 | 2. Real-Time Data Pipeline | 1/2 | 4 min | 4 min |
-| 3. Bottom Sheet and Route List | 1/2 | 4 min | 4 min |
+| 3. Bottom Sheet and Route List | 2/2 | 6 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 9m, 3m, 4m, 4m
+- Last 5 plans: 3m, 4m, 4m, 2m
 - Trend: Stable (fast)
 
 *Updated after each plan completion*
@@ -78,6 +78,9 @@ Recent decisions affecting current work:
 - [03-01]: ScrollView enabled/disabled via React state synced from spring settle callback
 - [03-01]: Spring config: damping 20, stiffness 150 for responsive but controlled snap feel
 - [03-01]: Velocity projection factor 0.15 for natural fling-to-snap behavior
+- [03-02]: hexToRgba helper converts route color to 6% opacity tint for card background
+- [03-02]: React.memo on RouteCard to prevent re-renders during 5s polling updates
+- [03-02]: gap property on cardList container for spacing instead of marginBottom on each card
 
 ### Pending Todos
 
@@ -91,6 +94,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-26T03:12:22.000Z
-Stopped at: Completed 03-01-PLAN.md
-Resume file: .planning/phases/03-bottom-sheet-and-route-list/03-01-SUMMARY.md
+Last session: 2026-03-26T03:17:51Z
+Stopped at: Completed 03-02-PLAN.md
+Resume file: .planning/phases/03-bottom-sheet-and-route-list/03-02-SUMMARY.md
