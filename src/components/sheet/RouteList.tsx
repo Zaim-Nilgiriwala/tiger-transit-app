@@ -18,10 +18,11 @@
  * - state.routes.list -> sorted route array (active-first, then alphabetical)
  * - state.vehicles.positions -> busCountMap per routeId (used in sort + card display)
  */
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { useAppSelector } from '../../store';
+import { useAppDispatch, useAppSelector } from '../../store';
+import { selectRoute } from '../../store/slices/uiSlice';
 import {
   surfaces,
   textColors,
@@ -31,17 +32,21 @@ import {
   listItemGap,
 } from '../../theme';
 import RouteCard from './RouteCard';
+import RouteDetailView from './RouteDetailView';
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
 export default function RouteList() {
+  const dispatch = useAppDispatch();
+
   // -------------------------------------------------------------------------
   // Read from Redux
   // -------------------------------------------------------------------------
   const routes = useAppSelector((state) => state.routes.list);
   const positions = useAppSelector((state) => state.vehicles.positions);
+  const selectedRouteId = useAppSelector((state) => state.ui.selectedRouteId);
 
   // -------------------------------------------------------------------------
   // Derived data (memoized)
@@ -67,7 +72,24 @@ export default function RouteList() {
   }, [routes, busCountMap]);
 
   // -------------------------------------------------------------------------
-  // Render
+  // Handlers
+  // -------------------------------------------------------------------------
+  const handleRoutePress = useCallback(
+    (routeId: string) => {
+      dispatch(selectRoute(routeId));
+    },
+    [dispatch],
+  );
+
+  // -------------------------------------------------------------------------
+  // Render: Route Detail View (when a route is selected)
+  // -------------------------------------------------------------------------
+  if (selectedRouteId !== null) {
+    return <RouteDetailView />;
+  }
+
+  // -------------------------------------------------------------------------
+  // Render: Route List (default)
   // -------------------------------------------------------------------------
   return (
     <View style={styles.container}>
@@ -81,6 +103,7 @@ export default function RouteList() {
             key={route.routeId}
             route={route}
             busCount={busCountMap.get(route.routeId) || 0}
+            onPress={() => handleRoutePress(route.routeId)}
           />
         ))}
       </View>
