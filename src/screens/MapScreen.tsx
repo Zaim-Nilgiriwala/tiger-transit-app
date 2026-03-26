@@ -29,6 +29,7 @@ import { useStaticData } from '../hooks/useStaticData';
 import { useGtfsPolling } from '../hooks/useGtfsPolling';
 import FloatingLocationButton from '../components/map/FloatingLocationButton';
 import BottomSheet from '../components/sheet/BottomSheet';
+import RouteList from '../components/sheet/RouteList';
 import BusMarker from '../components/map/BusMarker';
 
 /** Fallback marker color when routeId is not found in ROUTES */
@@ -110,7 +111,7 @@ export default function MapScreen() {
         ))}
       </MapView>
       <BottomSheet loading={routesLoading}>
-        {/* Route list content will be added in Plan 03-02 */}
+        <RouteList />
       </BottomSheet>
       <FloatingLocationButton
         mapRef={mapRef}
