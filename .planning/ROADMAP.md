@@ -80,11 +80,12 @@ Plans:
   3. Ordered stop list displays next 3 arrival ETAs per stop from XGBoost model predictions, formatted as "3 min", "< 1 min", or "No buses en route"
   4. Tapping a stop in the list centers the map on that stop, and a back button returns to the route list
   5. If model prediction times out, ETAs fall back to GTFS-RT trip update data or show "ETA unavailable"
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md -- GTFS static data bundling (stops, shapes, routeStops as TypeScript constants), useStaticRouteData hook, FastAPI batch ETA endpoint stub
+- [ ] 04-02-PLAN.md -- Route Detail View with sticky header, transit-diagram stop list, GTFS-RT ETAs, RouteCard onPress wiring
+- [ ] 04-03-PLAN.md -- Route polyline, stop markers, map auto-fit, stop-tap-to-center, bus dimming on route select
 
 ### Phase 5: Animated Markers and Callout Bubbles
 **Goal**: Bus markers animate smoothly between positions and tapping markers opens informative glass-panel callouts
@@ -127,6 +128,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Foundation and Map Shell | 2/2 | Complete   | 2026-03-25 |
 | 2. Real-Time Data Pipeline | 1/2 | In progress | - |
 | 3. Bottom Sheet and Route List | 3/3 | Complete | 2026-03-26 |
-| 4. Route Detail and ETA Predictions | 0/? | Not started | - |
+| 4. Route Detail and ETA Predictions | 0/3 | Not started | - |
 | 5. Animated Markers and Callout Bubbles | 0/? | Not started | - |
 | 6. Stop Detail, Favorites, Alerts, and Polish | 0/? | Not started | - |
