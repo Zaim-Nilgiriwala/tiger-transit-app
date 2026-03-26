@@ -32,6 +32,7 @@ interface BusMarkerProps {
   vehicle: VehiclePosition;
   routeColor: string; // '#RRGGBB' — looked up by parent
   zIndex: number;     // for z-ordering by timestamp
+  opacity?: number;   // 0-1, defaults to 1; used for dimming non-selected route buses
 }
 
 // ---------------------------------------------------------------------------
@@ -74,7 +75,7 @@ const SHARP_CORNER_OFFSET = 135;
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
-function BusMarker({ vehicle, routeColor, zIndex }: BusMarkerProps) {
+function BusMarker({ vehicle, routeColor, zIndex, opacity = 1 }: BusMarkerProps) {
   const rotation = vehicle.heading + SHARP_CORNER_OFFSET;
   const counterRotation = -rotation;
   const brighterTint = brightenColor(routeColor, 0.3);
@@ -91,6 +92,7 @@ function BusMarker({ vehicle, routeColor, zIndex }: BusMarkerProps) {
         style={[
           styles.container,
           {
+            opacity,
             backgroundColor: routeColor,
             borderColor: brighterTint,
             transform: [{ rotate: `${rotation}deg` }],
