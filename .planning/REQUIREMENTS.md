@@ -33,12 +33,12 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **ROUTE-02**: Each route card shows route color accent, short name, long name, active bus count, and next ETA
 - [x] **ROUTE-03**: Route cards are Level 2 surfaces on Level 1 section backgrounds (no border lines, tonal layering only)
 - [x] **ROUTE-04**: Inactive routes (0 active buses) are dimmed and sorted to bottom
-- [ ] **ROUTE-05**: Tapping a route card transitions the sheet to Route Detail View and draws polyline + stop markers on map
-- [ ] **ROUTE-06**: Route Detail View shows route name in Headline-LG (32pt Manrope Bold) with color bar and favorite button
-- [ ] **ROUTE-07**: Route Detail View displays an ordered stop list with next 3 arrival ETAs per stop
-- [ ] **ROUTE-08**: ETAs are rounded to nearest minute ("3 min", "< 1 min", "No buses en route")
+- [x] **ROUTE-05**: Tapping a route card transitions the sheet to Route Detail View and draws polyline + stop markers on map
+- [x] **ROUTE-06**: Route Detail View shows route name in Headline-LG (32pt Manrope Bold) with color bar and favorite button
+- [x] **ROUTE-07**: Route Detail View displays an ordered stop list with next 3 arrival ETAs per stop
+- [x] **ROUTE-08**: ETAs are rounded to nearest minute ("3 min", "< 1 min", "No buses en route")
 - [ ] **ROUTE-09**: User can tap a stop in the list to center the map on that stop
-- [ ] **ROUTE-10**: Back button returns from Route Detail to Route List
+- [x] **ROUTE-10**: Back button returns from Route Detail to Route List
 
 ### Stop Detail
 
@@ -77,7 +77,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **ETA-01**: Bus callout shows GTFS-RT feed ETA for next stop (low-latency, single stop)
 - [x] **ETA-02**: Stop list shows XGBoost model predictions for next 3 arrivals (multi-stop, higher accuracy)
-- [ ] **ETA-03**: ETA predictions refresh every 15 seconds while viewing a route
+- [x] **ETA-03**: ETA predictions refresh every 15 seconds while viewing a route
 - [x] **ETA-04**: If model prediction times out, app falls back to GTFS-RT trip update ETAs or shows "ETA unavailable"
 
 ### Alerts & Error States
@@ -159,12 +159,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ROUTE-02 | Phase 3+4 | Partial (ETA deferred to Phase 4) |
 | ROUTE-03 | Phase 3 | Complete |
 | ROUTE-04 | Phase 3 | Complete |
-| ROUTE-05 | Phase 4 | Pending |
-| ROUTE-06 | Phase 4 | Pending |
-| ROUTE-07 | Phase 4 | Pending |
-| ROUTE-08 | Phase 4 | Pending |
+| ROUTE-05 | Phase 4 | Complete |
+| ROUTE-06 | Phase 4 | Complete |
+| ROUTE-07 | Phase 4 | Complete |
+| ROUTE-08 | Phase 4 | Complete |
 | ROUTE-09 | Phase 4 | Pending |
-| ROUTE-10 | Phase 4 | Pending |
+| ROUTE-10 | Phase 4 | Complete |
 | STOP-01 | Phase 6 | Pending |
 | STOP-02 | Phase 6 | Pending |
 | STOP-03 | Phase 6 | Pending |
@@ -188,7 +188,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-05 | Phase 2 | Complete |
 | ETA-01 | Phase 5 | Pending |
 | ETA-02 | Phase 4 | Complete |
-| ETA-03 | Phase 4 | Pending |
+| ETA-03 | Phase 4 | Complete |
 | ETA-04 | Phase 4 | Complete |
 | ALERT-01 | Phase 6 | Pending |
 | ALERT-02 | Phase 6 | Pending |

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in-progress
-stopped_at: Completed 04-01 GTFS static data foundation
-last_updated: "2026-03-26T17:40:41Z"
-last_activity: "2026-03-26 -- Completed Plan 04-01 (GTFS stops, shapes, route-stop-sequences as TS constants + useStaticRouteData hook + batch ETA endpoint stub)"
+stopped_at: Completed 04-03 Map overlays (polyline, stop markers, auto-fit, bus dimming)
+last_updated: "2026-03-26T17:46:36Z"
+last_activity: "2026-03-26 -- Completed Plan 04-03 (RouteOverlay polyline + stop markers, map auto-fit, stop centering, bus dimming)"
 progress:
   total_phases: 6
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 10
-  completed_plans: 7
-  percent: 70
+  completed_plans: 9
+  percent: 90
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** When a student pulls up the app, they see exactly where their bus is and when it arrives at their stop -- accurate to ~85 seconds -- with zero navigation complexity.
-**Current focus:** Phase 4: Route Detail and ETA Predictions -- Plan 01 complete, Plan 02 next
+**Current focus:** Phase 4: Route Detail and ETA Predictions -- Plan 02 complete, Plan 03 next
 
 ## Current Position
 
 Phase: 4 of 6 (Route Detail and ETA Predictions)
-Plan: 1 of 2 in current phase
-Status: Plan 04-01 complete, ready for Plan 04-02
-Last activity: 2026-03-26 -- Completed Plan 04-01 (GTFS static data foundation)
+Plan: 2 of 3 in current phase
+Status: Plan 04-02 complete, ready for Plan 04-03
+Last activity: 2026-03-26 -- Completed Plan 04-02 (Route Detail View and ETA Display)
 
-Progress: [███████░░░] 70%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
+- Total plans completed: 8
 - Average duration: 4 min
-- Total execution time: 0.45 hours
+- Total execution time: 0.48 hours
 
 **By Phase:**
 
@@ -46,10 +46,10 @@ Progress: [███████░░░] 70%
 | 1. Foundation and Map Shell | 2/2 | 12 min | 6 min |
 | 2. Real-Time Data Pipeline | 1/2 | 4 min | 4 min |
 | 3. Bottom Sheet and Route List | 3/3 | 8 min | 3 min |
-| 4. Route Detail and ETA Predictions | 1/2 | 3 min | 3 min |
+| 4. Route Detail and ETA Predictions | 2/3 | 5 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 4m, 4m, 2m, 2m, 3m
+- Last 5 plans: 4m, 2m, 2m, 3m, 2m
 - Trend: Stable (fast)
 
 *Updated after each plan completion*
@@ -86,6 +86,10 @@ Recent decisions affecting current work:
 - [04-01]: STOPS_BY_ID as Record<string, Stop> for O(1) stop lookup by ID
 - [04-01]: First-encountered trip used as canonical stop sequence per route
 - [04-01]: Batch ETA endpoint returns source="stub" for clear model/stub distinction
+- [04-02]: Plain View mapping for stop list (4-15 stops per route, no FlatList overhead needed)
+- [04-02]: ETA derived from vehiclePosition.nextStopId matching, reactive with 5s polling
+- [04-02]: Instant content swap in bottom sheet (no animation) -- map polyline provides visual feedback
+- [04-02]: hexToRgba exported from RouteCard for shared use in StopRow and RouteDetailView
 
 ### Pending Todos
 
@@ -99,6 +103,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-26T17:40:41Z
-Stopped at: Completed 04-01-PLAN.md
-Resume file: .planning/phases/04-route-detail-and-eta-predictions/04-01-SUMMARY.md
+Last session: 2026-03-26T17:46:48Z
+Stopped at: Completed 04-02-PLAN.md
+Resume file: .planning/phases/04-route-detail-and-eta-predictions/04-02-SUMMARY.md
