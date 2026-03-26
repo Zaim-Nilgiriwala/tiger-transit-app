@@ -17,7 +17,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **MAP-06**: Route polyline is drawn on the map in route color when a route is selected
 - [ ] **MAP-07**: Map auto-fits to show all stops + buses when a route is selected
 - [x] **MAP-08**: Floating glass-panel map controls (my_location, search placeholder, settings placeholder) are visible above the map
-- [ ] **MAP-09**: Vehicles with timestamps older than 2 minutes are hidden from the map
+- [x] **MAP-09**: Vehicles with timestamps older than 2 minutes are hidden from the map
 
 ### Bottom Sheet
 
@@ -67,11 +67,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Real-Time Data
 
-- [ ] **DATA-01**: App decodes GTFS-RT protobuf binary feeds (position updates + trip updates) client-side
-- [ ] **DATA-02**: Position and trip update feeds are polled every 5 seconds while app is in foreground
-- [ ] **DATA-03**: Polling stops when app is backgrounded and resumes immediately on foreground
-- [ ] **DATA-04**: Trip updates are processed before position updates so ETA enrichment is available
-- [ ] **DATA-05**: GTFS static data (routes, stops, shapes, trips, calendar) loads on app launch
+- [x] **DATA-01**: App decodes GTFS-RT protobuf binary feeds (position updates + trip updates) client-side
+- [x] **DATA-02**: Position and trip update feeds are polled every 5 seconds while app is in foreground
+- [x] **DATA-03**: Polling stops when app is backgrounded and resumes immediately on foreground
+- [x] **DATA-04**: Trip updates are processed before position updates so ETA enrichment is available
+- [x] **DATA-05**: GTFS static data (routes, stops, shapes, trips, calendar) loads on app launch
 
 ### ETA Predictions
 
@@ -149,7 +149,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MAP-06 | Phase 4 | Pending |
 | MAP-07 | Phase 4 | Pending |
 | MAP-08 | Phase 1 | Complete |
-| MAP-09 | Phase 2 | Pending |
+| MAP-09 | Phase 2 | Complete |
 | SHEET-01 | Phase 3 | Pending |
 | SHEET-02 | Phase 3 | Pending |
 | SHEET-03 | Phase 3 | Pending |
@@ -181,11 +181,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FAV-02 | Phase 6 | Pending |
 | FAV-03 | Phase 6 | Pending |
 | FAV-04 | Phase 6 | Pending |
-| DATA-01 | Phase 2 | Pending |
-| DATA-02 | Phase 2 | Pending |
-| DATA-03 | Phase 2 | Pending |
-| DATA-04 | Phase 2 | Pending |
-| DATA-05 | Phase 2 | Pending |
+| DATA-01 | Phase 2 | Complete |
+| DATA-02 | Phase 2 | Complete |
+| DATA-03 | Phase 2 | Complete |
+| DATA-04 | Phase 2 | Complete |
+| DATA-05 | Phase 2 | Complete |
 | ETA-01 | Phase 5 | Pending |
 | ETA-02 | Phase 4 | Pending |
 | ETA-03 | Phase 4 | Pending |
