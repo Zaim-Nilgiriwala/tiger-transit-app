@@ -63,7 +63,7 @@ Plans:
   3. Route list displays sectioned layout (Active Routes, Favorites placeholder, Alerts placeholder) with each card showing route color accent, short name, long name, active bus count, and next ETA
   4. Route cards use Level 2 surfaces on Level 1 section backgrounds with no border lines (tonal layering only)
   5. Inactive routes (0 active buses) appear dimmed, sorted to bottom, and show "No active buses" message
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 03-01-PLAN.md -- Draggable glassmorphic bottom sheet with three snap points, spring animation, and map interaction
@@ -125,7 +125,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|----------------|--------|-----------|
 | 1. Foundation and Map Shell | 2/2 | Complete   | 2026-03-25 |
 | 2. Real-Time Data Pipeline | 1/2 | In progress | - |
-| 3. Bottom Sheet and Route List | 0/2 | Not started | - |
+| 3. Bottom Sheet and Route List | 1/2 | In Progress|  |
 | 4. Route Detail and ETA Predictions | 0/? | Not started | - |
 | 5. Animated Markers and Callout Bubbles | 0/? | Not started | - |
 | 6. Stop Detail, Favorites, Alerts, and Polish | 0/? | Not started | - |
