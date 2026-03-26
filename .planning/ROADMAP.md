@@ -2,7 +2,9 @@
 
 ## Overview
 
-This roadmap delivers a real-time bus tracking app for Auburn University's Tiger Transit system. The build progresses from proving the hardest integration risk (maps on Expo SDK 55) through establishing the real-time data pipeline, then layering the glassmorphic bottom sheet UI, route detail with ML-powered ETAs, animated markers with callouts, and finally completing the feature set with stop detail, favorites, alerts, and error handling. Each phase delivers a coherent, testable capability that the next phase builds on.
+This roadmap delivers a real-time bus tracking app for Auburn University's Tiger Transit system. The build progresses from proving the hardest integration risk (maps on Expo SDK 55) through establishing the real-time data pipeline (ETASpot PHP API via Supabase proxy), then layering the glassmorphic bottom sheet UI, route detail with ETAs, animated markers with callouts, and finally completing the feature set with stop detail, favorites, alerts, and error handling. Each phase delivers a coherent, testable capability that the next phase builds on.
+
+**Data pipeline pivot (2026-03-26):** Replaced GTFS-RT protobuf feeds with ETASpot PHP API for vehicle positions and ETAs. PHP provides richer data (multi-stop ETAs, delay, capacity, heading, timepoints) and is proxied through Supabase for scalability. Protobuf retained only for service alerts. Phase 2 requires replanning.
 
 ## Phases
 
@@ -13,7 +15,7 @@ This roadmap delivers a real-time bus tracking app for Auburn University's Tiger
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation and Map Shell** - Expo SDK 55 project with full-screen map, design token system, and Redux store scaffold (completed 2026-03-25)
-- [ ] **Phase 2: Real-Time Data Pipeline** - GTFS-RT protobuf decoding, 5s polling service, live bus markers on map
+- [ ] **Phase 2: Real-Time Data Pipeline** - ETASpot PHP API via Supabase proxy, live bus markers on map (rework: replacing protobuf with PHP API)
 - [x] **Phase 3: Bottom Sheet and Route List** - Glassmorphic draggable bottom sheet with sectioned route browsing (completed 2026-03-26)
 - [x] **Phase 4: Route Detail and ETA Predictions** - Route detail view with ordered stop list, XGBoost ETAs, polyline and stop markers on map (completed 2026-03-26)
 - [ ] **Phase 5: Animated Markers and Callout Bubbles** - Smooth marker animation and interactive glass-panel callouts
@@ -37,21 +39,23 @@ Plans:
 - [x] 01-01-PLAN.md -- Expo project init, design system tokens, fonts, Redux store scaffold
 - [x] 01-02-PLAN.md -- Full-screen map, splash screen, glassmorphic bottom bar, floating location button
 
-### Phase 2: Real-Time Data Pipeline
-**Goal**: Users see live bus positions on the map updating every 5 seconds with stale vehicles automatically hidden
+### Phase 2: Real-Time Data Pipeline (REWORK)
+**Goal**: Users see live bus positions on the map updating every 5 seconds via ETASpot PHP API proxied through Supabase
 **Depends on**: Phase 1
-**Requirements**: DATA-01, DATA-02, DATA-03, DATA-04, DATA-05, MAP-02, MAP-04, MAP-09
+**Requirements**: DATA-01, DATA-02, DATA-03, DATA-04, DATA-05, DATA-06, DATA-07, MAP-02, MAP-04, MAP-09
 **Success Criteria** (what must be TRUE):
-  1. GTFS-RT protobuf feeds (position updates + trip updates) decode correctly on both iOS and Android, with trip updates processed before position updates
-  2. Bus markers appear on the map at correct positions and update every 5 seconds while the app is in the foreground
-  3. Bus markers show directional heading and use secondary-fixed orange color
+  1. Supabase backend proxy polls ETASpot PHP `get_vehicles` every 5s and upserts vehicle data into a `vehicles` table with route ID mapping
+  2. Client reads vehicle positions from Supabase (Realtime subscription or polling) and renders bus markers at correct positions
+  3. Bus markers show directional heading (from PHP `h` field) and use route-colored markers
   4. Polling stops when the app is backgrounded and resumes immediately when foregrounded
-  5. Vehicles with timestamps older than 2 minutes disappear from the map automatically
-**Plans:** 2 plans
+  5. Vehicles with `receiveTime` older than 2 minutes are filtered out
+  6. Multi-stop ETAs from PHP `minutesToNextStops` are available in Redux for Route Detail View
+**Plans:** Needs replanning (previous protobuf-based plans are obsolete)
 
 Plans:
-- [x] 02-01-PLAN.md -- GTFS-RT protobuf decode service, static route data, 5s polling hook with AppState awareness
-- [ ] 02-02-PLAN.md -- BusMarker component with route-colored heading indicator, wired into MapScreen
+- [x] 02-01-PLAN.md -- (OBSOLETE) GTFS-RT protobuf decode service — to be replaced
+- [ ] 02-02-PLAN.md -- (OBSOLETE) BusMarker component — partially reusable, needs rewiring to Supabase data
+- [ ] TBD -- Supabase proxy worker, client Supabase integration, data pipeline rewire
 
 ### Phase 3: Bottom Sheet and Route List
 **Goal**: Users can browse all routes via a glassmorphic draggable bottom sheet with active bus counts and visual polish
@@ -93,7 +97,7 @@ Plans:
 **Requirements**: MAP-03, CALL-01, CALL-02, CALL-03, CALL-04, CALL-05, ETA-01
 **Success Criteria** (what must be TRUE):
   1. Bus markers animate smoothly between position updates with 1000ms Reanimated-based interpolation (no visible jumps) on both iOS and Android
-  2. Tapping a bus marker opens a glass-panel callout showing route, bus ID, speed, passengers, delay status, and GTFS-RT feed ETA to next stop
+  2. Tapping a bus marker opens a glass-panel callout showing route, bus ID, passengers, delay status, and next-stop ETA from PHP `nextStopETA`
   3. Tapping a stop marker opens a glass-panel callout showing stop name, stop number, ETA, route badges, and a "View More" link
   4. Only one callout can be open at a time, tapping outside dismisses it, and callout data refreshes with each 5-second polling cycle
 **Plans**: TBD
@@ -105,11 +109,11 @@ Plans:
 ### Phase 6: Stop Detail, Favorites, Alerts, and Polish
 **Goal**: All remaining MVP features are complete -- users can inspect stop details, manage favorite routes, view service alerts, and encounter graceful error handling
 **Depends on**: Phase 5
-**Requirements**: STOP-01, STOP-02, STOP-03, STOP-04, STOP-05, STOP-06, STOP-07, FAV-01, FAV-02, FAV-03, FAV-04, ALERT-01, ALERT-02, ERR-01
+**Requirements**: STOP-01, STOP-02, STOP-03, STOP-04, STOP-05, STOP-06, STOP-07, FAV-01, FAV-02, FAV-03, FAV-04, ALERT-01, ALERT-02, ERR-01, ETA-05
 **Success Criteria** (what must be TRUE):
-  1. Stop Detail View shows stop name, stop number, route count, city, a pulsing LIVE badge when buses are arriving, arriving bus cards with delay status and ETA, passenger capacity bars, and color-coded route pill badges in the footer
+  1. Stop Detail View shows stop name, stop number, route count, city, a pulsing LIVE badge when buses are arriving, arriving bus cards with delay status and ETA (from PHP `get_stop_etas`), passenger capacity bars, and color-coded route pill badges in the footer
   2. User can favorite a route via star button in Route Detail, see favorites pinned to top of route list in a Favorites section, toggle between "All Routes" and "Favorites" via pill tab, and favorites persist across app sessions
-  3. Service alerts from the GTFS-RT alerts feed appear in the Alerts section of the route list, polled every 60 seconds
+  3. Service alerts from the GTFS-RT protobuf alerts feed appear in the Alerts section of the route list, polled every 60 seconds
   4. When network is lost, the app shows last known positions dimmed with a "No connection" glass-panel banner
   5. Tapping a route badge in the Stop Detail footer switches to that route's detail view
 **Plans**: TBD
@@ -126,7 +130,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation and Map Shell | 2/2 | Complete   | 2026-03-25 |
-| 2. Real-Time Data Pipeline | 1/2 | In progress | - |
+| 2. Real-Time Data Pipeline (REWORK) | 0/? | Needs replanning (protobuf→PHP pivot) | - |
 | 3. Bottom Sheet and Route List | 3/3 | Complete | 2026-03-26 |
 | 4. Route Detail and ETA Predictions | 3/3 | Complete | 2026-03-26 |
 | 5. Animated Markers and Callout Bubbles | 0/? | Not started | - |

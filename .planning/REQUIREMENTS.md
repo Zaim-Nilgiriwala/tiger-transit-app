@@ -14,8 +14,10 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **MAP-03**: Bus markers animate smoothly between position updates (Reanimated-based, 1000ms interpolation)
 - [ ] **MAP-04**: Bus markers display directional heading and use secondary-fixed orange color
 - [x] **MAP-05**: Stop markers appear on the map in route color when a route is selected
-- [x] **MAP-06**: Route polyline is drawn on the map in route color when a route is selected
+- [ ] **MAP-06**: All route polylines are drawn on the map in their route colors by default; filtered to favorites when favorites toggle is active
 - [x] **MAP-07**: Map auto-fits to show all stops + buses when a route is selected
+- [ ] **MAP-10**: When a route is selected, non-selected route polylines dim to ~30% opacity; when deselected, all restore to full opacity
+- [ ] **MAP-11**: Map polyline visibility is synced with the bottom sheet favorites toggle (All Routes shows all polylines, Favorites shows only favorited route polylines)
 - [x] **MAP-08**: Floating glass-panel map controls (my_location, search placeholder, settings placeholder) are visible above the map
 - [x] **MAP-09**: Vehicles with timestamps older than 2 minutes are hidden from the map
 
@@ -52,7 +54,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Callout Bubbles
 
-- [ ] **CALL-01**: Tapping a bus marker opens a glass-panel callout showing route, bus ID, speed, passengers, delay status, ETA to next stop
+- [ ] **CALL-01**: Tapping a bus marker opens a glass-panel callout showing route, bus ID, passengers, delay status, ETA to next stop
 - [ ] **CALL-02**: Tapping a stop marker opens a glass-panel callout showing stop name, stop number, ETA, route badges, "View More"
 - [ ] **CALL-03**: Callouts use glassmorphic styling (backdrop blur, surface-container-lowest at ~95% opacity)
 - [ ] **CALL-04**: Only one callout can be open at a time; tapping outside dismisses it
@@ -67,18 +69,21 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Real-Time Data
 
-- [x] **DATA-01**: App decodes GTFS-RT protobuf binary feeds (position updates + trip updates) client-side
-- [x] **DATA-02**: Position and trip update feeds are polled every 5 seconds while app is in foreground
+- [ ] **DATA-01**: Backend proxy polls ETASpot PHP API (`get_vehicles`) every 5s and writes to Supabase; client reads from Supabase (replaces client-side protobuf decoding)
+- [ ] **DATA-02**: Vehicle positions update every 5 seconds while app is in foreground (via Supabase Realtime or client polling)
 - [x] **DATA-03**: Polling stops when app is backgrounded and resumes immediately on foreground
-- [x] **DATA-04**: Trip updates are processed before position updates so ETA enrichment is available
+- [ ] **DATA-04**: Multi-stop ETAs come from PHP `minutesToNextStops` array inline with vehicle data (replaces trip update pre-processing)
 - [x] **DATA-05**: GTFS static data (routes, stops, shapes, trips, calendar) loads on app launch
+- [ ] **DATA-06**: Supabase backend proxy handles ETASpot route ID mapping (215→215_202_201_156, 226→226_32, 235→235_93)
+- [ ] **DATA-07**: Vehicle speed derived from consecutive position history in Supabase (ETASpot PHP does not provide velocity)
 
 ### ETA Predictions
 
-- [ ] **ETA-01**: Bus callout shows GTFS-RT feed ETA for next stop (low-latency, single stop)
-- [x] **ETA-02**: Stop list shows XGBoost model predictions for next 3 arrivals (multi-stop, higher accuracy)
-- [x] **ETA-03**: ETA predictions refresh every 15 seconds while viewing a route
-- [x] **ETA-04**: If model prediction times out, app falls back to GTFS-RT trip update ETAs or shows "ETA unavailable"
+- [ ] **ETA-01**: Bus callout shows next-stop ETA from PHP `nextStopETA` field
+- [ ] **ETA-02**: Stop list shows multi-stop ETAs from PHP `minutesToNextStops` array (XGBoost model is a future accuracy upgrade)
+- [ ] **ETA-03**: ETAs refresh with each 5s vehicle data poll cycle
+- [ ] **ETA-04**: If PHP API is unavailable, app shows "ETA unavailable" (protobuf fallback for positions only, not ETAs)
+- [ ] **ETA-05**: `get_stop_etas` endpoint used for Stop Detail View arrival board (per-stop, includes delay status, schedule, timepoint, statuscolor)
 
 ### Alerts & Error States
 
@@ -127,7 +132,7 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Feature | Reason |
 |---------|--------|
-| Backend / API development | Supabase + FastAPI already exist; this is frontend only |
+| Backend / API development | Supabase proxy worker for ETASpot PHP API is in scope; FastAPI already exists |
 | Background location tracking | Battery drain; PRD explicitly prohibits |
 | Tab bar navigation | Design evolved to single-screen map + bottom sheet |
 | Full offline mode | Complex caching; show dimmed last-known state instead |
@@ -181,15 +186,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FAV-02 | Phase 6 | Pending |
 | FAV-03 | Phase 6 | Pending |
 | FAV-04 | Phase 6 | Pending |
-| DATA-01 | Phase 2 | Complete |
-| DATA-02 | Phase 2 | Complete |
+| DATA-01 | Phase 2 (rework) | Pending (was protobuf, now PHP API via Supabase) |
+| DATA-02 | Phase 2 (rework) | Pending (was protobuf polling, now Supabase) |
 | DATA-03 | Phase 2 | Complete |
-| DATA-04 | Phase 2 | Complete |
+| DATA-04 | Phase 2 (rework) | Pending (was trip updates, now PHP minutesToNextStops) |
 | DATA-05 | Phase 2 | Complete |
+| DATA-06 | Phase 2 (rework) | Pending |
+| DATA-07 | Phase 2 (rework) | Pending |
 | ETA-01 | Phase 5 | Pending |
-| ETA-02 | Phase 4 | Complete |
-| ETA-03 | Phase 4 | Complete |
-| ETA-04 | Phase 4 | Complete |
+| ETA-02 | Phase 2+4 (rework) | Pending (PHP minutesToNextStops replaces XGBoost for MVP) |
+| ETA-03 | Phase 2 (rework) | Pending (refreshes with 5s poll cycle) |
+| ETA-04 | Phase 2 (rework) | Pending (updated fallback strategy) |
+| ETA-05 | Phase 6 | Pending |
 | ALERT-01 | Phase 6 | Pending |
 | ALERT-02 | Phase 6 | Pending |
 | ERR-01 | Phase 6 | Pending |
