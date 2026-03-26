@@ -35,6 +35,7 @@ import { colors } from '../theme';
 import { useAppSelector } from '../store';
 import { useLocation } from '../hooks/useLocation';
 import { useStaticData } from '../hooks/useStaticData';
+import { useStaticRouteData } from '../hooks/useStaticRouteData';
 import { useGtfsPolling } from '../hooks/useGtfsPolling';
 import FloatingLocationButton from '../components/map/FloatingLocationButton';
 import BottomSheet from '../components/sheet/BottomSheet';
@@ -62,6 +63,7 @@ export default function MapScreen() {
   // Data hooks: load static routes and start real-time polling
   // -----------------------------------------------------------------------
   useStaticData();
+  useStaticRouteData();
   useGtfsPolling();
 
   // -----------------------------------------------------------------------
