@@ -21,11 +21,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Bottom Sheet
 
-- [ ] **SHEET-01**: User can drag the bottom sheet between three snap points (collapsed ~80px, half ~45%, full ~90%)
-- [ ] **SHEET-02**: Bottom sheet uses glassmorphic styling (frosted glass with backdrop blur, 20px top radius, navy-tinted shadow)
-- [ ] **SHEET-03**: Bottom sheet grab handle is a subtle #C4C6CE pill, 32px wide
-- [ ] **SHEET-04**: Bottom sheet transitions use smooth spring animation
-- [ ] **SHEET-05**: Map remains interactive (pan/zoom) when sheet is at half position
+- [x] **SHEET-01**: User can drag the bottom sheet between three snap points (collapsed ~80px, half ~45%, full ~90%)
+- [x] **SHEET-02**: Bottom sheet uses glassmorphic styling (frosted glass with backdrop blur, 20px top radius, navy-tinted shadow)
+- [x] **SHEET-03**: Bottom sheet grab handle is a subtle #C4C6CE pill, 32px wide
+- [x] **SHEET-04**: Bottom sheet transitions use smooth spring animation
+- [x] **SHEET-05**: Map remains interactive (pan/zoom) when sheet is at half position
 
 ### Route Navigation
 
@@ -86,7 +86,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **ALERT-02**: Alerts feed is polled every 60 seconds
 - [ ] **ERR-01**: No network connection shows last known positions dimmed to surface-dim + "No connection" glass-panel banner
 - [ ] **ERR-02**: Routes with no active buses show "No active buses" in on-surface-variant color
-- [ ] **ERR-03**: Loading states provide visual feedback during data fetch
+- [x] **ERR-03**: Loading states provide visual feedback during data fetch
 
 ### Design System
 
@@ -150,11 +150,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MAP-07 | Phase 4 | Pending |
 | MAP-08 | Phase 1 | Complete |
 | MAP-09 | Phase 2 | Complete |
-| SHEET-01 | Phase 3 | Pending |
-| SHEET-02 | Phase 3 | Pending |
-| SHEET-03 | Phase 3 | Pending |
-| SHEET-04 | Phase 3 | Pending |
-| SHEET-05 | Phase 3 | Pending |
+| SHEET-01 | Phase 3 | Complete |
+| SHEET-02 | Phase 3 | Complete |
+| SHEET-03 | Phase 3 | Complete |
+| SHEET-04 | Phase 3 | Complete |
+| SHEET-05 | Phase 3 | Complete |
 | ROUTE-01 | Phase 3 | Pending |
 | ROUTE-02 | Phase 3 | Pending |
 | ROUTE-03 | Phase 3 | Pending |
@@ -194,7 +194,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ALERT-02 | Phase 6 | Pending |
 | ERR-01 | Phase 6 | Pending |
 | ERR-02 | Phase 3 | Pending |
-| ERR-03 | Phase 3 | Pending |
+| ERR-03 | Phase 3 | Complete |
 | DS-01 | Phase 1 | Complete |
 | DS-02 | Phase 1 | Complete |
 | DS-03 | Phase 1 | Complete |

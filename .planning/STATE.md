@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 3 context gathered
-last_updated: "2026-03-26T02:57:54.965Z"
-last_activity: 2026-03-26 -- Completed Plan 02-01 (GTFS-RT protobuf decode, polling hook, static routes)
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-03-26T03:12:22.000Z"
+last_activity: 2026-03-26 -- Completed Plan 03-01 (Draggable bottom sheet with snap points and glassmorphism)
 progress:
   total_phases: 6
-  completed_phases: 1
-  total_plans: 4
-  completed_plans: 3
-  percent: 75
+  completed_phases: 2
+  total_plans: 5
+  completed_plans: 4
+  percent: 80
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** When a student pulls up the app, they see exactly where their bus is and when it arrives at their stop -- accurate to ~85 seconds -- with zero navigation complexity.
-**Current focus:** Phase 2: Real-Time Data Pipeline
+**Current focus:** Phase 3: Bottom Sheet and Route List
 
 ## Current Position
 
-Phase: 2 of 6 (Real-Time Data Pipeline)
+Phase: 3 of 6 (Bottom Sheet and Route List)
 Plan: 1 of 2 in current phase
 Status: In Progress
-Last activity: 2026-03-26 -- Completed Plan 02-01 (GTFS-RT protobuf decode, polling hook, static routes)
+Last activity: 2026-03-26 -- Completed Plan 03-01 (Draggable bottom sheet with snap points and glassmorphism)
 
-Progress: [███████░░░] 75%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
+- Total plans completed: 4
 - Average duration: 5 min
-- Total execution time: 0.27 hours
+- Total execution time: 0.33 hours
 
 **By Phase:**
 
@@ -45,10 +45,11 @@ Progress: [███████░░░] 75%
 |-------|-------|-------|----------|
 | 1. Foundation and Map Shell | 2/2 | 12 min | 6 min |
 | 2. Real-Time Data Pipeline | 1/2 | 4 min | 4 min |
+| 3. Bottom Sheet and Route List | 1/2 | 4 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 9m, 3m, 4m
-- Trend: Accelerating
+- Last 5 plans: 9m, 3m, 4m, 4m
+- Trend: Stable (fast)
 
 *Updated after each plan completion*
 
@@ -73,6 +74,10 @@ Recent decisions affecting current work:
 - [02-01]: Used protobufjs with Root.fromJSON() embedded descriptor instead of gtfs-realtime-bindings (Hermes-safe, no eval/require)
 - [02-01]: Embedded minimal GTFS-RT proto definition as JSON INamespace rather than loading .proto file at runtime
 - [02-01]: Store access via store.getState() in AppState resume handler to avoid stale closure over positions
+- [03-01]: GestureHandlerRootView added to App.tsx root for global gesture support
+- [03-01]: ScrollView enabled/disabled via React state synced from spring settle callback
+- [03-01]: Spring config: damping 20, stiffness 150 for responsive but controlled snap feel
+- [03-01]: Velocity projection factor 0.15 for natural fling-to-snap behavior
 
 ### Pending Todos
 
@@ -86,6 +91,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-26T02:57:54.948Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-bottom-sheet-and-route-list/03-CONTEXT.md
+Last session: 2026-03-26T03:12:22.000Z
+Stopped at: Completed 03-01-PLAN.md
+Resume file: .planning/phases/03-bottom-sheet-and-route-list/03-01-SUMMARY.md
