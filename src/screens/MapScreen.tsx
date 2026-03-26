@@ -11,7 +11,8 @@
  *
  * Data flow:
  * - useStaticData() loads ROUTES into Redux on mount
- * - useGtfsPolling() starts 5s polling lifecycle, dispatches positions to Redux
+ * - useVehicleSubscription() subscribes to Supabase Realtime for push-based vehicle updates
+ * - dispatches positions to Redux on each Realtime change notification
  * - useAppSelector reads vehicle positions, route list, and sheet position
  * - BusMarker rendered per vehicle as a child of MapView
  * - RouteOverlay rendered inside MapView when a route is selected
@@ -36,7 +37,7 @@ import { useAppSelector } from '../store';
 import { useLocation } from '../hooks/useLocation';
 import { useStaticData } from '../hooks/useStaticData';
 import { useStaticRouteData } from '../hooks/useStaticRouteData';
-import { useGtfsPolling } from '../hooks/useGtfsPolling';
+import { useVehicleSubscription } from '../hooks/useVehicleSubscription';
 import FloatingLocationButton from '../components/map/FloatingLocationButton';
 import BottomSheet from '../components/sheet/BottomSheet';
 import RouteList from '../components/sheet/RouteList';
@@ -64,7 +65,7 @@ export default function MapScreen() {
   // -----------------------------------------------------------------------
   useStaticData();
   useStaticRouteData();
-  useGtfsPolling();
+  useVehicleSubscription();
 
   // -----------------------------------------------------------------------
   // Read vehicle positions, route list, and UI state from Redux
