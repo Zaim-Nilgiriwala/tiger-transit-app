@@ -47,7 +47,7 @@ interface RouteCardProps {
  * Convert a hex color string to rgba with the given alpha.
  * Handles both '#RRGGBB' and 'RRGGBB' formats.
  */
-function hexToRgba(hex: string, alpha: number): string {
+export function hexToRgba(hex: string, alpha: number): string {
   const clean = hex.replace('#', '');
   const r = parseInt(clean.substring(0, 2), 16);
   const g = parseInt(clean.substring(2, 4), 16);
