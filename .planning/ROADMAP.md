@@ -50,12 +50,11 @@ Plans:
   4. Polling stops when the app is backgrounded and resumes immediately when foregrounded
   5. Vehicles with `receiveTime` older than 2 minutes are filtered out
   6. Multi-stop ETAs from PHP `minutesToNextStops` are available in Redux for Route Detail View
-**Plans:** Needs replanning (previous protobuf-based plans are obsolete)
+**Plans:** 2 plans
 
 Plans:
-- [x] 02-01-PLAN.md -- (OBSOLETE) GTFS-RT protobuf decode service — to be replaced
-- [ ] 02-02-PLAN.md -- (OBSOLETE) BusMarker component — partially reusable, needs rewiring to Supabase data
-- [ ] TBD -- Supabase proxy worker, client Supabase integration, data pipeline rewire
+- [ ] 02-01-PLAN.md -- Supabase Edge Function + DB migrations (vehicles table, position_history, pg_cron 5s polling, ETASpot PHP transform with route ID mapping and deduplication)
+- [ ] 02-02-PLAN.md -- Client Supabase integration (SDK install, Realtime subscription hook, MapScreen rewire, protobuf code archival)
 
 ### Phase 3: Bottom Sheet and Route List
 **Goal**: Users can browse all routes via a glassmorphic draggable bottom sheet with active bus counts and visual polish
@@ -130,7 +129,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation and Map Shell | 2/2 | Complete   | 2026-03-25 |
-| 2. Real-Time Data Pipeline (REWORK) | 0/? | Needs replanning (protobuf→PHP pivot) | - |
+| 2. Real-Time Data Pipeline (REWORK) | 0/2 | Planned (2 plans, 2 waves) | - |
 | 3. Bottom Sheet and Route List | 3/3 | Complete | 2026-03-26 |
 | 4. Route Detail and ETA Predictions | 3/3 | Complete | 2026-03-26 |
 | 5. Animated Markers and Callout Bubbles | 0/? | Not started | - |
