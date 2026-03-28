@@ -3,26 +3,18 @@
  *
  * The primary map screen for Tiger Transit. Renders:
  * - Auburn campus center (~32.606, -85.487)
- * - Live bus markers (route-colored, directional heading) updated every 5s
- * - Route polyline + stop markers when a route is selected (RouteOverlay)
+ * - Live bus markers (route-colored, directional heading) updated every 10s
+ * - Route polylines + stop markers (RouteOverlay)
  * - Blue dot for user location (if permission granted)
  * - BottomSheet with three snap points (collapsed, half, full)
  * - FloatingLocationButton above the collapsed sheet
  *
- * Data flow:
- * - useStaticData() loads ROUTES into Redux on mount
- * - useVehicleSubscription() subscribes to Supabase Realtime for push-based vehicle updates
- * - dispatches positions to Redux on each Realtime change notification
- * - useAppSelector reads vehicle positions, route list, and sheet position
- * - BusMarker rendered per vehicle as a child of MapView
- * - RouteOverlay rendered inside MapView when a route is selected
- * - mapPadding adjusts dynamically based on sheet snap position
+ * Route visibility rule:
+ * - No selection: ALL routes' polylines, stops, and buses visible
+ * - Route selected: ONLY that route's polylines, stops, and buses visible
+ * - Back (deselect): all routes visible again, camera stays
  *
- * Route selection behavior:
- * - Auto-fit: map fits to show all stops + buses for selected route
- * - Stop centering: tapping a stop in the list centers the map on it
- * - Bus dimming: non-selected route buses dim to 30% opacity
- * - Back (deselect): overlays removed, bus opacity restored, camera stays
+ * For any route, polyline/stops/buses are ALWAYS in the same visibility state.
  *
  * Render order: MapView (fills screen) -> RouteOverlay (polyline/stops) ->
  *   BusMarkers (map children) -> BottomSheet (draggable) ->
@@ -37,7 +29,7 @@ import { useAppSelector } from '../store';
 import { useLocation } from '../hooks/useLocation';
 import { useStaticData } from '../hooks/useStaticData';
 import { useStaticRouteData } from '../hooks/useStaticRouteData';
-import { useVehicleSubscription } from '../hooks/useVehicleSubscription';
+import { useEtaspotPolling } from '../hooks/useEtaspotPolling';
 import FloatingLocationButton from '../components/map/FloatingLocationButton';
 import BottomSheet from '../components/sheet/BottomSheet';
 import RouteList from '../components/sheet/RouteList';
@@ -65,7 +57,7 @@ export default function MapScreen() {
   // -----------------------------------------------------------------------
   useStaticData();
   useStaticRouteData();
-  useVehicleSubscription();
+  useEtaspotPolling();
 
   // -----------------------------------------------------------------------
   // Read vehicle positions, route list, and UI state from Redux
@@ -74,6 +66,8 @@ export default function MapScreen() {
   const routes = useAppSelector((state) => state.routes.list);
   const routesLoading = useAppSelector((state) => state.routes.loading);
   const sheetPosition = useAppSelector((state) => state.ui.sheetPosition);
+
+  const shapes = useAppSelector((state) => state.routes.shapes);
 
   // Route selection state
   const selectedRouteId = useAppSelector((state) => state.ui.selectedRouteId);
@@ -88,6 +82,9 @@ export default function MapScreen() {
     routes.forEach((r) => map.set(r.routeId, r.routeColor));
     return map;
   }, [routes]);
+
+  // Bus visibility follows the same rule as polylines/stops:
+  // All buses always mounted; hidden via opacity, never unmounted.
 
   // -----------------------------------------------------------------------
   // Auto-fit map when a route is selected (MAP-07)
@@ -113,12 +110,14 @@ export default function MapScreen() {
       });
 
     // Need at least 2 coordinates for fitToCoordinates
+    // Note: mapPadding already shifts the logical viewport to account for
+    // the sheet, so edgePadding here is purely cosmetic breathing room.
     if (allCoords.length >= 2) {
       mapRef.current?.fitToCoordinates(allCoords, {
         edgePadding: {
           top: 60,
           right: 40,
-          bottom: Math.round(screenHeight * 0.45) + 20,
+          bottom: 60,
           left: 40,
         },
         animated: true,
@@ -183,31 +182,26 @@ export default function MapScreen() {
         {/* Route polyline + stop markers (rendered before buses so buses are on top) */}
         <RouteOverlay />
 
-        {/* Bus markers with opacity dimming for non-selected routes */}
-        {positions.map((vehicle) => (
+        {/* Bus markers: always mounted, hidden via opacity (never unmounted) */}
+        {positions.map((vehicle, index) => (
           <BusMarker
             key={vehicle.vehicleId}
             vehicle={vehicle}
             routeColor={routeColorMap.get(vehicle.routeId) || FALLBACK_COLOR}
-            zIndex={vehicle.timestamp}
-            opacity={
-              selectedRouteId
-                ? vehicle.routeId === selectedRouteId
-                  ? 1
-                  : 0.3
-                : 1
-            }
+            zIndex={1000 + index}
+            visible={!selectedRouteId || vehicle.routeId === selectedRouteId}
+            routeShape={shapes[vehicle.routeId]}
           />
         ))}
       </MapView>
-      <BottomSheet loading={routesLoading}>
-        <RouteList />
-      </BottomSheet>
       <FloatingLocationButton
         mapRef={mapRef}
         location={location}
         permissionDenied={permissionDenied}
       />
+      <BottomSheet loading={routesLoading}>
+        <RouteList />
+      </BottomSheet>
     </View>
   );
 }
