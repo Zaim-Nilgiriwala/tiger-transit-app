@@ -20,21 +20,26 @@
  *   BusMarkers (map children) -> BottomSheet (draggable) ->
  *   FloatingLocationButton (above sheet)
  */
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import MapView from 'react-native-maps';
 
 import { colors } from '../theme';
-import { useAppSelector } from '../store';
+import { useAppSelector, useAppDispatch } from '../store';
+import { setActiveCallout, clearCallout } from '../store/slices/uiSlice';
 import { useLocation } from '../hooks/useLocation';
 import { useStaticData } from '../hooks/useStaticData';
 import { useStaticRouteData } from '../hooks/useStaticRouteData';
 import { useEtaspotPolling } from '../hooks/useEtaspotPolling';
+import { STOPS_BY_ID } from '../data/stops';
 import FloatingLocationButton from '../components/map/FloatingLocationButton';
 import BottomSheet from '../components/sheet/BottomSheet';
 import RouteList from '../components/sheet/RouteList';
 import BusMarker from '../components/map/BusMarker';
 import RouteOverlay from '../components/map/RouteOverlay';
+import CalloutBubble from '../components/map/CalloutBubble';
+import BusCalloutContent from '../components/map/BusCalloutContent';
+import StopCalloutContent from '../components/map/StopCalloutContent';
 
 /** Fallback marker color when routeId is not found in ROUTES */
 const FALLBACK_COLOR = '#FF8934';
@@ -49,6 +54,7 @@ const AUBURN_CAMPUS = {
 
 export default function MapScreen() {
   const mapRef = useRef<MapView>(null);
+  const dispatch = useAppDispatch();
   const { height: screenHeight } = useWindowDimensions();
   const { location, permissionDenied } = useLocation();
 
@@ -76,6 +82,10 @@ export default function MapScreen() {
     selectedRouteId ? state.routes.stops[selectedRouteId] : undefined
   );
 
+  // Callout state
+  const activeCallout = useAppSelector((state) => state.ui.activeCallout);
+  const [markerScreenPos, setMarkerScreenPos] = useState<{ x: number; y: number } | null>(null);
+
   // Memoized route color lookup: routeId -> '#RRGGBB'
   const routeColorMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -83,8 +93,93 @@ export default function MapScreen() {
     return map;
   }, [routes]);
 
+  // Route long name lookup
+  const routeLongNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    routes.forEach((r) => map.set(r.routeId, r.longName));
+    return map;
+  }, [routes]);
+
   // Bus visibility follows the same rule as polylines/stops:
   // All buses always mounted; hidden via opacity, never unmounted.
+
+  // -----------------------------------------------------------------------
+  // Callout handlers
+  // -----------------------------------------------------------------------
+  const handleBusMarkerPress = useCallback(
+    (vehicleId: string, lat: number, lon: number) => {
+      mapRef.current
+        ?.pointForCoordinate({ latitude: lat, longitude: lon })
+        .then((point) => {
+          setMarkerScreenPos({ x: point.x, y: point.y });
+          dispatch(setActiveCallout({ type: 'bus', id: vehicleId }));
+        });
+    },
+    [dispatch]
+  );
+
+  const handleStopPress = useCallback(
+    (stopId: string) => {
+      const stop = STOPS_BY_ID[stopId];
+      if (!stop) return;
+      mapRef.current
+        ?.pointForCoordinate({ latitude: stop.lat, longitude: stop.lon })
+        .then((point) => {
+          setMarkerScreenPos({ x: point.x, y: point.y });
+          dispatch(setActiveCallout({ type: 'stop', id: stopId }));
+        });
+    },
+    [dispatch]
+  );
+
+  const handleMapPress = useCallback(() => {
+    if (activeCallout) {
+      dispatch(clearCallout());
+      setMarkerScreenPos(null);
+    }
+  }, [activeCallout, dispatch]);
+
+  const handleCalloutDismiss = useCallback(() => {
+    dispatch(clearCallout());
+    setMarkerScreenPos(null);
+  }, [dispatch]);
+
+  // Update callout position when map region changes (so it follows the marker)
+  const handleRegionChangeComplete = useCallback(() => {
+    if (!activeCallout || !mapRef.current) return;
+
+    if (activeCallout.type === 'bus') {
+      const vehicle = positions.find((v) => v.vehicleId === activeCallout.id);
+      if (vehicle) {
+        mapRef.current
+          .pointForCoordinate({ latitude: vehicle.lat, longitude: vehicle.lon })
+          .then((point) => setMarkerScreenPos({ x: point.x, y: point.y }));
+      }
+    } else {
+      const stop = STOPS_BY_ID[activeCallout.id];
+      if (stop) {
+        mapRef.current
+          .pointForCoordinate({ latitude: stop.lat, longitude: stop.lon })
+          .then((point) => setMarkerScreenPos({ x: point.x, y: point.y }));
+      }
+    }
+  }, [activeCallout, positions]);
+
+  // Dismiss callout when bottom sheet is touched
+  const handleSheetTouch = useCallback(() => {
+    if (activeCallout) {
+      dispatch(clearCallout());
+      setMarkerScreenPos(null);
+    }
+  }, [activeCallout, dispatch]);
+
+  // Resolve callout content
+  const calloutVehicle = activeCallout?.type === 'bus'
+    ? positions.find((v) => v.vehicleId === activeCallout.id)
+    : undefined;
+  const calloutStop = activeCallout?.type === 'stop'
+    ? STOPS_BY_ID[activeCallout.id]
+    : undefined;
 
   // -----------------------------------------------------------------------
   // Auto-fit map when a route is selected (MAP-07)
@@ -178,9 +273,11 @@ export default function MapScreen() {
         showsUserLocation={true}
         showsMyLocationButton={false}
         mapPadding={mapPadding}
+        onPress={handleMapPress}
+        onRegionChangeComplete={handleRegionChangeComplete}
       >
         {/* Route polyline + stop markers (rendered before buses so buses are on top) */}
-        <RouteOverlay />
+        <RouteOverlay onStopPress={handleStopPress} />
 
         {/* Bus markers: always mounted, hidden via opacity (never unmounted) */}
         {positions.map((vehicle, index) => (
@@ -191,15 +288,43 @@ export default function MapScreen() {
             zIndex={1000 + index}
             visible={!selectedRouteId || vehicle.routeId === selectedRouteId}
             routeShape={shapes[vehicle.routeId]}
+            onPress={() => handleBusMarkerPress(vehicle.vehicleId, vehicle.lat, vehicle.lon)}
+            isHighlighted={activeCallout?.type === 'bus' && activeCallout.id === vehicle.vehicleId}
           />
         ))}
       </MapView>
+
+      {/* Callout bubble overlay — rendered OUTSIDE MapView, positioned via screen coords */}
+      {activeCallout && markerScreenPos && (
+        <CalloutBubble
+          type={activeCallout.type}
+          markerScreenX={markerScreenPos.x}
+          markerScreenY={markerScreenPos.y}
+          visible={true}
+          onDismiss={handleCalloutDismiss}
+        >
+          {activeCallout.type === 'bus' && calloutVehicle ? (
+            <BusCalloutContent
+              vehicle={calloutVehicle}
+              routeColor={routeColorMap.get(calloutVehicle.routeId) || FALLBACK_COLOR}
+              routeLongName={routeLongNameMap.get(calloutVehicle.routeId) || 'Unknown Route'}
+            />
+          ) : activeCallout.type === 'stop' && calloutStop ? (
+            <StopCalloutContent
+              stop={calloutStop}
+              vehicles={positions}
+              routes={routes}
+            />
+          ) : null}
+        </CalloutBubble>
+      )}
+
       <FloatingLocationButton
         mapRef={mapRef}
         location={location}
         permissionDenied={permissionDenied}
       />
-      <BottomSheet loading={routesLoading}>
+      <BottomSheet loading={routesLoading} onTouchStart={handleSheetTouch}>
         <RouteList />
       </BottomSheet>
     </View>

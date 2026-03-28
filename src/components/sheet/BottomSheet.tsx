@@ -17,7 +17,7 @@
  * within its own bounds, so the map behind receives touches on
  * uncovered areas naturally.
  */
-import React, { useState } from 'react';
+import React, { createContext, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -33,7 +33,6 @@ import Animated, {
   withSpring,
   runOnJS,
   useAnimatedScrollHandler,
-  useDerivedValue,
   useAnimatedRef,
 } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
@@ -82,20 +81,49 @@ const SPRING_CONFIG = {
 // Types
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Scroll context — lets children save/restore scroll position
+// ---------------------------------------------------------------------------
+
+interface SheetScrollAPI {
+  saveScrollPosition: () => void;
+  restoreScrollPosition: () => void;
+}
+
+export const SheetScrollContext = createContext<SheetScrollAPI | null>(null);
+
 interface BottomSheetProps {
   children?: React.ReactNode;
   loading?: boolean;
+  onTouchStart?: () => void;
 }
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export default function BottomSheet({ children, loading = false }: BottomSheetProps) {
+export default function BottomSheet({ children, loading = false, onTouchStart }: BottomSheetProps) {
   const { height: screenHeight } = useWindowDimensions();
   const dispatch = useAppDispatch();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const [canScroll, setCanScroll] = useState(false);
+  const savedScrollY = useRef(0);
+
+  // Expose save/restore to children via context
+  const scrollAPI = React.useMemo<SheetScrollAPI>(() => ({
+    saveScrollPosition: () => {
+      savedScrollY.current = scrollOffset.value;
+    },
+    restoreScrollPosition: () => {
+      const y = savedScrollY.current;
+      if (y > 0) {
+        requestAnimationFrame(() => {
+          (scrollRef as unknown as { current: { scrollTo: (opts: { y: number; animated: boolean }) => void } | null }).current?.scrollTo({ y, animated: false });
+        });
+      }
+    },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), []);
 
   // -------------------------------------------------------------------------
   // Snap points (translateY values — 0 is top of screen)
@@ -111,17 +139,12 @@ export default function BottomSheet({ children, loading = false }: BottomSheetPr
   const context = useSharedValue(0);
   const scrollOffset = useSharedValue(0);
 
-  // Whether scroll is enabled (only at full position)
-  const isAtFull = useDerivedValue(() => {
-    return Math.abs(translateY.value - fullY) < 5;
-  });
-
   // -------------------------------------------------------------------------
   // Redux sync helper (called via runOnJS)
   // -------------------------------------------------------------------------
   const syncSheetPosition = (position: 'collapsed' | 'half' | 'full') => {
     dispatch(setSheetPosition(position));
-    setCanScroll(position === 'full');
+    setCanScroll(position === 'full' || position === 'half');
   };
 
   // -------------------------------------------------------------------------
@@ -146,11 +169,9 @@ export default function BottomSheet({ children, loading = false }: BottomSheetPr
       }
     }
 
-    translateY.value = withSpring(snapPoints[closestIndex], SPRING_CONFIG, (finished) => {
-      if (finished) {
-        runOnJS(syncSheetPosition)(labels[closestIndex]);
-      }
-    });
+    // Sync immediately so scroll enables without waiting for spring to settle
+    runOnJS(syncSheetPosition)(labels[closestIndex]);
+    translateY.value = withSpring(snapPoints[closestIndex], SPRING_CONFIG);
   };
 
   // -------------------------------------------------------------------------
@@ -163,27 +184,18 @@ export default function BottomSheet({ children, loading = false }: BottomSheetPr
   });
 
   // -------------------------------------------------------------------------
-  // Pan gesture
+  // Pan gesture (handle area only — always responds regardless of scroll)
   // -------------------------------------------------------------------------
   const panGesture = Gesture.Pan()
     .onStart(() => {
       context.value = translateY.value;
     })
     .onUpdate((event) => {
-      // When at full and content is scrolled down, don't drag the sheet
-      if (isAtFull.value && scrollOffset.value > 0) {
-        return;
-      }
-
       const newY = context.value + event.translationY;
       // Clamp between full and collapsed
       translateY.value = Math.max(fullY, Math.min(collapsedY, newY));
     })
     .onEnd((event) => {
-      // If content is scrolled, don't snap
-      if (isAtFull.value && scrollOffset.value > 0) {
-        return;
-      }
       snapToNearest(translateY.value, event.velocityY);
     })
     .activeOffsetY([-10, 10]);
@@ -206,57 +218,68 @@ export default function BottomSheet({ children, loading = false }: BottomSheetPr
   // Render
   // -------------------------------------------------------------------------
   return (
-    <GestureDetector gesture={panGesture}>
-      <Animated.View style={[styles.container, { height: screenHeight }, animatedSheetStyle]}>
-        <BlurView intensity={20} tint="light" style={styles.blur}>
-          {/* Grab handle pill */}
-          <View style={styles.handleRow}>
-            <View style={styles.handle} />
-          </View>
-
-          {/* Search + Settings row (always visible) */}
-          <View style={styles.controlsRow}>
-            <Pressable
-              style={styles.searchBar}
-              onPress={handleSearchPress}
-              accessibilityLabel="Search routes or stops"
-              accessibilityRole="button"
-              hitSlop={{ top: 4, bottom: 4 }}
-            >
-              <MaterialIcons
-                name="search"
-                size={20}
-                color={textColors.onSurfaceVariant}
-              />
-              <Text style={styles.searchPlaceholder}>
-                Search routes or stops
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.settingsButton,
-                pressed && styles.settingsPressed,
-              ]}
-              onPress={() => showToast('Coming soon')}
-              accessibilityLabel="Settings"
-              accessibilityRole="button"
-              hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
-            >
-              <MaterialIcons
-                name="settings"
-                size={24}
-                color={textColors.onSurface}
-              />
-            </Pressable>
-          </View>
-
-          {/* Content area: loading state or scrollable children */}
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={textColors.onSurfaceVariant} />
+    <Animated.View
+      style={[styles.container, { height: screenHeight }, animatedSheetStyle]}
+      onTouchStart={onTouchStart}
+    >
+      <BlurView intensity={20} tint="light" style={styles.blur}>
+        {/* Draggable header — always responds to pan regardless of scroll */}
+        <GestureDetector gesture={panGesture}>
+          <Animated.View>
+            {/* Grab handle pill */}
+            <View style={styles.handleRow}>
+              <View style={styles.handle} />
             </View>
-          ) : (
+
+            {/* Search + Settings row (always visible) */}
+            <View style={styles.controlsRow}>
+              <Pressable
+                style={styles.searchBar}
+                onPress={handleSearchPress}
+                accessibilityLabel="Search routes or stops"
+                accessibilityRole="button"
+                hitSlop={{ top: 4, bottom: 4 }}
+              >
+                <MaterialIcons
+                  name="search"
+                  size={20}
+                  color={textColors.onSurfaceVariant}
+                />
+                <Text style={styles.searchPlaceholder}>
+                  Search routes or stops
+                </Text>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.settingsButton,
+                  pressed && styles.settingsPressed,
+                ]}
+                onPress={() => showToast('Coming soon')}
+                accessibilityLabel="Settings"
+                accessibilityRole="button"
+                hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+              >
+                <MaterialIcons
+                  name="settings"
+                  size={24}
+                  color={textColors.onSurface}
+                />
+              </Pressable>
+            </View>
+
+            {/* Separator line between fixed header and scroll content */}
+            <View style={styles.separator} />
+          </Animated.View>
+        </GestureDetector>
+
+        {/* Content area: loading state or scrollable children */}
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={textColors.onSurfaceVariant} />
+          </View>
+        ) : (
+          <SheetScrollContext.Provider value={scrollAPI}>
             <Animated.ScrollView
               ref={scrollRef}
               style={styles.scrollView}
@@ -265,14 +288,14 @@ export default function BottomSheet({ children, loading = false }: BottomSheetPr
               showsVerticalScrollIndicator={false}
               onScroll={scrollHandler}
               scrollEventThrottle={16}
-              bounces={false}
+              bounces={true}
             >
               {children}
             </Animated.ScrollView>
-          )}
-        </BlurView>
-      </Animated.View>
-    </GestureDetector>
+          </SheetScrollContext.Provider>
+        )}
+      </BlurView>
+    </Animated.View>
   );
 }
 
@@ -340,6 +363,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: spacing.s6,
+  },
+  separator: {
+    height: StyleSheet.hairlineWidth * 4,
+    backgroundColor: 'rgba(0, 0, 0, 0.08)',
+    marginTop: 10,
   },
   scrollView: {
     flex: 1,
