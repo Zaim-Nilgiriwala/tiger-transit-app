@@ -26,6 +26,8 @@ interface BusMarkerProps {
   zIndex: number;              // for z-ordering
   visible: boolean;            // false = hidden via opacity (stays mounted)
   routeShape?: Coordinate[];   // polyline for this vehicle's route
+  onPress?: () => void;        // fires when marker is tapped (callout system)
+  isHighlighted?: boolean;     // true = 1.2x scale + glow ring (callout open)
 }
 
 // ---------------------------------------------------------------------------
@@ -87,7 +89,15 @@ const SHARP_CORNER_OFFSET = 225;
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
-function BusMarker({ vehicle, routeColor, zIndex, visible, routeShape }: BusMarkerProps) {
+function BusMarker({
+  vehicle,
+  routeColor,
+  zIndex,
+  visible,
+  routeShape,
+  onPress,
+  isHighlighted = false,
+}: BusMarkerProps) {
   const fade = useFade(visible);
   const animated = useAnimatedPosition(vehicle, routeShape, visible);
   const rotation = animated.heading + SHARP_CORNER_OFFSET;
@@ -101,6 +111,7 @@ function BusMarker({ vehicle, routeColor, zIndex, visible, routeShape }: BusMark
       tracksViewChanges={animated.isAnimating}
       zIndex={zIndex}
       opacity={fade}
+      onPress={onPress}
     >
       {/* Outer container: rotates to point sharp corner in heading direction */}
       <View
@@ -109,8 +120,12 @@ function BusMarker({ vehicle, routeColor, zIndex, visible, routeShape }: BusMark
           {
             backgroundColor: routeColor,
             borderColor: brighterTint,
-            transform: [{ rotate: `${rotation}deg` }],
+            transform: [
+              { scale: isHighlighted ? 1.2 : 1 },
+              { rotate: `${rotation}deg` },
+            ],
           },
+          isHighlighted && styles.highlighted,
         ]}
       >
         {/* Bus icon: counter-rotates to stay upright */}
@@ -150,6 +165,18 @@ const styles = StyleSheet.create({
       },
       android: {
         elevation: 5,
+      },
+    }),
+  },
+  // Glow ring effect when callout is open for this marker
+  highlighted: {
+    ...Platform.select({
+      ios: {
+        shadowOpacity: 0.5,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 10,
       },
     }),
   },
