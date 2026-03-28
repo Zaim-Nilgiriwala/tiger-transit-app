@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Phase 5 context gathered
-last_updated: "2026-03-28T00:10:18.713Z"
-last_activity: "2026-03-26 -- Completed Plan 04-03 (Map overlays: polyline, stop markers, auto-fit, bus dimming)"
+status: in-progress
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-03-28T00:41:36Z"
+last_activity: "2026-03-28 -- Completed Plan 05-01 (Animated bus markers with polyline-path interpolation)"
 progress:
   total_phases: 6
-  completed_phases: 3
-  total_plans: 10
-  completed_plans: 9
-  percent: 90
+  completed_phases: 4
+  total_plans: 12
+  completed_plans: 10
+  percent: 83
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** When a student pulls up the app, they see exactly where their bus is and when it arrives at their stop -- accurate to ~85 seconds -- with zero navigation complexity.
-**Current focus:** Phase 4 complete. Ready for Phase 5: Animated Markers and Callout Bubbles
+**Current focus:** Phase 5 in progress: Animated Markers and Callout Bubbles
 
 ## Current Position
 
-Phase: 4 of 6 (Route Detail and ETA Predictions) -- COMPLETE
-Plan: 3 of 3 in current phase (all complete)
-Status: Phase 4 complete, ready for Phase 5
-Last activity: 2026-03-26 -- Completed Plan 04-03 (Map overlays: polyline, stop markers, auto-fit, bus dimming)
+Phase: 5 of 6 (Animated Markers and Callout Bubbles)
+Plan: 1 of 2 in current phase (1 complete)
+Status: Plan 05-01 complete, ready for Plan 05-02
+Last activity: 2026-03-28 -- Completed Plan 05-01 (Animated bus markers with polyline-path interpolation)
 
-Progress: [█████████░] 90%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
+- Total plans completed: 10
 - Average duration: 3 min
-- Total execution time: 0.52 hours
+- Total execution time: 0.57 hours
 
 **By Phase:**
 
@@ -47,9 +47,10 @@ Progress: [█████████░] 90%
 | 2. Real-Time Data Pipeline | 1/2 | 4 min | 4 min |
 | 3. Bottom Sheet and Route List | 3/3 | 8 min | 3 min |
 | 4. Route Detail and ETA Predictions | 3/3 | 7 min | 2 min |
+| 5. Animated Markers and Callout Bubbles | 1/2 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 2m, 2m, 3m, 2m, 2m
+- Last 5 plans: 2m, 3m, 2m, 2m, 3m
 - Trend: Stable (fast)
 
 *Updated after each plan completion*
@@ -94,6 +95,10 @@ Recent decisions affecting current work:
 - [04-03]: Shadow polyline (9px navy-tinted) underneath main polyline (5px route color) for depth effect
 - [04-03]: Auto-fit skips on deselect (selectedRouteId null) -- camera stays in place per user decision
 - [04-03]: Stop centering uses animateToRegion with 0.008 delta for close zoom, 500ms animation
+- [05-01]: requestAnimationFrame over Reanimated for Marker coordinate animation (Marker.coordinate is a plain object, not Animated.Value)
+- [05-01]: Euclidean distance for polyline projection (adequate for campus-scale distances)
+- [05-01]: 30s gap threshold for fallback 1s animation on missed position updates
+- [05-01]: tracksViewChanges toggled true only during active animation frames for GPU savings
 
 ### Pending Todos
 
@@ -107,6 +112,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T00:10:18.701Z
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-animated-markers-and-callout-bubbles/05-CONTEXT.md
+Last session: 2026-03-28T00:41:36Z
+Stopped at: Completed 05-01-PLAN.md
+Resume file: .planning/phases/05-animated-markers-and-callout-bubbles/05-01-SUMMARY.md
