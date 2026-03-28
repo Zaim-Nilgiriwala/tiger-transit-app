@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: Real-Time Data Pipeline** - ETASpot PHP API via Supabase proxy, live bus markers on map (rework: replacing protobuf with PHP API)
 - [x] **Phase 3: Bottom Sheet and Route List** - Glassmorphic draggable bottom sheet with sectioned route browsing (completed 2026-03-26)
 - [x] **Phase 4: Route Detail and ETA Predictions** - Route detail view with ordered stop list, XGBoost ETAs, polyline and stop markers on map (completed 2026-03-26)
-- [ ] **Phase 5: Animated Markers and Callout Bubbles** - Smooth marker animation and interactive glass-panel callouts
+- [x] **Phase 5: Animated Markers and Callout Bubbles** - Smooth marker animation and interactive glass-panel callouts (completed 2026-03-28)
 - [ ] **Phase 6: Stop Detail, Favorites, Alerts, and Polish** - Remaining features to complete the MVP
 
 ## Phase Details
@@ -99,7 +99,7 @@ Plans:
   2. Tapping a bus marker opens a glass-panel callout showing route, bus ID, passengers, delay status, and next-stop ETA from PHP `nextStopETA`
   3. Tapping a stop marker opens a glass-panel callout showing stop name, stop number, ETA, route badges, and a "View More" link
   4. Only one callout can be open at a time, tapping outside dismisses it, and callout data refreshes with each 5-second polling cycle
-**Plans:** 1/2 plans complete
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 05-01-PLAN.md -- Animated bus markers with playback buffer polyline interpolation, minutesToNextStops data surfacing
@@ -132,5 +132,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 2. Real-Time Data Pipeline (REWORK) | 0/2 | Planned (2 plans, 2 waves) | - |
 | 3. Bottom Sheet and Route List | 3/3 | Complete | 2026-03-26 |
 | 4. Route Detail and ETA Predictions | 3/3 | Complete | 2026-03-26 |
-| 5. Animated Markers and Callout Bubbles | 1/2 | In Progress | - |
+| 5. Animated Markers and Callout Bubbles | 2/2 | Complete   | 2026-03-28 |
 | 6. Stop Detail, Favorites, Alerts, and Polish | 0/? | Not started | - |
