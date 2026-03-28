@@ -54,11 +54,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Callout Bubbles
 
-- [ ] **CALL-01**: Tapping a bus marker opens a glass-panel callout showing route, bus ID, passengers, delay status, ETA to next stop
-- [ ] **CALL-02**: Tapping a stop marker opens a glass-panel callout showing stop name, stop number, ETA, route badges, "View More"
-- [ ] **CALL-03**: Callouts use glassmorphic styling (backdrop blur, surface-container-lowest at ~95% opacity)
-- [ ] **CALL-04**: Only one callout can be open at a time; tapping outside dismisses it
-- [ ] **CALL-05**: Callout data refreshes with each 5s polling cycle
+- [x] **CALL-01**: Tapping a bus marker opens a glass-panel callout showing route, bus ID, passengers, delay status, ETA to next stop
+- [x] **CALL-02**: Tapping a stop marker opens a glass-panel callout showing stop name, stop number, ETA, route badges, "View More"
+- [x] **CALL-03**: Callouts use glassmorphic styling (backdrop blur, surface-container-lowest at ~95% opacity)
+- [x] **CALL-04**: Only one callout can be open at a time; tapping outside dismisses it
+- [x] **CALL-05**: Callout data refreshes with each 5s polling cycle
 
 ### Favorites & Personalization
 
@@ -177,11 +177,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STOP-05 | Phase 6 | Pending |
 | STOP-06 | Phase 6 | Pending |
 | STOP-07 | Phase 6 | Pending |
-| CALL-01 | Phase 5 | Pending |
-| CALL-02 | Phase 5 | Pending |
-| CALL-03 | Phase 5 | Pending |
-| CALL-04 | Phase 5 | Pending |
-| CALL-05 | Phase 5 | Pending |
+| CALL-01 | Phase 5 | Complete |
+| CALL-02 | Phase 5 | Complete |
+| CALL-03 | Phase 5 | Complete |
+| CALL-04 | Phase 5 | Complete |
+| CALL-05 | Phase 5 | Complete |
 | FAV-01 | Phase 6 | Pending |
 | FAV-02 | Phase 6 | Pending |
 | FAV-03 | Phase 6 | Pending |
