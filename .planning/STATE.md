@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Phase 2 context gathered (rework)
-last_updated: "2026-03-26T22:35:29.805Z"
+stopped_at: Phase 5 context gathered
+last_updated: "2026-03-28T00:10:18.713Z"
 last_activity: "2026-03-26 -- Completed Plan 04-03 (Map overlays: polyline, stop markers, auto-fit, bus dimming)"
 progress:
   total_phases: 6
@@ -107,6 +107,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-26T22:35:29.798Z
-Stopped at: Phase 2 context gathered (rework)
-Resume file: .planning/phases/02-real-time-data-pipeline/02-CONTEXT.md
+Last session: 2026-03-28T00:10:18.701Z
+Stopped at: Phase 5 context gathered
+Resume file: .planning/phases/05-animated-markers-and-callout-bubbles/05-CONTEXT.md
