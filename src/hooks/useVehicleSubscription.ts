@@ -41,6 +41,7 @@ function mapRowToVehiclePosition(row: any): VehiclePosition {
     lastStopId: row.last_stop_id ?? '',
     isDelayed: row.is_delayed ?? false,
     timestamp: row.timestamp ?? 0,
+    minutesToNextStops: [],
   };
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */

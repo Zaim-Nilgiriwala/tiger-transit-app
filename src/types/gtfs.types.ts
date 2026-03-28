@@ -48,6 +48,8 @@ export interface VehiclePosition {
   lastStopId: string;
   isDelayed: boolean;
   timestamp: number;
+  /** Upcoming stops with ETA in minutes from the PHP minutesToNextStops field */
+  minutesToNextStops: Array<{ stopId: string; minutes: number }>;
 }
 
 /** Model or feed-based arrival prediction for a stop */
