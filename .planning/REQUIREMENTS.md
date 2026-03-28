@@ -11,7 +11,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **MAP-01**: User sees a full-screen map centered on Auburn campus (~32.606, -85.487) on app launch
 - [ ] **MAP-02**: User sees live bus markers on the map with positions updated every 5 seconds
-- [ ] **MAP-03**: Bus markers animate smoothly between position updates (Reanimated-based, 1000ms interpolation)
+- [x] **MAP-03**: Bus markers animate smoothly between position updates (Reanimated-based, 1000ms interpolation)
 - [ ] **MAP-04**: Bus markers display directional heading and use secondary-fixed orange color
 - [x] **MAP-05**: Stop markers appear on the map in route color when a route is selected
 - [ ] **MAP-06**: All route polylines are drawn on the map in their route colors by default; filtered to favorites when favorites toggle is active
@@ -79,7 +79,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### ETA Predictions
 
-- [ ] **ETA-01**: Bus callout shows next-stop ETA from PHP `nextStopETA` field
+- [x] **ETA-01**: Bus callout shows next-stop ETA from PHP `nextStopETA` field
 - [ ] **ETA-02**: Stop list shows multi-stop ETAs from PHP `minutesToNextStops` array (XGBoost model is a future accuracy upgrade)
 - [ ] **ETA-03**: ETAs refresh with each 5s vehicle data poll cycle
 - [ ] **ETA-04**: If PHP API is unavailable, app shows "ETA unavailable" (protobuf fallback for positions only, not ETAs)
@@ -148,7 +148,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | MAP-01 | Phase 1 | Complete |
 | MAP-02 | Phase 2 | Pending |
-| MAP-03 | Phase 5 | Pending |
+| MAP-03 | Phase 5 | Complete |
 | MAP-04 | Phase 2 | Pending |
 | MAP-05 | Phase 4 | Complete |
 | MAP-06 | Phase 4 | Complete |
@@ -193,7 +193,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-05 | Phase 2 | Complete |
 | DATA-06 | Phase 2 (rework) | Pending |
 | DATA-07 | Phase 2 (rework) | Pending |
-| ETA-01 | Phase 5 | Pending |
+| ETA-01 | Phase 5 | Complete |
 | ETA-02 | Phase 2+4 (rework) | Pending (PHP minutesToNextStops replaces XGBoost for MVP) |
 | ETA-03 | Phase 2 (rework) | Pending (refreshes with 5s poll cycle) |
 | ETA-04 | Phase 2 (rework) | Pending (updated fallback strategy) |

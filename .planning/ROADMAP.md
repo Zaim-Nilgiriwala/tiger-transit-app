@@ -99,10 +99,10 @@ Plans:
   2. Tapping a bus marker opens a glass-panel callout showing route, bus ID, passengers, delay status, and next-stop ETA from PHP `nextStopETA`
   3. Tapping a stop marker opens a glass-panel callout showing stop name, stop number, ETA, route badges, and a "View More" link
   4. Only one callout can be open at a time, tapping outside dismisses it, and callout data refreshes with each 5-second polling cycle
-**Plans:** 2 plans
+**Plans:** 1/2 plans complete
 
 Plans:
-- [ ] 05-01-PLAN.md -- Animated bus markers with playback buffer polyline interpolation, minutesToNextStops data surfacing
+- [x] 05-01-PLAN.md -- Animated bus markers with playback buffer polyline interpolation, minutesToNextStops data surfacing
 - [ ] 05-02-PLAN.md -- Glassmorphic callout bubbles for bus and stop markers, marker onPress wiring, dismiss behavior
 
 ### Phase 6: Stop Detail, Favorites, Alerts, and Polish
@@ -132,5 +132,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 2. Real-Time Data Pipeline (REWORK) | 0/2 | Planned (2 plans, 2 waves) | - |
 | 3. Bottom Sheet and Route List | 3/3 | Complete | 2026-03-26 |
 | 4. Route Detail and ETA Predictions | 3/3 | Complete | 2026-03-26 |
-| 5. Animated Markers and Callout Bubbles | 0/2 | Planned (2 plans, 2 waves) | - |
+| 5. Animated Markers and Callout Bubbles | 1/2 | In Progress | - |
 | 6. Stop Detail, Favorites, Alerts, and Polish | 0/? | Not started | - |
