@@ -5,45 +5,57 @@
  * (the "pointer") that rotates to indicate travel direction. The bus icon
  * inside counter-rotates to stay upright at all times.
  *
- * Visual design:
- * - ~36x36px container filled with the route's specific color
- * - 3 corners heavily rounded (borderRadius ~18px), 1 sharp (0px)
- * - Brighter tint outline (30% toward white) for subtle glow effect
- * - Navy-tinted drop shadow consistent with design system
- * - White Ionicons 'bus' icon, always upright
- *
- * Heading rotation:
- * - Sharp corner is at bottom-right by default (135 degrees from north)
- * - Container rotates by (heading + 135) degrees to point sharp corner
- *   in the travel direction
- * - Icon counter-rotates by -(heading + 135) degrees to stay upright
+ * Visibility is controlled via `visible` prop with a 500ms fade.
+ * Markers are never unmounted — react-native-maps handles prop updates
+ * reliably but struggles with bulk add/remove.
  */
-import React from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Platform, StyleSheet, View } from 'react-native';
 import { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 
-import type { VehiclePosition } from '../../types/gtfs.types';
+import type { Coordinate, VehiclePosition } from '../../types/gtfs.types';
+import { useAnimatedPosition } from '../../hooks/useAnimatedPosition';
 
 // ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
 interface BusMarkerProps {
   vehicle: VehiclePosition;
-  routeColor: string; // '#RRGGBB' — looked up by parent
-  zIndex: number;     // for z-ordering by timestamp
-  opacity?: number;   // 0-1, defaults to 1; used for dimming non-selected route buses
+  routeColor: string;          // '#RRGGBB' -- looked up by parent
+  zIndex: number;              // for z-ordering
+  visible: boolean;            // false = hidden via opacity (stays mounted)
+  routeShape?: Coordinate[];   // polyline for this vehicle's route
+}
+
+// ---------------------------------------------------------------------------
+// useFade — drives a 0→1 or 1→0 animation, returns current value as number
+// ---------------------------------------------------------------------------
+const FADE_MS = 200;
+
+function useFade(visible: boolean): number {
+  const anim = useRef(new Animated.Value(visible ? 1 : 0)).current;
+  const [value, setValue] = useState(visible ? 1 : 0);
+
+  useEffect(() => {
+    const id = anim.addListener(({ value: v }) => setValue(v));
+
+    Animated.timing(anim, {
+      toValue: visible ? 1 : 0,
+      duration: FADE_MS,
+      useNativeDriver: false,
+    }).start();
+
+    return () => anim.removeListener(id);
+  }, [visible, anim]);
+
+  return value;
 }
 
 // ---------------------------------------------------------------------------
 // Helper: brighten a hex color toward white
 // ---------------------------------------------------------------------------
-/**
- * Parse hex color, increase each RGB channel toward 255 by `amount` fraction
- * (0.3 = 30%), return as hex string.
- */
 function brightenColor(hex: string, amount: number): string {
-  // Strip leading '#' if present
   const raw = hex.replace(/^#/, '');
   const r = parseInt(raw.substring(0, 2), 16);
   const g = parseInt(raw.substring(2, 4), 16);
@@ -68,31 +80,33 @@ const ICON_SIZE = 18;
 /**
  * The sharp corner sits at bottom-right, which is 135 degrees clockwise
  * from north (12 o'clock). To point the sharp corner in the heading
- * direction, rotate the container by (heading + 135) degrees.
+ * direction, rotate the container by (heading + 225) degrees.
  */
-const SHARP_CORNER_OFFSET = 135;
+const SHARP_CORNER_OFFSET = 225;
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
-function BusMarker({ vehicle, routeColor, zIndex, opacity = 1 }: BusMarkerProps) {
-  const rotation = vehicle.heading + SHARP_CORNER_OFFSET;
+function BusMarker({ vehicle, routeColor, zIndex, visible, routeShape }: BusMarkerProps) {
+  const fade = useFade(visible);
+  const animated = useAnimatedPosition(vehicle, routeShape, visible);
+  const rotation = animated.heading + SHARP_CORNER_OFFSET;
   const counterRotation = -rotation;
   const brighterTint = brightenColor(routeColor, 0.3);
 
   return (
     <Marker
-      coordinate={{ latitude: vehicle.lat, longitude: vehicle.lon }}
+      coordinate={{ latitude: animated.latitude, longitude: animated.longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
-      tracksViewChanges={false}
+      tracksViewChanges={animated.isAnimating}
       zIndex={zIndex}
+      opacity={fade}
     >
       {/* Outer container: rotates to point sharp corner in heading direction */}
       <View
         style={[
           styles.container,
           {
-            opacity,
             backgroundColor: routeColor,
             borderColor: brighterTint,
             transform: [{ rotate: `${rotation}deg` }],
