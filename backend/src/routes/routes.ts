@@ -1,6 +1,6 @@
 // This file defines the routes for the backend API. 
 import { Router } from 'express';
-import { getRoutes } from '../services/routesService.js';
+import { getRoutes } from '../services/routesService';
 
 const router = Router();
 
