@@ -11,7 +11,8 @@ export default function Index() {
 
   useEffect(() => {
     // Fetch route lines from the backend API
-    fetch("http://10.1.83.155:3000/api/route-lines")
+    // USE YOUR IP ADDRESS HERE
+    fetch("http://YOUR_IP_HERE:3000/api/route-lines")
       .then((response) => response.json())
       .then((data) => setRoutes(data))
       .catch((error) => console.error("Error fetching routes:", error));
