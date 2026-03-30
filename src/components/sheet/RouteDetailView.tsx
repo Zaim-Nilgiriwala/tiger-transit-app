@@ -199,7 +199,7 @@ export default function RouteDetailView() {
       <View style={styles.stopList}>
         {stops.map((stop, index) => (
           <StopRow
-            key={stop.stopId}
+            key={`${stop.stopId}-${index}`}
             stop={stop}
             sequenceNumber={index + 1}
             routeColor={route.routeColor}
@@ -227,7 +227,7 @@ const HEADER_MIN_HEIGHT = 56;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: surfaces.level1,
+    backgroundColor: 'transparent',
   },
   header: {
     flexDirection: 'row',

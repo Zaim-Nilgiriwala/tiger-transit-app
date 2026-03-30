@@ -1,7 +1,7 @@
 /**
  * FloatingLocationButton - Glass-panel my_location FAB
  *
- * Positioned bottom-left above the collapsed bottom bar.
+ * Positioned bottom-right above the collapsed bottom bar.
  * Uses BlurView for glassmorphism backdrop blur.
  * Tapping centers the map on the user's GPS position.
  * No-op if location permission was denied.
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   container: {
     position: 'absolute',
     bottom: BOTTOM_OFFSET,
-    left: EDGE_MARGIN,
+    right: EDGE_MARGIN,
     width: BUTTON_SIZE,
     height: BUTTON_SIZE,
     borderRadius: BUTTON_SIZE / 2,

@@ -16,6 +16,7 @@
     "gtfs_data",
     "reports",
     "supabase",
-    ".planning"
+    ".planning",
+    "src/archived"
   ]
 }

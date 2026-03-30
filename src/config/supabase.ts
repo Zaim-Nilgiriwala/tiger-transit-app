@@ -15,14 +15,20 @@ const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn(
     '[Supabase] Missing EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_ANON_KEY. ' +
-      'Copy .env.example to .env and fill in your Supabase credentials.',
+      'Supabase client disabled — using ETASpot direct polling instead.',
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  realtime: {
-    params: {
-      eventsPerSecond: 10,
+// Use a placeholder URL when credentials are missing to prevent crash.
+// The Supabase client won't be used while ETASpot polling is active.
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder-key',
+  {
+    realtime: {
+      params: {
+        eventsPerSecond: 10,
+      },
     },
   },
-});
+);
