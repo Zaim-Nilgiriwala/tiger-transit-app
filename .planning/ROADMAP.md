@@ -19,6 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Bottom Sheet and Route List** - Glassmorphic draggable bottom sheet with sectioned route browsing (completed 2026-03-26)
 - [x] **Phase 4: Route Detail and ETA Predictions** - Route detail view with ordered stop list, XGBoost ETAs, polyline and stop markers on map (completed 2026-03-26)
 - [x] **Phase 5: Animated Markers and Callout Bubbles** - Smooth marker animation and interactive glass-panel callouts (completed 2026-03-28)
+- [ ] **Phase 5.1: Advanced Vehicle Position Smoothing** — INSERTED — Redesign interpolation pipeline with Kalman filtering, forward-only projection, predictive extrapolation, and heading smoothing
 - [ ] **Phase 6: Stop Detail, Favorites, Alerts, and Polish** - Remaining features to complete the MVP
 
 ## Phase Details
@@ -104,6 +105,23 @@ Plans:
 Plans:
 - [x] 05-01-PLAN.md -- Animated bus markers with playback buffer polyline interpolation, minutesToNextStops data surfacing
 - [ ] 05-02-PLAN.md -- Glassmorphic callout bubbles for bus and stop markers, marker onPress wiring, dismiss behavior
+
+### Phase 5.1: Advanced Vehicle Position Smoothing (INSERTED)
+**Goal**: Bus markers move with production-grade smoothness — GPS noise is filtered, markers predict ahead when updates are late, heading rotates fluidly through turns, and loop routes project correctly
+**Depends on**: Phase 5
+**Requirements**: MAP-03 (upgrade)
+**Success Criteria** (what must be TRUE):
+  1. Forward-only constrained projection prevents markers from snapping backward on loop routes
+  2. GPS outlier pings are filtered before projection (no visual jumps from urban canyon bounces)
+  3. When a position update is late, the marker continues moving at its last known speed along the polyline instead of freezing
+  4. Heading rotates smoothly through polyline vertices (no discrete snapping at segment boundaries)
+  5. Animation uses an easing curve instead of constant-speed linear interpolation
+  6. Loop route wrap-around (fromIndex > toIndex) is handled correctly
+**Plans**: TBD
+
+Plans:
+- [ ] 5.1-01: TBD
+- [ ] 5.1-02: TBD
 
 ### Phase 6: Stop Detail, Favorites, Alerts, and Polish
 **Goal**: All remaining MVP features are complete -- users can inspect stop details, manage favorite routes, view service alerts, and encounter graceful error handling

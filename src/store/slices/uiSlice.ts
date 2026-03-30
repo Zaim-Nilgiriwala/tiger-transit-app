@@ -36,11 +36,11 @@ export const uiSlice = createSlice({
   initialState,
   reducers: {
     selectRoute(state, action: PayloadAction<string | null>) {
-      state.selectedRouteId = action.payload;
       // Clear stop selection when changing routes
       if (action.payload !== state.selectedRouteId) {
         state.selectedStopId = null;
       }
+      state.selectedRouteId = action.payload;
     },
     selectStop(state, action: PayloadAction<string | null>) {
       state.selectedStopId = action.payload;

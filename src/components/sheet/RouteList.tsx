@@ -18,11 +18,12 @@
  * - state.routes.list -> sorted route array (active-first, then alphabetical)
  * - state.vehicles.positions -> busCountMap per routeId (used in sort + card display)
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../store';
 import { selectRoute } from '../../store/slices/uiSlice';
+import { SheetScrollContext } from './BottomSheet';
 import {
   surfaces,
   textColors,
@@ -40,6 +41,8 @@ import RouteDetailView from './RouteDetailView';
 
 export default function RouteList() {
   const dispatch = useAppDispatch();
+  const sheetScroll = useContext(SheetScrollContext);
+  const prevSelectedRef = useRef<string | null>(null);
 
   // -------------------------------------------------------------------------
   // Read from Redux
@@ -47,6 +50,14 @@ export default function RouteList() {
   const routes = useAppSelector((state) => state.routes.list);
   const positions = useAppSelector((state) => state.vehicles.positions);
   const selectedRouteId = useAppSelector((state) => state.ui.selectedRouteId);
+
+  // Restore scroll position when returning from route detail to route list
+  useEffect(() => {
+    if (prevSelectedRef.current !== null && selectedRouteId === null) {
+      sheetScroll?.restoreScrollPosition();
+    }
+    prevSelectedRef.current = selectedRouteId;
+  }, [selectedRouteId, sheetScroll]);
 
   // -------------------------------------------------------------------------
   // Derived data (memoized)
@@ -76,9 +87,10 @@ export default function RouteList() {
   // -------------------------------------------------------------------------
   const handleRoutePress = useCallback(
     (routeId: string) => {
+      sheetScroll?.saveScrollPosition();
       dispatch(selectRoute(routeId));
     },
-    [dispatch],
+    [dispatch, sheetScroll],
   );
 
   // -------------------------------------------------------------------------
@@ -127,7 +139,7 @@ export default function RouteList() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: surfaces.level1,
+    backgroundColor: 'transparent',
   },
   sectionHeader: {
     ...typography.labelSM,

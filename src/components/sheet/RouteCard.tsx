@@ -18,10 +18,10 @@
  */
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { BlurView } from 'expo-blur';
 
 import type { Route } from '../../types/gtfs.types';
 import {
-  surfaces,
   textColors,
   typography,
   cardPadding,
@@ -77,7 +77,7 @@ const RouteCard = React.memo(function RouteCard({
   onPress,
 }: RouteCardProps) {
   const isInactive = busCount === 0;
-  const tintColor = hexToRgba(route.routeColor, 0.06);
+  const tintColor = hexToRgba(route.routeColor, 0.12);
 
   return (
     <Pressable
@@ -90,10 +90,13 @@ const RouteCard = React.memo(function RouteCard({
       accessibilityRole="button"
       accessibilityLabel={`${route.longName}, ${formatBusCount(busCount)}`}
     >
-      {/* Tinted background overlay */}
+      {/* Frosted glass background */}
+      <BlurView intensity={40} tint="light" style={styles.blur} />
+
+      {/* Route color tint overlay */}
       <View style={[styles.tint, { backgroundColor: tintColor }]} />
 
-      {/* 4px color stripe on left edge */}
+      {/* Color stripe on left edge */}
       <View
         style={[styles.stripe, { backgroundColor: route.routeColor }]}
       />
@@ -119,11 +122,11 @@ export default RouteCard;
 // ---------------------------------------------------------------------------
 
 /** Extra left padding to account for the 4px stripe */
-const STRIPE_WIDTH = 4;
+const STRIPE_WIDTH = 8;
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: surfaces.level2,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     borderRadius: cardRadius,
     minHeight: MIN_TAP_TARGET,
     overflow: 'hidden',
@@ -131,9 +134,11 @@ const styles = StyleSheet.create({
   inactive: {
     opacity: 0.5,
   },
+  blur: {
+    ...StyleSheet.absoluteFillObject,
+  },
   tint: {
     ...StyleSheet.absoluteFillObject,
-    borderRadius: cardRadius,
   },
   stripe: {
     position: 'absolute',

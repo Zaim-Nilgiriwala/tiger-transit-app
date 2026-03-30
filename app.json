@@ -7,7 +7,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -16,7 +16,10 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "edu.auburn.tigertransit",
-      "newArchEnabled": true
+      "newArchEnabled": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -26,18 +29,24 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "package": "edu.auburn.tigertransit",
-      "newArchEnabled": true,
+      "newArchEnabled": false,
       "config": {
         "googleMaps": {
           "apiKey": ""
         }
-      }
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      ["expo-font"],
+      [
+        "expo-font"
+      ],
       [
         "expo-location",
         {
@@ -45,7 +54,14 @@
           "isAndroidForegroundServiceEnabled": false
         }
       ],
-      ["expo-splash-screen"]
-    ]
+      [
+        "expo-splash-screen"
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a5da2553-6bb5-42ef-aebd-73004a59c0e1"
+      }
+    }
   }
 }
