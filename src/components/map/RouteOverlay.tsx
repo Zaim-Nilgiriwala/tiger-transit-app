@@ -205,7 +205,7 @@ function RouteOverlay({ onStopPress }: RouteOverlayProps) {
             routeId={route.routeId}
             color={routeColorMap.get(route.routeId) || FALLBACK_COLOR}
             coords={coords}
-            routeStops={stops[route.routeId]}
+            routeStops={stops?.[route.routeId] || []}
             selectedStopId={selectedStopId}
             visible={visible}
             zBase={zBaseMap.get(route.routeId) || 1}

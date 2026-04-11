@@ -70,3 +70,9 @@ export interface ServiceAlert {
   activePeriodEnd: number;
   routeIds: string[];
 }
+
+export interface BackendRoute {
+  route_id: string;
+  route_name: string;
+  coordinates: Coordinate[];
+}

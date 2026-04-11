@@ -22,8 +22,9 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
-import MapView from 'react-native-maps';
+import MapView, { Polyline } from 'react-native-maps';
 
+import type { BackendRoute, Coordinate } from '../types/gtfs.types';
 import { colors } from '../theme';
 import { useAppSelector, useAppDispatch } from '../store';
 import { setActiveCallout, clearCallout } from '../store/slices/uiSlice';
@@ -40,6 +41,7 @@ import RouteOverlay from '../components/map/RouteOverlay';
 import CalloutBubble from '../components/map/CalloutBubble';
 import BusCalloutContent from '../components/map/BusCalloutContent';
 import StopCalloutContent from '../components/map/StopCalloutContent';
+import { setRouteShape } from '../store/slices/routesSlice';
 
 /** Fallback marker color when routeId is not found in ROUTES */
 const FALLBACK_COLOR = '#FF8934';
@@ -52,22 +54,60 @@ const AUBURN_CAMPUS = {
   longitudeDelta: 0.025,
 };
 
+
 export default function MapScreen() {
   const mapRef = useRef<MapView>(null);
   const dispatch = useAppDispatch();
   const { height: screenHeight } = useWindowDimensions();
   const { location, permissionDenied } = useLocation();
-
+  
   // -----------------------------------------------------------------------
   // Data hooks: load static routes and start real-time polling
   // -----------------------------------------------------------------------
-  useStaticData();
-  useStaticRouteData();
+  //useStaticData();
+  //useStaticRouteData();
   useEtaspotPolling();
-
   // -----------------------------------------------------------------------
   // Read vehicle positions, route list, and UI state from Redux
   // -----------------------------------------------------------------------
+  useEffect(() => {
+    async function loudBERoutes() {
+      try {
+        const res = await fetch('http://10.1.83.61:3000/api/route-lines');
+        const data: BackendRoute[] = await res.json();
+
+        //used for debugging
+        //console.log('Fetched route lines:', data);
+
+        const routesList = data.map((r) => ({
+          routeId: r.route_id,
+          longName: r.route_name,
+          routeColor: "000000",
+        }));
+
+        
+        const shapes: Record<string, Coordinate[]> = {};
+        data.forEach((r) => {
+          const key = String(r.route_id);
+          shapes[key] = r.coordinates;
+        });
+        
+        // Dispatch actions to store routes and shapes in Redux (global state)
+        dispatch({ type: 'routes/setRoutes', payload: routesList });
+        Object.entries(shapes).forEach(([routeId, coords]) => {
+        dispatch(setRouteShape({ routeId, shape: coords }));
+        });
+
+        //console.log("ROUTES:", routes);
+        //console.log(shapes[Object.keys(shapes)[0]]);
+
+      } catch (error) {
+        console.error('Error fetching route lines:', error);
+      }
+    }
+
+    loudBERoutes();
+  }, []);
   const positions = useAppSelector((state) => state.vehicles.positions);
   const routes = useAppSelector((state) => state.routes.list);
   const routesLoading = useAppSelector((state) => state.routes.loading);

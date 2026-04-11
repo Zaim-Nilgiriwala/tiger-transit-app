@@ -59,8 +59,8 @@ router.get('/shapes/:shape_id', async (req, res) => {
 
     //map the data to an array of lat/lon points
     const coordinates = data.map((point) => ({
-        latitude: point.shape_pt_lat,
-        longitude: point.shape_pt_lon,
+        latitude: Number(point.shape_pt_lat),
+        longitude: Number(point.shape_pt_lon),
     }));
 
     res.json(coordinates);
@@ -79,36 +79,52 @@ router.get('/route-lines', async (req, res) => {
                 .from('trips')
                 .select('trip_id, shape_id')
                 .eq('route_id', route.route_id)
-                .limit(1); // We only need one trip to get the shape_id
-
+                
+            
             if (tripsError || !trips || trips.length === 0) {
                 return null; // Skip routes without trips or with errors
             }
 
-            const shapeId = trips[0].shape_id;
+            // Extract unique shape_ids from the trips
+            const shapeIds = [...new Set(trips.map(t => t.shape_id))];
 
             // Fetch shape points for the shape_id
             const { data: shapePoints, error: shapeError } = await supabase
                 .schema('gtfs')
                 .from('shapes')
-                .select('shape_pt_lat, shape_pt_lon, shape_pt_sequence')
-                .eq('shape_id', shapeId)
+                .select('shape_id, shape_pt_lat, shape_pt_lon, shape_pt_sequence')
+                .in('shape_id', shapeIds)
                 .order('shape_pt_sequence', { ascending: true });
 
             if (shapeError || !shapePoints) {
                 return null; // Skip if there's an error fetching shape points
             }
 
-            // Map shape points to an array of lat/lon coordinates
-            const coordinates = shapePoints.map((point) => ({
-                latitude: point.shape_pt_lat,
-                longitude: point.shape_pt_lon,
-            }));
+            //creates a mapping of shape_id to its corresponding lat/lon points
+            const groupedShapes: Record<string, { latitude: number; longitude: number }[]> = {};
+
+            // Group shape points by shape_id
+            shapePoints.forEach(point => {
+                if (!groupedShapes[point.shape_id]) {
+                    groupedShapes[point.shape_id] = [];
+                }
+
+                groupedShapes[point.shape_id].push({
+                    latitude: Number(point.shape_pt_lat),
+                    longitude: Number(point.shape_pt_lon),
+                });
+            });
+
+            const shapesArray = Object.values(groupedShapes);
+
+            const longestShape = shapesArray.reduce((longest, current) => {
+                return current.length > longest.length ? current : longest;
+            }, shapesArray[0]);
 
             return {
                 route_id: route.route_id,
                 route_name: route.route_long_name,
-                coordinates,
+                coordinates: longestShape,
             };
         }));
 
@@ -116,10 +132,12 @@ router.get('/route-lines', async (req, res) => {
         const validRouteLines = routeLines.filter(line => line !== null);
 
         res.json(validRouteLines);
+        
     } catch (error) {
         console.error('Error fetching route lines:', error);
         res.status(500).json({ error: 'Failed to fetch route lines' });
     }
+    
 });
 
 
